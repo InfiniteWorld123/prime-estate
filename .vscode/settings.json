@@ -1,0 +1,58 @@
+{
+	"files.watcherExclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"files.exclude": {
+		"routeTree.gen.ts": true,
+		"biome.json": true,
+		"bun.lock": true,
+		"cta.json": true,
+		"tsconfig.json": true,
+		"tsr.config.json": true,
+		"vite.config.ts": true,
+		"node_modules": true,
+		".tanstack": true,
+		".gitignore": true,
+		".cta.json": true,
+		"package.json": false,
+		".output": true,
+		".env": false,
+		".idea": true
+	},
+	"search.exclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"files.readonlyInclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[css]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[sql]": {
+		"editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
+		"editor.formatOnSave": true
+	},
+	"SQL-Formatter-VSCode.dialect": "postgresql",
+	"SQL-Formatter-VSCode.keywordCase": "upper",
+	"editor.codeActionsOnSave": {
+		"source.organizeImports.biome": "explicit"
+	}
+}
