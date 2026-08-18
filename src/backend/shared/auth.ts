@@ -53,6 +53,16 @@ const logInformationalEmailError = (type: string, error: unknown) => {
 
 export const auth = betterAuth({
 	database: pool,
+	user: {
+		additionalFields: {
+			role: {
+				type: "string",
+				required: true,
+				defaultValue: "USER",
+				input: false,
+			},
+		},
+	},
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,
