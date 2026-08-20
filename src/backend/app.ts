@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { env } from "#/shared/env";
+import { adminRoutes } from "./modules/admin/admin.route";
 import { authRoutes } from "./modules/auth/auth.route";
 import { AppError } from "./shared/error";
 import { handleError } from "./shared/error-handler";
@@ -9,6 +10,7 @@ import { responseError } from "./shared/response";
 export const app = new Elysia({ prefix: "/api" })
 	.error({ AppError })
 	.onError(handleError)
+	.use(adminRoutes)
 	.use(authRoutes)
 	.get("/", `Hello from api ${env.BASE_URL}!`);
 

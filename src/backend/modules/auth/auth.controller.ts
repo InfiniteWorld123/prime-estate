@@ -51,12 +51,18 @@ export const signUp = async ({ body }: { body: SignUpBodyType }) => {
 
 export const signIn = async ({ body }: { body: SignInBodyType }) => {
 	const parsedBody = v.parse(SignInSchema, body);
-	const result = await signInService({ body: parsedBody });
+	const result = await signInService({
+		body: parsedBody,
+	});
 
 	return status(
 		HttpStatusCode.OK,
 		responseOk({
-			data: result,
+			data: {
+				redirect: result.redirect,
+				url: result.url,
+				user: result.user,
+			},
 			message: "sign in success",
 		}),
 	);
