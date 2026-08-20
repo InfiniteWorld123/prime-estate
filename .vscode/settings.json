@@ -14,10 +14,14 @@
 		".tanstack": true,
 		".gitignore": true,
 		".cta.json": true,
-		"package.json": false,
+		"package.json": true,
 		".output": true,
 		".env": false,
-		".idea": true
+		".idea": true,
+		".dockerignore": true,
+		"compose.yaml": true,
+		"Dockerfile": true,
+		"README.md": true
 	},
 	"search.exclude": {
 		"**/routeTree.gen.ts": true
