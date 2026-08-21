@@ -69,6 +69,7 @@ Routes:
 - `GET /api/admin/properties/:id`
 - `PATCH /api/admin/properties/:id`
 - `POST /api/admin/properties/:id/archive`
+- `POST /api/admin/properties/bulk-archive`
 - `POST /api/admin/properties/:id/restore`
 - `DELETE /api/admin/properties/:id`
 
@@ -77,6 +78,8 @@ Rules:
 - Properties are internal administrative records.
 - External client properties require a primary contact.
 - Archive only when no open listing exists.
+- Bulk archive accepts 1 to 100 selected, unique property IDs and succeeds or
+  fails as one transaction. It does not provide an archive-everything action.
 - Permanently delete only when the property has no business history and its
   draft listings have already been deleted.
 - Return features and image metadata in the property detail response.

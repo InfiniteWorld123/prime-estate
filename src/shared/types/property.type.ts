@@ -1,5 +1,6 @@
 import type * as v from "valibot";
 import type {
+	BulkArchivePropertiesSchema,
 	CreatePropertySchema,
 	ListPropertiesQuerySchema,
 	PropertyParamsSchema,
@@ -15,6 +16,19 @@ export type UpdatePropertyBodyType = v.InferInput<typeof UpdatePropertySchema>;
 export type UpdatePropertyDataType = v.InferOutput<typeof UpdatePropertySchema>;
 
 export type PropertyParamsType = v.InferInput<typeof PropertyParamsSchema>;
+
+export type BulkArchivePropertiesBodyType = v.InferInput<
+	typeof BulkArchivePropertiesSchema
+>;
+
+export type BulkArchivePropertiesDataType = v.InferOutput<
+	typeof BulkArchivePropertiesSchema
+>;
+
+export type BulkArchivePropertiesResultType = {
+	archived_ids: string[];
+	archived_count: number;
+};
 
 export type ListPropertiesQueryType = v.InferOutput<
 	typeof ListPropertiesQuerySchema

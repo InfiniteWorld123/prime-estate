@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import {
+	BulkArchivePropertiesSchema,
 	CreatePropertySchema,
 	ListPropertiesQuerySchema,
 	PropertyParamsSchema,
@@ -7,6 +8,7 @@ import {
 } from "#/shared/validation/property.validation";
 import {
 	archiveProperty,
+	bulkArchiveProperties,
 	createProperty,
 	deleteProperty,
 	getPropertyById,
@@ -23,6 +25,9 @@ export const propertyRoutes = new Elysia({
 	})
 	.get("/", listProperties, {
 		query: ListPropertiesQuerySchema,
+	})
+	.post("/bulk-archive", bulkArchiveProperties, {
+		body: BulkArchivePropertiesSchema,
 	})
 	.get("/:id", getPropertyById, {
 		params: PropertyParamsSchema,

@@ -3,18 +3,21 @@ import * as v from "valibot";
 import { HttpStatusCode } from "#/backend/shared/http";
 import { responseOk } from "#/backend/shared/response";
 import type {
+	BulkArchivePropertiesBodyType,
 	CreatePropertyBodyType,
 	ListPropertiesQueryType,
 	PropertyParamsType,
 	UpdatePropertyBodyType,
 } from "#/shared/types/property.type";
 import {
+	BulkArchivePropertiesSchema,
 	CreatePropertySchema,
 	PropertyParamsSchema,
 	UpdatePropertySchema,
 } from "#/shared/validation/property.validation";
 import {
 	archivePropertyService,
+	bulkArchivePropertiesService,
 	createPropertyService,
 	deletePropertyService,
 	getPropertyByIdService,
@@ -22,6 +25,20 @@ import {
 	restorePropertyService,
 	updatePropertyService,
 } from "./property.service";
+
+export const bulkArchiveProperties = async ({
+	body,
+}: {
+	body: BulkArchivePropertiesBodyType;
+}) => {
+	const input = v.parse(BulkArchivePropertiesSchema, body);
+	const result = await bulkArchivePropertiesService(input);
+
+	return responseOk({
+		data: result,
+		message: `${result.archived_count} properties archived`,
+	});
+};
 
 export const createProperty = async ({
 	body,

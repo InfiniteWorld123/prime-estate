@@ -1,8 +1,14 @@
 import { pool } from "#/backend/db/pool";
 import { getContactByIdService } from "#/backend/modules/contacts/contact.service";
-import { conflictError, validationError } from "#/backend/shared/error";
+import {
+	conflictError,
+	notFoundError,
+	validationError,
+} from "#/backend/shared/error";
 import { requireCreated, requireFound } from "#/backend/shared/service-utils";
 import type {
+	BulkArchivePropertiesDataType,
+	BulkArchivePropertiesResultType,
 	CreatePropertyDataType,
 	ListPropertiesDataType,
 	PropertiesPageType,
@@ -54,6 +60,12 @@ type PropertyCountRow = {
 
 type ExistsRow = {
 	exists: boolean;
+};
+
+type BulkArchivePropertyRow = {
+	id: string;
+	reference_number: string;
+	archived_at: Date | null;
 };
 
 const propertyOrderBy: Record<PropertySortType, string> = {
@@ -697,6 +709,80 @@ export const archivePropertyService = async (
 	requireFound(result.rows[0], "Property not found");
 
 	return await getPropertyByIdService(id);
+};
+
+export const bulkArchivePropertiesService = async (
+	input: BulkArchivePropertiesDataType,
+): Promise<BulkArchivePropertiesResultType> => {
+	const client = await pool.connect();
+
+	try {
+		await client.query("BEGIN");
+
+		const propertiesResult = await client.query<BulkArchivePropertyRow>(
+			`SELECT id, reference_number, archived_at
+			 FROM properties
+			 WHERE id = ANY($1::uuid[])
+			 ORDER BY id
+			 FOR UPDATE;`,
+			[input.property_ids],
+		);
+
+		if (propertiesResult.rowCount !== input.property_ids.length) {
+			throw notFoundError("One or more properties were not found");
+		}
+
+		const alreadyArchived = propertiesResult.rows
+			.filter((property) => property.archived_at !== null)
+			.map((property) => property.reference_number);
+
+		if (alreadyArchived.length > 0) {
+			throw conflictError("One or more properties are already archived", {
+				reference_numbers: alreadyArchived,
+			});
+		}
+
+		const openListingsResult = await client.query<{
+			reference_number: string;
+		}>(
+			`SELECT DISTINCT p.reference_number
+			 FROM listings AS listing
+			 JOIN properties AS p ON p.id = listing.property_id
+			 WHERE listing.property_id = ANY($1::uuid[])
+			   AND listing.status IN ('DRAFT', 'PUBLISHED')
+			 ORDER BY p.reference_number;`,
+			[input.property_ids],
+		);
+
+		if (openListingsResult.rowCount && openListingsResult.rowCount > 0) {
+			throw conflictError("Properties with open listings cannot be archived", {
+				reference_numbers: openListingsResult.rows.map(
+					(property) => property.reference_number,
+				),
+			});
+		}
+
+		const archivedResult = await client.query<PropertyIdRow>(
+			`UPDATE properties
+			 SET archived_at = CURRENT_TIMESTAMP,
+			     updated_at = CURRENT_TIMESTAMP
+			 WHERE id = ANY($1::uuid[])
+			 RETURNING id;`,
+			[input.property_ids],
+		);
+
+		await client.query("COMMIT");
+
+		return {
+			archived_ids: archivedResult.rows.map((property) => property.id),
+			archived_count: archivedResult.rowCount ?? 0,
+		};
+	} catch (error) {
+		await client.query("ROLLBACK");
+		throw error;
+	} finally {
+		client.release();
+	}
 };
 
 export const restorePropertyService = async (

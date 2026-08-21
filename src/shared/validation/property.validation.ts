@@ -197,6 +197,20 @@ export const PropertyParamsSchema = v.object({
 	id: UuidSchema,
 });
 
+export const BulkArchivePropertiesSchema = v.pipe(
+	v.object({
+		property_ids: v.pipe(
+			v.array(UuidSchema),
+			v.minLength(1, "At least one property ID is required"),
+			v.maxLength(100, "Cannot archive more than 100 properties at once"),
+		),
+	}),
+	v.check(
+		(input) => new Set(input.property_ids).size === input.property_ids.length,
+		"Property IDs must be unique",
+	),
+);
+
 export const ListPropertiesQuerySchema = v.object({
 	search: OptionalTextSchema,
 
