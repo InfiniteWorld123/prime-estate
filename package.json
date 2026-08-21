@@ -30,6 +30,7 @@
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
     "better-auth": "^1.6.23",
+    "cloudinary": "^2.10.1",
     "dotenv": "^17.4.2",
     "elysia": "^1.4.29",
     "lucide-react": "^0.545.0",

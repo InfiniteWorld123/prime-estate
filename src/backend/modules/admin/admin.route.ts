@@ -3,6 +3,7 @@ import { responseOk } from "#/backend/shared/response";
 import { contactRoutes } from "../contacts/contact.route";
 import { featureRoutes } from "../features/feature.route";
 import { propertyRoutes } from "../properties/property.route";
+import { propertyImageRoutes } from "../property-images/property-image.route";
 import { adminGuard } from "./admin.guard";
 
 export const adminRoutes = new Elysia({
@@ -11,6 +12,7 @@ export const adminRoutes = new Elysia({
 	.use(adminGuard)
 	.use(contactRoutes)
 	.use(featureRoutes)
+	.use(propertyImageRoutes)
 	.use(propertyRoutes)
 	.get("/me", ({ adminUser }) =>
 		responseOk({

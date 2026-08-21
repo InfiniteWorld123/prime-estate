@@ -101,17 +101,24 @@ Rules:
 
 Routes:
 
+- `GET /api/admin/properties/:id/images`
 - `POST /api/admin/properties/:id/images`
 - `PATCH /api/admin/properties/:id/images/:imageId`
 - `DELETE /api/admin/properties/:id/images/:imageId`
+- `PUT /api/admin/properties/:id/images/order`
+- `POST /api/admin/properties/:id/images/:imageId/cover`
 
 Rules:
 
-- Choose the object-storage provider and upload flow before implementing file
-  uploads.
+- Use Cloudinary behind the shared image-storage abstraction.
+- Send one image per multipart request through the backend.
 - PostgreSQL stores only storage keys and image metadata.
+- Allow JPEG, PNG, and WebP files up to 10 MB and at most 30 images per
+  property.
+- Make the first uploaded image the cover automatically.
 - Preserve ordering and allow only one cover image per property.
 - Changing the cover image must be transactional.
+- If the cover is deleted, promote the first remaining image automatically.
 
 ## Phase 5: Listings
 
@@ -179,9 +186,5 @@ For one capability at a time:
 
 ## Immediate Next Step
 
-Implement only:
-
-`POST /api/admin/contacts`
-
-Do not build the remaining Contacts routes until this first endpoint works from
-validation through PostgreSQL and its tests pass.
+Configure Cloudinary credentials and smoke-test the Property Images routes,
+then add bulk property archiving before starting Listings.
