@@ -127,7 +127,7 @@ Rules:
 
 Routes:
 
-- `POST /api/admin/properties/:propertyId/listings`
+- `POST /api/admin/properties/:id/listings`
 - `GET /api/admin/listings`
 - `GET /api/admin/listings/:id`
 - `PATCH /api/admin/listings/:id`
@@ -145,6 +145,11 @@ Rules:
 - Archiving requires a valid outcome for the listing type.
 - Selling a property archives its open rental listing as `WITHDRAWN` in the
   same database transaction.
+- When a sale closes as `SOLD`, a published rental is archived as `WITHDRAWN`
+  and an unpublished rental draft is deleted in the same transaction.
+
+Current status: the administrative Listings routes are implemented. Public
+Listings routes remain the next phase.
 
 ## Phase 6: Public Listings
 
