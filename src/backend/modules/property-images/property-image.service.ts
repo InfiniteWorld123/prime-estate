@@ -236,6 +236,34 @@ export const deletePropertyImageService = async (
 			[imageId, propertyId],
 		);
 		const image = requireFound(imageResult.rows[0], "Property image not found");
+		const remainingImagesResult = await client.query<{ image_count: string }>(
+			`SELECT COUNT(*) AS image_count
+			 FROM property_images
+			 WHERE property_id = $1 AND id <> $2;`,
+			[propertyId, imageId],
+		);
+		if (Number(remainingImagesResult.rows[0]?.image_count ?? 0) === 0) {
+			const publicListingResult = await client.query<{ exists: boolean }>(
+				`SELECT EXISTS (
+					SELECT 1
+					FROM listings
+					WHERE property_id = $1
+					  AND (
+						status = 'PUBLISHED'
+						OR (
+							status = 'ARCHIVED'
+							AND archive_outcome IN ('SOLD', 'RENTED')
+						)
+					  )
+				 ) AS exists;`,
+				[propertyId],
+			);
+			if (publicListingResult.rows[0]?.exists) {
+				throw conflictError(
+					"The last image cannot be deleted while the property has a public listing page",
+				);
+			}
+		}
 		await deleteStoredImage(image.storage_key);
 		await client.query("DELETE FROM property_images WHERE id = $1;", [imageId]);
 		if (image.is_cover) {

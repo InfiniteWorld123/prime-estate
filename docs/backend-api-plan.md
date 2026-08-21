@@ -122,6 +122,8 @@ Rules:
 - Preserve ordering and allow only one cover image per property.
 - Changing the cover image must be transactional.
 - If the cover is deleted, promote the first remaining image automatically.
+- Do not allow deleting the last image while a published or historical public
+  listing page depends on it.
 
 ## Phase 5: Listings
 
@@ -169,6 +171,15 @@ Rules:
   or bookings.
 - Withdrawn listing detail pages return `404 Not Found`.
 - Support the agreed filters, sorting, feature matching, and pagination.
+- Multiple selected feature IDs use AND semantics: a property must have every
+  selected feature.
+- Public feature options include only features used by currently published
+  listings.
+- Public responses always expose city and postal code, but expose street,
+  house number, and unit only when the listing allows the exact address.
+
+Current status: the Public Listings and public Feature options routes are
+implemented. The first backend vertical slice is complete.
 
 ## Later Vertical Slices
 
