@@ -1,108 +1,131 @@
-# Frontend and Release Roadmap
+# Frontend and Integration Roadmap
 
 ## Purpose
 
-Deliver Prime Estate as small, complete vertical slices. A stage may have a
-mock UI pass and a later integration pass when that separation is explicitly
-recorded. Each pass includes its UX contract, implementation, responsive and
-bilingual behavior, required states, and verification.
+Deliver Prime Estate through an interface-first track followed by a separate
+integration track. Public and administrative experiences are designed,
+documented, and implemented with deterministic mock data before backend
+connections are introduced.
 
-The roadmap records the major delivery order. Detailed decisions belong in the
-document for the stage currently being built.
+This separation keeps visual and UX decisions focused while leaving React
+Query, URL state, authentication sessions, and API contracts for deliberate
+integration slices. Detailed requirements are documented only after they have
+been discussed and approved.
 
 ## Status Legend
 
-- `Not started`: scope is named but deliberately not designed yet.
-- `Draft`: the detailed specification is written and awaiting joint review.
-- `Planned`: detailed specification is approved and ready to implement.
+- `Not started`: the slice is named but its detailed UX is not approved.
+- `Draft`: detailed planning is being discussed or documented.
+- `Planned`: the specification is approved and ready to implement.
 - `In progress`: implementation or verification is underway.
-- `Completed`: completion criteria are verified.
+- `Completed`: the scope assigned to this roadmap stage is verified.
 
-## Stage 1: Public Property Search
+## Stage 1: Public Property Search UI
 
-**Status:** In progress
+**Status:** Completed
 
-Build the bilingual public results experience with mock data first, including
-search, filters, sorting, pagination, responsive layouts, and loading, empty,
-and error states. Then move applied criteria into Router URL state and connect
-the same UI contract to the public listings API through React Query.
+The bilingual mock-first public property search UI includes listing intent,
+filters, applied-filter chips, sorting, pagination, responsive layouts, and
+loading, empty, full-error, background-error, and missing-image states.
+
+URL-owned search state, React Query, and the public listings API are assigned to
+Stage 7 rather than keeping this UI stage open.
 
 Detailed specification: [`pages/properties.md`](pages/properties.md)
 
-The mock-first UI implementation is complete. Router URL state, React Query,
-the backend connection, and the final cross-browser visual sign-off remain in
-this stage before it can be marked completed.
+## Stage 2: Public Property Details UI
 
-## Stage 2: Property Details
+**Status:** Completed
 
-**Status:** In progress
+The bilingual mock-first property detail UI includes the responsive gallery
+and lightbox, listing summary, optional-field omission, property information,
+availability behavior, sticky contact card, TanStack Form inquiry dialog, and
+page-state previews.
 
-Build the public listing detail page with its image gallery, property facts,
-description, features, address-visibility rules, availability state, metadata,
-and contact direction.
-
-The mock-first bilingual UI is implemented with its responsive gallery and
-lightbox, listing facts, optional-field omission, availability states, sticky
-contact card, TanStack Form inquiry dialog, and page-state previews. Public API
-integration, real inquiry submission, route-level server metadata, and final
-cross-browser visual sign-off remain before this stage is completed.
+Public detail API loading, real inquiry submission, and server-aware metadata
+are assigned to Stage 7.
 
 Detailed specification: [`pages/property-details.md`](pages/property-details.md)
 
-## Stage 3: Home Page Backend Integration
+## Stage 3: About Page
 
 **Status:** Not started
 
-Replace the seven deterministic home-page mock listings with the newest public
-listings through a plain API module and focused React Query hooks. Activate hero
-search and listing navigation without changing the established visual contract.
+Discuss and document the About page before implementation. Its job, content,
+trust signals, layout, bilingual copy, responsive behavior, and page states
+must be approved without fabricating agency history, staff, statistics,
+testimonials, or unsupported claims.
 
-The detailed specification will be written after Stage 2 is complete.
+A detailed page file will be created only after the planning discussion.
 
-## Stage 4: Authentication
-
-**Status:** Not started
-
-Design and implement sign-up, sign-in, verification, session handling, route
-protection, and the different visitor, user, and admin experiences. Refactor
-the temporary auth query structure as part of this stage.
-
-The detailed specification will be written after Stage 3 is complete.
-
-## Stage 5: Admin Dashboard
+## Stage 4: Contact Page
 
 **Status:** Not started
 
-Build the administrative shell and the UI required by the completed backend
-property and listing scope: contacts, properties, features, images, listing
-drafts, publishing, archiving, and lifecycle feedback. After the documented
-inquiry backend slice is implemented, add unread inquiry counts and the basic
-inquiry-management workflow without WebSockets.
+Discuss and document the Contact page before implementation. Planning will
+cover its relationship to property inquiries, the information visitors need,
+form behavior, bilingual copy, privacy expectations, and mock success and
+failure states.
 
-Blogging, analytics, general user management, payments, and organizations stay
-outside this stage unless the product scope is explicitly changed later.
+Real submission and backend persistence remain Stage 7 work. A detailed page
+file will be created only after the planning discussion.
 
-## Stage 6: Visual and Quality Review
-
-**Status:** Not started
-
-Review the complete product in German and English across supported viewport
-sizes, light and dark themes, keyboard navigation, accessibility, loading and
-failure states, browser behavior, performance, and end-to-end workflows.
-
-## Stage 7: Deployment
+## Stage 5: Authentication UI
 
 **Status:** Not started
 
-Prepare and deploy the verified application to its selected hosting or VPS,
-including production configuration, database migration, image storage, domain,
-TLS, backups, monitoring, and post-deployment smoke tests.
+Discuss and document the authentication experience before implementation. The
+UI plan will identify the required screens and user-visible states without yet
+connecting Better Auth, React Query mutations, sessions, or protected routes.
 
-The hosting provider and operational budget will be selected when this stage
-begins rather than assumed now.
+After Stages 3, 4, and 5 are jointly approved, their mock-first UI
+implementations may be delivered together as one focused frontend batch.
+
+## Stage 6: Administrative UI
+
+**Status:** Not started
+
+Plan and implement the administrative shell and the UI required by the
+approved MVP property and listing workflow. Mock data and local preview states
+remain acceptable during this stage.
+
+The dashboard shell and property/listing management may become separate slices
+if their detailed planning shows that this is clearer. That decision is
+deliberately deferred until Stage 6 begins.
+
+Contacts, inquiries, and other approved administrative surfaces are added only
+when their documented workflow requires them. Blogging, analytics, general
+user management, payments, staff roles, and organizations remain outside the
+current MVP.
+
+## Stage 7: Application Integration
+
+**Status:** Not started
+
+Replace mock orchestration with real application behavior through small,
+independently verified integration slices. This stage includes, where required
+by the completed UI:
+
+- TanStack Router URL state for shareable public search views
+- Plain frontend API transport modules
+- React Query queries, mutations, caching, and invalidation
+- Home, public search, and property detail API integration
+- Inquiry persistence and administrative inquiry visibility
+- Better Auth flows, sessions, and protected routes
+- Administrative property and listing API integration
+- Loading, error, retry, authorization, and stale-data behavior against real
+  backend responses
+
+The first integration slice is implemented as a learning pass: the file and
+data flow are explained, the user applies the initial changes, and the result
+is reviewed. Later repetitive integration work may then be implemented
+directly after its scope and contract are approved.
+
+Deployment, production legal identity, monitoring, backups, and hosting remain
+later release work and are not silently included in Stage 7.
 
 ## Current Focus
 
-Stage 2 integration planning: the Property Details mock UI is complete. Stage
-1's URL state, React Query, and backend integration pass also remains
-deliberately deferred.
+Plan and document Stages 3, 4, and 5 in order: About, Contact, then
+Authentication UI. Do not implement them until all three plans have been
+approved for the combined frontend batch.
