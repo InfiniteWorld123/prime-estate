@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './../routes/__root'
 import { Route as MarketingIndexRouteImport } from './../routes/_marketing/index'
 import { Route as ApiSplatRouteImport } from './../routes/api.$'
+import { Route as MarketingPropertiesRouteImport } from './../routes/_marketing/properties'
 
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
   id: '/_marketing/',
@@ -22,29 +23,38 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketingPropertiesRoute = MarketingPropertiesRouteImport.update({
+  id: '/_marketing/properties',
+  path: '/properties',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/properties': typeof MarketingPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/': typeof MarketingIndexRoute
 }
 export interface FileRoutesByTo {
+  '/properties': typeof MarketingPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/': typeof MarketingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_marketing/properties': typeof MarketingPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/_marketing/': typeof MarketingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/api/$' | '/'
+  fullPaths: '/properties' | '/api/$' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/api/$' | '/'
-  id: '__root__' | '/api/$' | '/_marketing/'
+  to: '/properties' | '/api/$' | '/'
+  id: '__root__' | '/_marketing/properties' | '/api/$' | '/_marketing/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  MarketingPropertiesRoute: typeof MarketingPropertiesRoute
   ApiSplatRoute: typeof ApiSplatRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
 }
@@ -65,10 +75,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_marketing/properties': {
+      id: '/_marketing/properties'
+      path: '/properties'
+      fullPath: '/properties'
+      preLoaderRoute: typeof MarketingPropertiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  MarketingPropertiesRoute: MarketingPropertiesRoute,
   ApiSplatRoute: ApiSplatRoute,
   MarketingIndexRoute: MarketingIndexRoute,
 }
