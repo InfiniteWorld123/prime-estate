@@ -1,0 +1,108 @@
+import type { PropertyDetailListing } from "@/frontend/features/listings/listing.types";
+
+export const mockPropertyDetail: PropertyDetailListing = {
+	slug: "modernes-familienhaus-erfurt",
+	title: "Modernes Familienhaus mit ruhigem Garten",
+	description:
+		"Dieses moderne Familienhaus bietet großzügige, lichtdurchflutete Räume und eine ruhige Wohnlage in Erfurt.\n\nDer offene Wohn- und Essbereich führt direkt auf die Terrasse und in den gepflegten Garten. Die durchdachte Raumaufteilung eignet sich besonders für Familien, die Komfort und eine gute Anbindung miteinander verbinden möchten.",
+	seoTitle: "Modernes Familienhaus in Erfurt | Prime Estate",
+	seoDescription:
+		"Modernes Familienhaus mit Garten, Terrasse und fünf Zimmern in Erfurt entdecken.",
+	listingType: "SALE",
+	price: 435000,
+	currencyCode: "EUR",
+	archiveOutcome: null,
+	isAvailable: true,
+	referenceNumber: "PE-2026-001",
+	propertyType: "HOUSE",
+	address: {
+		streetName: null,
+		houseNumber: null,
+		unitNumber: null,
+		postalCode: "99094",
+		city: "Erfurt",
+	},
+	livingArea: 148,
+	plotArea: 520,
+	rooms: 5,
+	bedrooms: 3,
+	bathrooms: 2,
+	yearBuilt: 2019,
+	floorNumber: null,
+	totalFloors: 2,
+	images: [
+		{
+			id: "property-image-1",
+			src: "/images/properties/modern-home-erfurt.jpg",
+			alt: "Modernes Familienhaus mit Garten in Erfurt",
+			sortOrder: 1,
+			isCover: true,
+		},
+		{
+			id: "property-image-2",
+			src: "/images/properties/erfurt-apartment.jpg",
+			alt: "Heller Wohnbereich des Hauses",
+			sortOrder: 2,
+			isCover: false,
+		},
+		{
+			id: "property-image-3",
+			src: "/images/properties/weimar-apartment.jpg",
+			alt: "Moderner Essbereich",
+			sortOrder: 3,
+			isCover: false,
+		},
+		{
+			id: "property-image-4",
+			src: "/images/properties/jena-residence.jpg",
+			alt: "Großzügiger Wohnbereich",
+			sortOrder: 4,
+			isCover: false,
+		},
+		{
+			id: "property-image-5",
+			src: "/images/properties/gotha-apartment.jpg",
+			alt: "Helles Schlafzimmer",
+			sortOrder: 5,
+			isCover: false,
+		},
+		{
+			id: "property-image-6",
+			src: "/images/properties/eisenach-house.jpg",
+			alt: "Außenansicht des Hauses",
+			sortOrder: 6,
+			isCover: false,
+		},
+		{
+			id: "property-image-7",
+			src: "/images/properties/gera-apartment.jpg",
+			alt: "Ruhige Umgebung des Hauses",
+			sortOrder: 7,
+			isCover: false,
+		},
+	],
+	features: [
+		{
+			id: "feature-garden",
+			code: "garden",
+			name: "Garten",
+		},
+		{
+			id: "feature-terrace",
+			code: "terrace",
+			name: "Terrasse",
+		},
+		{
+			id: "feature-parking",
+			code: "parking",
+			name: "Stellplatz",
+		},
+		{
+			id: "feature-cellar",
+			code: "cellar",
+			name: "Keller",
+		},
+	],
+	publishedAt: "2026-08-20T10:00:00.000Z",
+	archivedAt: null,
+};
