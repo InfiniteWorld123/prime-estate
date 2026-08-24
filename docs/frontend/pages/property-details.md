@@ -2,7 +2,8 @@
 
 ## Status
 
-Planned and approved for mock-first frontend implementation.
+Mock-first frontend implementation completed. Public API and inquiry endpoint
+integration remain deferred to their dedicated passes.
 
 The first pass is UI-only and uses one deterministic listing. It does not call
 the public listing API or submit inquiries. Its component contracts must allow

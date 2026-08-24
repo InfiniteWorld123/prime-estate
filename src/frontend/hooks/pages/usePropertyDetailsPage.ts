@@ -9,10 +9,13 @@ const brokenImageSource = "/images/properties/unavailable-property-image.jpg";
 
 function createPreviewListing(
 	previewState: PropertyDetailsPreviewState,
+	slug: string,
 ): PropertyDetailListing {
+	const listing = { ...mockPropertyDetail, slug };
+
 	if (previewState === "sold") {
 		return {
-			...mockPropertyDetail,
+			...listing,
 			archiveOutcome: "SOLD",
 			isAvailable: false,
 			archivedAt: "2026-08-23T10:00:00.000Z",
@@ -21,7 +24,7 @@ function createPreviewListing(
 
 	if (previewState === "rented") {
 		return {
-			...mockPropertyDetail,
+			...listing,
 			listingType: "RENT",
 			price: 1450,
 			archiveOutcome: "RENTED",
@@ -32,7 +35,7 @@ function createPreviewListing(
 
 	if (previewState === "missing-image") {
 		return {
-			...mockPropertyDetail,
+			...listing,
 			images: mockPropertyDetail.images.map((image, index) =>
 				index === 0
 					? {
@@ -46,18 +49,15 @@ function createPreviewListing(
 
 	if (previewState === "all-images-missing") {
 		return {
-			...mockPropertyDetail,
-			images: mockPropertyDetail.images.map((image) => ({
-				...image,
-				src: brokenImageSource,
-			})),
+			...listing,
+			images: [],
 		};
 	}
 
-	return mockPropertyDetail;
+	return listing;
 }
 
-export function usePropertyDetailsPage() {
+export function usePropertyDetailsPage(slug: string) {
 	const [isInitialLoading, setIsInitialLoading] = useState(true);
 	const [previewState, setPreviewState] =
 		useState<PropertyDetailsPreviewState>("ready");
@@ -70,21 +70,23 @@ export function usePropertyDetailsPage() {
 		return () => window.clearTimeout(loadingTimer);
 	}, []);
 
+	const isLoading = isInitialLoading || previewState === "loading";
+	const isError = previewState === "error";
+	const isNotFound = previewState === "not-found";
 	const listing = useMemo(() => {
-		if (
-			isInitialLoading ||
-			previewState === "loading" ||
-			previewState === "error" ||
-			previewState === "not-found"
-		) {
+		if (isLoading || isError || isNotFound) {
 			return null;
 		}
 
-		return createPreviewListing(previewState);
-	}, [isInitialLoading, previewState]);
+		return createPreviewListing(previewState, slug);
+	}, [isError, isLoading, isNotFound, previewState, slug]);
 
 	return {
+		hasBackgroundError: previewState === "background-error",
+		isError,
 		isInitialLoading,
+		isLoading,
+		isNotFound,
 		listing,
 		previewState,
 		retry: () => setPreviewState("ready"),

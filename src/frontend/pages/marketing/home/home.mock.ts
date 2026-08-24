@@ -4,6 +4,7 @@ export type HomeListing = PropertyCardListing;
 
 export const heroListing: HomeListing = {
 	id: "mock-erfurt-modern-home",
+	slug: "modernes-familienhaus-erfurt",
 	title: {
 		de: "Modernes Familienhaus mit ruhigem Garten",
 		en: "Modern family home with a quiet garden",
@@ -27,6 +28,7 @@ export const heroListing: HomeListing = {
 export const latestListings: HomeListing[] = [
 	{
 		id: "mock-erfurt-apartment",
+		slug: "helle-wohnung-erfurt-innenstadt",
 		title: {
 			de: "Helle Wohnung nahe der Erfurter Innenstadt",
 			en: "Bright apartment close to Erfurt city centre",
@@ -48,6 +50,7 @@ export const latestListings: HomeListing[] = [
 	},
 	{
 		id: "mock-weimar-apartment",
+		slug: "ruhige-wohnung-weimar",
 		title: {
 			de: "Ruhige Wohnung mit lichtdurchflutetem Wohnbereich",
 			en: "Calm apartment with a light-filled living space",
@@ -69,6 +72,7 @@ export const latestListings: HomeListing[] = [
 	},
 	{
 		id: "mock-jena-residence",
+		slug: "grosszuegiges-wohnhaus-jena",
 		title: {
 			de: "Zeitgemäßes Wohnhaus mit großzügigen Räumen",
 			en: "Contemporary residence with generous rooms",
@@ -90,6 +94,7 @@ export const latestListings: HomeListing[] = [
 	},
 	{
 		id: "mock-gotha-apartment",
+		slug: "komfortable-wohnung-gotha",
 		title: {
 			de: "Wohnliche Wohnung für einen komfortablen Alltag",
 			en: "Warm apartment designed for everyday comfort",
@@ -111,6 +116,7 @@ export const latestListings: HomeListing[] = [
 	},
 	{
 		id: "mock-eisenach-house",
+		slug: "freistehendes-haus-eisenach",
 		title: {
 			de: "Freistehendes Haus mit Garten und offenen Wohnbereichen",
 			en: "Detached home with garden and open living areas",
@@ -132,6 +138,7 @@ export const latestListings: HomeListing[] = [
 	},
 	{
 		id: "mock-gera-apartment",
+		slug: "ruhige-wohnung-gera",
 		title: {
 			de: "Gut angebundene Wohnung in ruhiger Nachbarschaft",
 			en: "Well-connected apartment in a quiet neighbourhood",

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './../routes/__root'
 import { Route as MarketingIndexRouteImport } from './../routes/_marketing/index'
 import { Route as ApiSplatRouteImport } from './../routes/api.$'
 import { Route as MarketingPropertiesRouteImport } from './../routes/_marketing/properties'
+import { Route as MarketingPropertiesSlugRouteImport } from './../routes/_marketing/properties_.$slug'
 
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
   id: '/_marketing/',
@@ -28,35 +29,49 @@ const MarketingPropertiesRoute = MarketingPropertiesRouteImport.update({
   path: '/properties',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketingPropertiesSlugRoute = MarketingPropertiesSlugRouteImport.update({
+  id: '/_marketing/properties_/$slug',
+  path: '/properties/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/properties': typeof MarketingPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/': typeof MarketingIndexRoute
+  '/properties/$slug': typeof MarketingPropertiesSlugRoute
 }
 export interface FileRoutesByTo {
   '/properties': typeof MarketingPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/': typeof MarketingIndexRoute
+  '/properties/$slug': typeof MarketingPropertiesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_marketing/properties': typeof MarketingPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/_marketing/': typeof MarketingIndexRoute
+  '/_marketing/properties_/$slug': typeof MarketingPropertiesSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/properties' | '/api/$' | '/'
+  fullPaths: '/properties' | '/api/$' | '/' | '/properties/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/properties' | '/api/$' | '/'
-  id: '__root__' | '/_marketing/properties' | '/api/$' | '/_marketing/'
+  to: '/properties' | '/api/$' | '/' | '/properties/$slug'
+  id:
+    | '__root__'
+    | '/_marketing/properties'
+    | '/api/$'
+    | '/_marketing/'
+    | '/_marketing/properties_/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   MarketingPropertiesRoute: typeof MarketingPropertiesRoute
   ApiSplatRoute: typeof ApiSplatRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
+  MarketingPropertiesSlugRoute: typeof MarketingPropertiesSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +97,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingPropertiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_marketing/properties_/$slug': {
+      id: '/_marketing/properties_/$slug'
+      path: '/properties/$slug'
+      fullPath: '/properties/$slug'
+      preLoaderRoute: typeof MarketingPropertiesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +111,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketingPropertiesRoute: MarketingPropertiesRoute,
   ApiSplatRoute: ApiSplatRoute,
   MarketingIndexRoute: MarketingIndexRoute,
+  MarketingPropertiesSlugRoute: MarketingPropertiesSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

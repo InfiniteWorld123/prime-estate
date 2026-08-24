@@ -5,6 +5,7 @@ export type LocalizedText = {
 
 export type PropertyCardListing = {
 	id: string;
+	slug: string;
 	title: LocalizedText;
 	city: string;
 	postalCode: string;
@@ -20,7 +21,6 @@ export type PropertyCardListing = {
 };
 
 export type PropertySearchListing = PropertyCardListing & {
-	slug: string;
 	bedrooms: number;
 	featureIds: string[];
 };

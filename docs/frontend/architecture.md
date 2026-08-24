@@ -194,7 +194,7 @@ src/frontend/
     `-- _marketing/
         |-- index.tsx
         |-- properties.tsx
-        `-- properties.$slug.tsx            # planned
+        `-- properties_.$slug.tsx           # non-nested detail route
 ```
 
 Future pages are siblings rather than children of the dashboard:

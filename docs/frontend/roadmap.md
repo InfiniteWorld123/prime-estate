@@ -35,14 +35,17 @@ this stage before it can be marked completed.
 
 ## Stage 2: Property Details
 
-**Status:** Planned
+**Status:** In progress
 
 Build the public listing detail page with its image gallery, property facts,
 description, features, address-visibility rules, availability state, metadata,
 and contact direction.
 
-The mock-first specification is approved and ready to implement while the
-separate Public Property Search integration pass remains deferred.
+The mock-first bilingual UI is implemented with its responsive gallery and
+lightbox, listing facts, optional-field omission, availability states, sticky
+contact card, TanStack Form inquiry dialog, and page-state previews. Public API
+integration, real inquiry submission, route-level server metadata, and final
+cross-browser visual sign-off remain before this stage is completed.
 
 Detailed specification: [`pages/property-details.md`](pages/property-details.md)
 
@@ -100,5 +103,6 @@ begins rather than assumed now.
 
 ## Current Focus
 
-Stage 2 mock UI: Public Property Details. Stage 1's mock UI is complete; its URL
-state, React Query, and backend integration pass remains deliberately deferred.
+Stage 2 integration planning: the Property Details mock UI is complete. Stage
+1's URL state, React Query, and backend integration pass also remains
+deliberately deferred.
