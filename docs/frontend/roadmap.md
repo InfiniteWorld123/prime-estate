@@ -49,37 +49,42 @@ Detailed specification: [`pages/property-details.md`](pages/property-details.md)
 
 ## Stage 3: About Page
 
-**Status:** Not started
+**Status:** Completed
 
-Discuss and document the About page before implementation. Its job, content,
-trust signals, layout, bilingual copy, responsive behavior, and page states
-must be approved without fabricating agency history, staff, statistics,
-testimonials, or unsupported claims.
+The bilingual About page presents Prime Estate as a real agency centered on
+Erfurt and Thuringia, using an architectural hero and concise service
+principles without fabricated history, staff, statistics, testimonials, or
+unsupported claims.
 
-A detailed page file will be created only after the planning discussion.
+Detailed specification: [`pages/about.md`](pages/about.md)
 
 ## Stage 4: Contact Page
 
-**Status:** Not started
+**Status:** Completed
 
-Discuss and document the Contact page before implementation. Planning will
-cover its relationship to property inquiries, the information visitors need,
-form behavior, bilingual copy, privacy expectations, and mock success and
-failure states.
+The bilingual Contact page provides general agency contact, portfolio contact
+information, a TanStack Form with submit-first validation, mock submission
+states, and a concise FAQ. It remains separate from property-specific
+inquiries.
 
-Real submission and backend persistence remain Stage 7 work. A detailed page
-file will be created only after the planning discussion.
+Real submission and backend persistence remain Stage 7 work.
+
+Detailed specification: [`pages/contact.md`](pages/contact.md)
 
 ## Stage 5: Authentication UI
 
-**Status:** Not started
+**Status:** Completed
 
-Discuss and document the authentication experience before implementation. The
-UI plan will identify the required screens and user-visible states without yet
-connecting Better Auth, React Query mutations, sessions, or protected routes.
+The bilingual authentication UI covers sign-up, six-digit email verification,
+sign-in, forgot password, reset password, sign-out, and session-aware header
+previews. Email and password are active; Google is visibly deferred. The mock
+slice does not connect Better Auth, React Query mutations, sessions, or
+protected routes.
 
 After Stages 3, 4, and 5 are jointly approved, their mock-first UI
 implementations may be delivered together as one focused frontend batch.
+
+Detailed specification: [`pages/authentication.md`](pages/authentication.md)
 
 ## Stage 6: Administrative UI
 
@@ -126,6 +131,8 @@ later release work and are not silently included in Stage 7.
 
 ## Current Focus
 
-Plan and document Stages 3, 4, and 5 in order: About, Contact, then
-Authentication UI. Do not implement them until all three plans have been
-approved for the combined frontend batch.
+Stages 3, 4, and 5 are completed: their combined mock-first implementation
+passes the code, type-check, build, route-smoke-test, and user visual-review
+gates. The next focus is detailed planning for Stage 6, the Administrative UI.
+Keep all real submissions, sessions, redirects, and backend connections in
+Stage 7.

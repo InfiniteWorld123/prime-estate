@@ -7,10 +7,11 @@ keeping route files thin, page composition explicit, and server interaction
 separate from visual components.
 
 Frontend work is delivered in mock-first and integration passes when useful.
-The home page and public property search currently use mock presentation data,
-and the property detail mock UI is the current planned slice. Public API
-integration, authentication screens, and administrative screens remain
-separate roadmap work. Current status lives in [`roadmap.md`](roadmap.md).
+The public marketing and property experiences currently use mock presentation
+data. About, Contact, and the authentication UI are completed as a combined
+mock-first batch. Public API integration, real
+authentication behavior, and administrative screens remain separate roadmap
+work. Current status lives in [`roadmap.md`](roadmap.md).
 
 ## Core Principles
 
@@ -173,7 +174,7 @@ src/frontend/
 |       |-- carousel.tsx
 |       `-- ...
 |-- features/
-|   |-- auth/                           # later
+|   |-- auth/
 |   `-- listings/
 |       |-- components/
 |       |   |-- PropertyCard.tsx
@@ -185,10 +186,19 @@ src/frontend/
 |       |-- usePropertiesPage.ts
 |       `-- usePropertyDetailsPage.ts       # planned
 |-- pages/
+|   |-- auth/
+|   |   |-- sign-in/
+|   |   |-- sign-up/
+|   |   |-- verify-email/
+|   |   |-- forgot-password/
+|   |   `-- reset-password/
 |   `-- marketing/
+|       |-- about/
+|       |-- contact/
 |       |-- home/
+|       |-- legal/
 |       |-- properties/
-|       `-- property-details/               # planned
+|       `-- property-details/
 `-- routes/
     |-- __root.tsx
     `-- _marketing/

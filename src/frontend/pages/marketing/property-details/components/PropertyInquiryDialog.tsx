@@ -1,4 +1,5 @@
 import { revalidateLogic, useForm } from "@tanstack/react-form";
+import { Link } from "@tanstack/react-router";
 import { CircleCheck, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/frontend/components/ui/button";
@@ -325,14 +326,12 @@ export function PropertyInquiryDialog({
 													htmlFor={field.name}
 												>
 													{inquiryCopy.privacyPrefix}{" "}
-													<button
-														className="font-medium text-primary underline underline-offset-4 disabled:cursor-not-allowed"
-														disabled
-														title={inquiryCopy.privacyLater}
-														type="button"
+													<Link
+														className="font-medium text-primary underline underline-offset-4"
+														to="/privacy"
 													>
 														{inquiryCopy.privacyLink}
-													</button>{" "}
+													</Link>{" "}
 													{inquiryCopy.privacySuffix}
 												</Label>
 											</div>

@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/frontend/components/ui/button";
@@ -31,14 +32,11 @@ export function ContactCtaSection() {
 						</p>
 					</div>
 
-					<Button
-						className="mt-8 h-11 gap-2 px-5 lg:mt-0"
-						disabled
-						title={copy.cta.title}
-						type="button"
-					>
-						{copy.cta.action}
-						<ArrowUpRight aria-hidden="true" />
+					<Button asChild className="mt-8 h-11 gap-2 px-5 lg:mt-0">
+						<Link to="/contact">
+							{copy.cta.action}
+							<ArrowUpRight aria-hidden="true" />
+						</Link>
 					</Button>
 				</div>
 			</div>

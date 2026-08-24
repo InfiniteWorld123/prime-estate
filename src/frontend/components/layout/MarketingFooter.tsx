@@ -25,6 +25,12 @@ function FooterBrand() {
 
 export function MarketingFooter() {
 	const { copy } = useLanguage();
+	const footerRoutes = [
+		["/properties", "/properties", "/properties"],
+		["/about", "/contact"],
+		["/sign-in", "/sign-up"],
+		["/imprint", "/privacy"],
+	] as const;
 	return (
 		<footer className="border-t border-sidebar-border bg-sidebar text-sidebar-foreground">
 			<div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
@@ -41,24 +47,19 @@ export function MarketingFooter() {
 						aria-label={copy.footer.navigation}
 						className="grid grid-cols-2 gap-8 sm:grid-cols-4"
 					>
-						{copy.footer.groups.map((group) => (
+						{copy.footer.groups.map((group, groupIndex) => (
 							<div key={group.title}>
 								<h2 className="text-sm font-semibold">{group.title}</h2>
 
 								<ul className="mt-4 space-y-3">
-									{group.items.map((item) => (
+									{group.items.map((item, itemIndex) => (
 										<li key={item}>
-											<button
-												className="cursor-not-allowed text-left text-sm text-sidebar-foreground/55"
-												disabled
-												title={copy.footer.disabledTitle.replace(
-													"{item}",
-													item,
-												)}
-												type="button"
+											<Link
+												className="text-left text-sm text-sidebar-foreground/60 transition-colors hover:text-sidebar-foreground"
+												to={footerRoutes[groupIndex]?.[itemIndex] ?? "/"}
 											>
 												{item}
-											</button>
+											</Link>
 										</li>
 									))}
 								</ul>

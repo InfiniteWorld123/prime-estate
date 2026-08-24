@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, LoaderCircle, LogOut, Menu } from "lucide-react";
 
 import { ThemeToggle } from "@/frontend/components/theme/ThemeToggle";
 import { Button } from "@/frontend/components/ui/button";
@@ -19,6 +19,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/frontend/components/ui/sheet";
+import { useAuthPreview } from "@/frontend/features/auth/hooks/useAuthPreview";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 import { LanguageToggle } from "@/frontend/i18n/LanguageToggle";
 
@@ -46,23 +47,9 @@ function Brand() {
 	);
 }
 
-function DisabledNavigationButton({ children }: { children: React.ReactNode }) {
-	const { copy } = useLanguage();
-	return (
-		<button
-			className="cursor-not-allowed rounded-md px-3 py-2 text-sm font-medium text-muted-foreground opacity-65"
-			disabled
-			title={copy.header.disabledTitle}
-			type="button"
-		>
-			{children}
-		</button>
-	);
-}
-
 function DesktopNavigation() {
 	const { copy } = useLanguage();
-	const disabledNavigation = [
+	const propertyNavigation = [
 		{ label: copy.header.forSale, description: copy.header.forSaleDescription },
 		{ label: copy.header.forRent, description: copy.header.forRentDescription },
 	];
@@ -91,30 +78,109 @@ function DesktopNavigation() {
 						</Link>
 					</DropdownMenuItem>
 
-					{disabledNavigation.map((item) => (
-						<DropdownMenuItem
-							className="flex cursor-not-allowed flex-col items-start gap-1 opacity-60"
-							disabled
-							key={item.label}
-						>
-							<span className="font-medium">{item.label}</span>
-							<span className="text-xs text-muted-foreground">
-								{item.description}
-							</span>
+					{propertyNavigation.map((item) => (
+						<DropdownMenuItem asChild key={item.label}>
+							<Link
+								className="flex flex-col items-start gap-1"
+								to="/properties"
+							>
+								<span className="font-medium">{item.label}</span>
+								<span className="text-xs text-muted-foreground">
+									{item.description}
+								</span>
+							</Link>
 						</DropdownMenuItem>
 					))}
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<DisabledNavigationButton>{copy.header.about}</DisabledNavigationButton>
-			<DisabledNavigationButton>{copy.header.contact}</DisabledNavigationButton>
+			<Button asChild variant="ghost">
+				<Link to="/about">{copy.header.about}</Link>
+			</Button>
+			<Button asChild variant="ghost">
+				<Link to="/contact">{copy.header.contact}</Link>
+			</Button>
 		</nav>
 	);
 }
 
-function MobileNavigation() {
+type AccountNavigationProps = ReturnType<typeof useAuthPreview>;
+
+function initials(name: string) {
+	return name
+		.split(" ")
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((part) => part[0]?.toUpperCase())
+		.join("");
+}
+
+function AccountNavigation({
+	isSigningOut,
+	signOut,
+	user,
+}: AccountNavigationProps) {
 	const { copy } = useLanguage();
-	const disabledNavigation = [copy.header.forSale, copy.header.forRent];
+	if (!user)
+		return (
+			<div className="hidden items-center gap-2 lg:flex">
+				<Button asChild variant="ghost">
+					<Link to="/sign-in">{copy.header.signIn}</Link>
+				</Button>
+				<Button asChild>
+					<Link to="/sign-up">{copy.header.signUp}</Link>
+				</Button>
+			</div>
+		);
+	return (
+		<div className="hidden lg:block">
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						aria-label={copy.header.account}
+						className="size-9 rounded-full p-0"
+						variant="outline"
+					>
+						<span className="grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+							{initials(user.name) || "PE"}
+						</span>
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" className="w-64">
+					<DropdownMenuLabel>
+						<span className="block truncate font-medium">{user.name}</span>
+						<span className="mt-1 block truncate text-xs font-normal text-muted-foreground">
+							{user.email}
+						</span>
+					</DropdownMenuLabel>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						disabled={isSigningOut}
+						onSelect={() => void signOut()}
+					>
+						{isSigningOut ? (
+							<LoaderCircle
+								aria-hidden="true"
+								className="animate-spin motion-reduce:animate-none"
+							/>
+						) : (
+							<LogOut aria-hidden="true" />
+						)}
+						{isSigningOut ? copy.header.signingOut : copy.header.signOut}
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		</div>
+	);
+}
+
+function MobileNavigation({
+	isSigningOut,
+	signOut,
+	user,
+}: AccountNavigationProps) {
+	const { copy } = useLanguage();
+	const propertyNavigation = [copy.header.forSale, copy.header.forRent];
 	return (
 		<Sheet>
 			<SheetTrigger asChild>
@@ -149,36 +215,71 @@ function MobileNavigation() {
 						{copy.header.browseAll}
 					</Link>
 
-					{disabledNavigation.map((item) => (
-						<button
-							className="cursor-not-allowed rounded-md px-3 py-3 text-left text-sm font-medium text-muted-foreground opacity-65"
-							disabled
+					{propertyNavigation.map((item) => (
+						<Link
+							className="rounded-md px-3 py-3 text-sm font-medium hover:bg-muted"
 							key={item}
-							type="button"
+							to="/properties"
 						>
 							{item}
-						</button>
+						</Link>
 					))}
 
 					<div className="my-4 h-px bg-border" />
 
-					<DisabledNavigationButton>
+					<Link
+						className="rounded-md px-3 py-3 text-sm font-medium hover:bg-muted"
+						to="/about"
+					>
 						{copy.header.about}
-					</DisabledNavigationButton>
-					<DisabledNavigationButton>
+					</Link>
+					<Link
+						className="rounded-md px-3 py-3 text-sm font-medium hover:bg-muted"
+						to="/contact"
+					>
 						{copy.header.contact}
-					</DisabledNavigationButton>
-					<DisabledNavigationButton>
-						{copy.header.signIn}
-					</DisabledNavigationButton>
-
-					<Button className="mt-3" disabled type="button">
-						{copy.header.signUp}
-					</Button>
+					</Link>
+					{user ? (
+						<div className="rounded-md border bg-muted/35 p-3">
+							<p className="truncate text-sm font-medium">{user.name}</p>
+							<p className="mt-1 truncate text-xs text-muted-foreground">
+								{user.email}
+							</p>
+							<Button
+								className="mt-3 w-full"
+								disabled={isSigningOut}
+								onClick={() => void signOut()}
+								type="button"
+								variant="outline"
+							>
+								{isSigningOut ? (
+									<LoaderCircle
+										aria-hidden="true"
+										className="animate-spin motion-reduce:animate-none"
+									/>
+								) : (
+									<LogOut aria-hidden="true" />
+								)}
+								{isSigningOut ? copy.header.signingOut : copy.header.signOut}
+							</Button>
+						</div>
+					) : (
+						<>
+							<Link
+								className="rounded-md px-3 py-3 text-sm font-medium hover:bg-muted"
+								to="/sign-in"
+							>
+								{copy.header.signIn}
+							</Link>
+							<Button asChild className="mt-3">
+								<Link to="/sign-up">{copy.header.signUp}</Link>
+							</Button>
+						</>
+					)}
 				</nav>
 
 				<div className="border-t px-4 py-4 text-xs text-muted-foreground">
-					{copy.header.pagesLater}
+					{copy.header.mobileDescription}
 				</div>
 			</SheetContent>
 		</Sheet>
@@ -186,7 +287,7 @@ function MobileNavigation() {
 }
 
 export function MarketingHeader() {
-	const { copy } = useLanguage();
+	const authPreview = useAuthPreview();
 	return (
 		<header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
 			<div className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -200,17 +301,9 @@ export function MarketingHeader() {
 					<LanguageToggle />
 					<ThemeToggle />
 
-					<div className="hidden items-center gap-2 lg:flex">
-						<Button disabled type="button" variant="ghost">
-							{copy.header.signIn}
-						</Button>
+					<AccountNavigation {...authPreview} />
 
-						<Button disabled type="button">
-							{copy.header.signUp}
-						</Button>
-					</div>
-
-					<MobileNavigation />
+					<MobileNavigation {...authPreview} />
 				</div>
 			</div>
 		</header>
