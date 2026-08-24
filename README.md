@@ -1,6 +1,14 @@
 # Prime Estate
 
-Prime Estate is a full-stack real-estate platform built with TypeScript, PostgreSQL, authentication, email, and Docker. The product modules and property-domain schema will be designed incrementally on top of this foundation.
+Prime Estate is a full-stack residential real-estate platform for one agency,
+built with TypeScript, PostgreSQL, authentication, and Docker. It supports the
+agency workflow from internal property management and public listings through
+visitor inquiries and listing closure.
+
+Product scope and architecture are documented in
+[`docs/project.md`](docs/project.md) and
+[`docs/architecture.md`](docs/architecture.md). AI and contributor rules live
+in [`AGENTS.md`](AGENTS.md).
 
 ## Stack
 
@@ -22,13 +30,9 @@ Prime Estate is a full-stack real-estate platform built with TypeScript, Postgre
 
 ## Quick Start with Docker
 
-1. Create your local environment file:
+1. Create a local `.env` file and provide the required environment variables.
 
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Fill in `.env`. Generate strong local secrets with:
+2. Generate strong local secrets with:
 
    ```bash
    openssl rand -hex 32

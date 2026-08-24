@@ -1,4 +1,4 @@
-# Property and Listing Management
+# Property and Listing Rules
 
 ## Scope
 

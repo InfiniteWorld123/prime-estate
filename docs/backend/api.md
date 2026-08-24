@@ -10,6 +10,13 @@ The MVP serves one real-estate agency. Registered users may exist, but only the
 single admin can access administrative routes. Properties are never exposed
 directly through the public API.
 
+Phases 1 through 6 are implemented. Phase 0 is implemented except for the
+automatic first-account bootstrap described below. Property inquiries are the
+next documented backend slice and remain planned rather than implemented.
+
+Property and listing domain rules live in
+[`property-listings.md`](property-listings.md).
+
 ## API Conventions
 
 - All application routes use the `/api` prefix.
@@ -150,8 +157,7 @@ Rules:
 - When a sale closes as `SOLD`, a published rental is archived as `WITHDRAWN`
   and an unpublished rental draft is deleted in the same transaction.
 
-Current status: the administrative Listings routes are implemented. Public
-Listings routes remain the next phase.
+Current status: the administrative Listings routes are implemented.
 
 ## Phase 6: Public Listings
 
@@ -185,7 +191,8 @@ implemented. The first backend vertical slice is complete.
 
 After the property/listing slice is complete:
 
-1. Inquiries and basic lead management.
+1. Inquiries and basic lead management, following
+   [`inquiries.md`](inquiries.md).
 2. Viewing availability and bookings.
 3. Admin and public frontend screens for each completed backend capability.
 4. Blogging.
@@ -203,7 +210,17 @@ For one capability at a time:
 6. Run formatting, type checking, tests, and a manual API smoke test.
 7. Update this document if an API decision changes.
 
-## Immediate Next Step
+## Current Handoff
 
-Configure Cloudinary credentials and smoke-test the Property Images routes,
-then add bulk property archiving before starting Listings.
+The property and listing backend vertical slice is complete, including
+Cloudinary-backed property images, bulk property archiving, administrative
+listing lifecycle routes, and public listing discovery.
+
+The next documented backend capability is property inquiries and basic lead
+management. It is planned but not implemented; PostgreSQL and the Admin
+Dashboard will be the primary notification surface, while Resend and real-time
+transport remain deferred.
+
+The current product work continues in the frontend roadmap. Runtime API smoke
+tests must be repeated before deployment against the final production
+configuration.
