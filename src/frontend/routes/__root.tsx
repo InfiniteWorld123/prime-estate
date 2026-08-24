@@ -5,6 +5,8 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { ThemeProvider } from "@/frontend/components/theme/ThemeProvider";
+import { LanguageProvider } from "@/frontend/i18n/LanguageProvider";
 import type { RouterContextType } from "../config/RouterContextType";
 import appCss from "../config/styles.css?url";
 
@@ -19,7 +21,12 @@ export const Route = createRootRouteWithContext<RouterContextType>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "Prime Estate",
+				title: "Prime Estate | Immobilien in Thüringen kaufen und mieten",
+			},
+			{
+				name: "description",
+				content:
+					"Entdecken Sie Immobilien zum Kauf und zur Miete in Erfurt, Thüringen und ganz Deutschland.",
 			},
 		],
 		links: [
@@ -34,12 +41,14 @@ export const Route = createRootRouteWithContext<RouterContextType>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
+		<html lang="de">
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				{children}
+				<LanguageProvider>
+					<ThemeProvider>{children}</ThemeProvider>
+				</LanguageProvider>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",

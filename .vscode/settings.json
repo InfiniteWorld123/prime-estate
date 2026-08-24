@@ -21,7 +21,8 @@
 		".dockerignore": true,
 		"compose.yaml": true,
 		"Dockerfile": true,
-		"README.md": true
+		"README.md": true,
+		"components.json": true
 	},
 	"search.exclude": {
 		"**/routeTree.gen.ts": true
