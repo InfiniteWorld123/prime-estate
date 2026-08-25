@@ -65,6 +65,11 @@ property is automatically archived as withdrawn.
 
 Draft listings may be incomplete.
 
+When a draft is created without a title or description, the backend supplies
+editable defaults from the Property's structured data. This generation does
+not translate content or create a second language version. The admin may edit
+or clear either value while the Listing remains a draft.
+
 Publishing requires:
 
 - Complete internal property address
@@ -75,6 +80,12 @@ Publishing requires:
 - Description
 - Slug
 - Cover image
+
+Title and Description are validated rather than generated at publication. A
+missing Slug is generated from the final Title. The generated Slug does not
+include the internal Property reference; when the same Slug already exists, a
+numeric suffix such as `-2` is added. The admin may customize the Slug before
+publication.
 
 Draft listings that have never been published may be permanently deleted.
 
@@ -96,8 +107,11 @@ Each listing supports:
 - SEO title
 - SEO description
 
-Missing SEO values are generated from the listing title and description.
-A published slug cannot be changed.
+Missing SEO values are resolved from the current Listing Title and Description.
+An empty SEO field remains `NULL` as the marker for this automatic fallback;
+the effective public SEO value is resolved when the Listing is read. A custom
+SEO value is stored and takes precedence over the fallback. A published Slug
+cannot be changed.
 
 ## Features
 

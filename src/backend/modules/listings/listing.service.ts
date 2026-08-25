@@ -59,6 +59,20 @@ type ListingStateRow = ListingRow & {
 	property_archived_at: Date | null;
 };
 
+type ListingCopySource = Pick<
+	ListingRow,
+	"property_type" | "city" | "living_area_m2" | "rooms" | "listing_type"
+>;
+
+type ListingPropertyRow = {
+	id: string;
+	archived_at: Date | null;
+	property_type: "APARTMENT" | "HOUSE";
+	city: string;
+	living_area_m2: string;
+	rooms: string;
+};
+
 type IdRow = { id: string };
 type CountRow = { total_count: string };
 
@@ -180,14 +194,37 @@ const normalizeSlug = (value: string): string => {
 	return slug;
 };
 
-const buildGeneratedTitle = (listing: ListingStateRow): string => {
+const getAvailableSlug = async (
+	value: string,
+	client: { query: typeof pool.query },
+): Promise<string> => {
+	const baseSlug = normalizeSlug(value);
+	const result = await client.query<{ slug: string }>(
+		`SELECT slug
+		 FROM listings
+		 WHERE slug = $1 OR slug LIKE $1 || '-%';`,
+		[baseSlug],
+	);
+	const existingSlugs = new Set(result.rows.map((row) => row.slug));
+	if (!existingSlugs.has(baseSlug)) {
+		return baseSlug;
+	}
+
+	let suffix = 2;
+	while (existingSlugs.has(`${baseSlug}-${suffix}`)) {
+		suffix += 1;
+	}
+	return `${baseSlug}-${suffix}`;
+};
+
+const buildGeneratedTitle = (listing: ListingCopySource): string => {
 	const propertyType =
 		listing.property_type === "APARTMENT" ? "Apartment" : "House";
 	const purpose = listing.listing_type === "SALE" ? "for sale" : "for rent";
 	return `${propertyType} ${purpose} in ${listing.city}`;
 };
 
-const buildGeneratedDescription = (listing: ListingStateRow): string => {
+const buildGeneratedDescription = (listing: ListingCopySource): string => {
 	const propertyType =
 		listing.property_type === "APARTMENT" ? "apartment" : "house";
 	const purpose = listing.listing_type === "SALE" ? "for sale" : "for rent";
@@ -226,14 +263,26 @@ export const createListingService = async (
 	propertyId: string,
 	input: CreateListingDataType,
 ): Promise<AdminListingDetailType> => {
-	const propertyResult = await pool.query<{
-		id: string;
-		archived_at: Date | null;
-	}>("SELECT id, archived_at FROM properties WHERE id = $1;", [propertyId]);
+	const propertyResult = await pool.query<ListingPropertyRow>(
+		`SELECT id, archived_at, property_type, city, living_area_m2, rooms
+		 FROM properties
+		 WHERE id = $1;`,
+		[propertyId],
+	);
 	const property = requireFound(propertyResult.rows[0], "Property not found");
 	if (property.archived_at !== null) {
 		throw conflictError("Cannot create a listing for an archived property");
 	}
+	const copySource: ListingCopySource = {
+		...property,
+		listing_type: input.listing_type,
+	};
+	const title = input.title ?? buildGeneratedTitle(copySource);
+	const description =
+		input.description ?? buildGeneratedDescription(copySource);
+	const slug = input.slug
+		? normalizeSlug(input.slug)
+		: await getAvailableSlug(title, pool);
 
 	const result = await pool.query<IdRow>(
 		`INSERT INTO listings (
@@ -246,9 +295,9 @@ export const createListingService = async (
 			propertyId,
 			input.listing_type,
 			input.price_amount ?? null,
-			input.title ?? null,
-			input.description ?? null,
-			input.slug ? normalizeSlug(input.slug) : null,
+			title,
+			description,
+			slug,
 			input.seo_title ?? null,
 			input.seo_description ?? null,
 			input.show_exact_address ?? false,
@@ -433,6 +482,12 @@ export const publishListingService = async (
 		if (listing.price_amount === null) {
 			throw validationError("A price is required before publishing");
 		}
+		if (listing.title === null) {
+			throw validationError("A title is required before publishing");
+		}
+		if (listing.description === null) {
+			throw validationError("A description is required before publishing");
+		}
 		const coverResult = await client.query<IdRow>(
 			"SELECT id FROM property_images WHERE property_id = $1 AND is_cover = TRUE;",
 			[listing.property_id],
@@ -441,27 +496,17 @@ export const publishListingService = async (
 			throw validationError("A cover image is required before publishing");
 		}
 
-		const title = listing.title ?? buildGeneratedTitle(listing);
-		const description =
-			listing.description ?? buildGeneratedDescription(listing);
 		const slug =
-			listing.slug ??
-			normalizeSlug(`${title}-${listing.property_reference_number}`);
-		const seoTitle = listing.seo_title ?? title;
-		const seoDescription = listing.seo_description ?? description.slice(0, 160);
+			listing.slug ?? (await getAvailableSlug(listing.title, client));
 
 		await client.query(
 			`UPDATE listings
 			 SET status = 'PUBLISHED',
-			     title = $1,
-			     description = $2,
-			     slug = $3,
-			     seo_title = $4,
-			     seo_description = $5,
+			     slug = $1,
 			     published_at = CURRENT_TIMESTAMP,
 			     updated_at = CURRENT_TIMESTAMP
-			 WHERE id = $6;`,
-			[title, description, slug, seoTitle, seoDescription, id],
+			 WHERE id = $2;`,
+			[slug, id],
 		);
 		await client.query("COMMIT");
 	} catch (error) {

@@ -147,8 +147,13 @@ Routes:
 Rules:
 
 - Drafts may be incomplete.
-- Publishing validates the complete property, listing content, slug, price,
-  and cover image.
+- Draft creation supplies editable Title and Description defaults from the
+  Property when they are omitted.
+- Publishing validates the complete Property, Price, Title, Description, and
+  cover image. A missing Slug is generated from the final Title and receives a
+  numeric suffix when necessary for uniqueness.
+- Empty SEO fields remain automatic fallbacks to the current Listing Title and
+  Description; custom SEO values take precedence.
 - A published slug cannot change.
 - Only never-published drafts may be deleted.
 - Archiving requires a valid outcome for the listing type.
