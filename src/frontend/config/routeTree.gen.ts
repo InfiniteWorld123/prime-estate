@@ -9,8 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './../routes/__root'
+import { Route as AdminRouteImport } from './../routes/admin'
+import { Route as AdminIndexRouteImport } from './../routes/admin.index'
 import { Route as MarketingIndexRouteImport } from './../routes/_marketing/index'
 import { Route as ApiSplatRouteImport } from './../routes/api.$'
+import { Route as AdminPropertiesRouteImport } from './../routes/admin.properties'
+import { Route as AdminListingsRouteImport } from './../routes/admin.listings'
 import { Route as MarketingVerifyEmailRouteImport } from './../routes/_marketing/verify-email'
 import { Route as MarketingTermsRouteImport } from './../routes/_marketing/terms'
 import { Route as MarketingSignUpRouteImport } from './../routes/_marketing/sign-up'
@@ -22,8 +26,26 @@ import { Route as MarketingImprintRouteImport } from './../routes/_marketing/imp
 import { Route as MarketingForgotPasswordRouteImport } from './../routes/_marketing/forgot-password'
 import { Route as MarketingContactRouteImport } from './../routes/_marketing/contact'
 import { Route as MarketingAboutRouteImport } from './../routes/_marketing/about'
+import { Route as AdminPropertiesNewRouteImport } from './../routes/admin.properties_.new'
+import { Route as AdminPropertiesPropertyIdRouteImport } from './../routes/admin.properties_.$propertyId'
+import { Route as AdminListingsNewRouteImport } from './../routes/admin.listings_.new'
+import { Route as AdminListingsListingIdRouteImport } from './../routes/admin.listings_.$listingId'
 import { Route as MarketingPropertiesSlugRouteImport } from './../routes/_marketing/properties_.$slug'
+import { Route as AdminPropertiesPropertyIdImagesRouteImport } from './../routes/admin.properties_.$propertyId_.images'
+import { Route as AdminPropertiesPropertyIdFeaturesRouteImport } from './../routes/admin.properties_.$propertyId_.features'
+import { Route as AdminListingsListingIdPreviewRouteImport } from './../routes/admin.listings_.$listingId_.preview'
+import { Route as AdminPropertiesPropertyIdListingsNewRouteImport } from './../routes/admin.properties_.$propertyId_.listings.new'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
   id: '/_marketing/',
   path: '/',
@@ -33,6 +55,16 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   id: '/api/$',
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPropertiesRoute = AdminPropertiesRouteImport.update({
+  id: '/properties',
+  path: '/properties',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminListingsRoute = AdminListingsRouteImport.update({
+  id: '/listings',
+  path: '/listings',
+  getParentRoute: () => AdminRoute,
 } as any)
 const MarketingVerifyEmailRoute = MarketingVerifyEmailRouteImport.update({
   id: '/_marketing/verify-email',
@@ -89,13 +121,59 @@ const MarketingAboutRoute = MarketingAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPropertiesNewRoute = AdminPropertiesNewRouteImport.update({
+  id: '/properties_/new',
+  path: '/properties/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPropertiesPropertyIdRoute =
+  AdminPropertiesPropertyIdRouteImport.update({
+    id: '/properties_/$propertyId',
+    path: '/properties/$propertyId',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminListingsNewRoute = AdminListingsNewRouteImport.update({
+  id: '/listings_/new',
+  path: '/listings/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminListingsListingIdRoute = AdminListingsListingIdRouteImport.update({
+  id: '/listings_/$listingId',
+  path: '/listings/$listingId',
+  getParentRoute: () => AdminRoute,
+} as any)
 const MarketingPropertiesSlugRoute = MarketingPropertiesSlugRouteImport.update({
   id: '/_marketing/properties_/$slug',
   path: '/properties/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPropertiesPropertyIdImagesRoute =
+  AdminPropertiesPropertyIdImagesRouteImport.update({
+    id: '/properties_/$propertyId_/images',
+    path: '/properties/$propertyId/images',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminPropertiesPropertyIdFeaturesRoute =
+  AdminPropertiesPropertyIdFeaturesRouteImport.update({
+    id: '/properties_/$propertyId_/features',
+    path: '/properties/$propertyId/features',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminListingsListingIdPreviewRoute =
+  AdminListingsListingIdPreviewRouteImport.update({
+    id: '/listings_/$listingId_/preview',
+    path: '/listings/$listingId/preview',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminPropertiesPropertyIdListingsNewRoute =
+  AdminPropertiesPropertyIdListingsNewRouteImport.update({
+    id: '/properties_/$propertyId_/listings/new',
+    path: '/properties/$propertyId/listings/new',
+    getParentRoute: () => AdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
+  '/admin': typeof AdminRouteWithChildren
   '/about': typeof MarketingAboutRoute
   '/contact': typeof MarketingContactRoute
   '/forgot-password': typeof MarketingForgotPasswordRoute
@@ -107,9 +185,20 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof MarketingSignUpRoute
   '/terms': typeof MarketingTermsRoute
   '/verify-email': typeof MarketingVerifyEmailRoute
+  '/admin/listings': typeof AdminListingsRoute
+  '/admin/properties': typeof AdminPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/': typeof MarketingIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/properties/$slug': typeof MarketingPropertiesSlugRoute
+  '/admin/listings/$listingId': typeof AdminListingsListingIdRoute
+  '/admin/listings/new': typeof AdminListingsNewRoute
+  '/admin/properties/$propertyId': typeof AdminPropertiesPropertyIdRoute
+  '/admin/properties/new': typeof AdminPropertiesNewRoute
+  '/admin/listings/$listingId/preview': typeof AdminListingsListingIdPreviewRoute
+  '/admin/properties/$propertyId/features': typeof AdminPropertiesPropertyIdFeaturesRoute
+  '/admin/properties/$propertyId/images': typeof AdminPropertiesPropertyIdImagesRoute
+  '/admin/properties/$propertyId/listings/new': typeof AdminPropertiesPropertyIdListingsNewRoute
 }
 export interface FileRoutesByTo {
   '/about': typeof MarketingAboutRoute
@@ -123,12 +212,24 @@ export interface FileRoutesByTo {
   '/sign-up': typeof MarketingSignUpRoute
   '/terms': typeof MarketingTermsRoute
   '/verify-email': typeof MarketingVerifyEmailRoute
+  '/admin/listings': typeof AdminListingsRoute
+  '/admin/properties': typeof AdminPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/': typeof MarketingIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/properties/$slug': typeof MarketingPropertiesSlugRoute
+  '/admin/listings/$listingId': typeof AdminListingsListingIdRoute
+  '/admin/listings/new': typeof AdminListingsNewRoute
+  '/admin/properties/$propertyId': typeof AdminPropertiesPropertyIdRoute
+  '/admin/properties/new': typeof AdminPropertiesNewRoute
+  '/admin/listings/$listingId/preview': typeof AdminListingsListingIdPreviewRoute
+  '/admin/properties/$propertyId/features': typeof AdminPropertiesPropertyIdFeaturesRoute
+  '/admin/properties/$propertyId/images': typeof AdminPropertiesPropertyIdImagesRoute
+  '/admin/properties/$propertyId/listings/new': typeof AdminPropertiesPropertyIdListingsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/admin': typeof AdminRouteWithChildren
   '/_marketing/about': typeof MarketingAboutRoute
   '/_marketing/contact': typeof MarketingContactRoute
   '/_marketing/forgot-password': typeof MarketingForgotPasswordRoute
@@ -140,13 +241,25 @@ export interface FileRoutesById {
   '/_marketing/sign-up': typeof MarketingSignUpRoute
   '/_marketing/terms': typeof MarketingTermsRoute
   '/_marketing/verify-email': typeof MarketingVerifyEmailRoute
+  '/admin/listings': typeof AdminListingsRoute
+  '/admin/properties': typeof AdminPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/_marketing/': typeof MarketingIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/_marketing/properties_/$slug': typeof MarketingPropertiesSlugRoute
+  '/admin/listings_/$listingId': typeof AdminListingsListingIdRoute
+  '/admin/listings_/new': typeof AdminListingsNewRoute
+  '/admin/properties_/$propertyId': typeof AdminPropertiesPropertyIdRoute
+  '/admin/properties_/new': typeof AdminPropertiesNewRoute
+  '/admin/listings_/$listingId_/preview': typeof AdminListingsListingIdPreviewRoute
+  '/admin/properties_/$propertyId_/features': typeof AdminPropertiesPropertyIdFeaturesRoute
+  '/admin/properties_/$propertyId_/images': typeof AdminPropertiesPropertyIdImagesRoute
+  '/admin/properties_/$propertyId_/listings/new': typeof AdminPropertiesPropertyIdListingsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/admin'
     | '/about'
     | '/contact'
     | '/forgot-password'
@@ -158,9 +271,20 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/terms'
     | '/verify-email'
+    | '/admin/listings'
+    | '/admin/properties'
     | '/api/$'
     | '/'
+    | '/admin/'
     | '/properties/$slug'
+    | '/admin/listings/$listingId'
+    | '/admin/listings/new'
+    | '/admin/properties/$propertyId'
+    | '/admin/properties/new'
+    | '/admin/listings/$listingId/preview'
+    | '/admin/properties/$propertyId/features'
+    | '/admin/properties/$propertyId/images'
+    | '/admin/properties/$propertyId/listings/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/about'
@@ -174,11 +298,23 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/terms'
     | '/verify-email'
+    | '/admin/listings'
+    | '/admin/properties'
     | '/api/$'
     | '/'
+    | '/admin'
     | '/properties/$slug'
+    | '/admin/listings/$listingId'
+    | '/admin/listings/new'
+    | '/admin/properties/$propertyId'
+    | '/admin/properties/new'
+    | '/admin/listings/$listingId/preview'
+    | '/admin/properties/$propertyId/features'
+    | '/admin/properties/$propertyId/images'
+    | '/admin/properties/$propertyId/listings/new'
   id:
     | '__root__'
+    | '/admin'
     | '/_marketing/about'
     | '/_marketing/contact'
     | '/_marketing/forgot-password'
@@ -190,12 +326,24 @@ export interface FileRouteTypes {
     | '/_marketing/sign-up'
     | '/_marketing/terms'
     | '/_marketing/verify-email'
+    | '/admin/listings'
+    | '/admin/properties'
     | '/api/$'
     | '/_marketing/'
+    | '/admin/'
     | '/_marketing/properties_/$slug'
+    | '/admin/listings_/$listingId'
+    | '/admin/listings_/new'
+    | '/admin/properties_/$propertyId'
+    | '/admin/properties_/new'
+    | '/admin/listings_/$listingId_/preview'
+    | '/admin/properties_/$propertyId_/features'
+    | '/admin/properties_/$propertyId_/images'
+    | '/admin/properties_/$propertyId_/listings/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AdminRoute: typeof AdminRouteWithChildren
   MarketingAboutRoute: typeof MarketingAboutRoute
   MarketingContactRoute: typeof MarketingContactRoute
   MarketingForgotPasswordRoute: typeof MarketingForgotPasswordRoute
@@ -214,6 +362,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_marketing/': {
       id: '/_marketing/'
       path: '/'
@@ -227,6 +389,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/$'
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/properties': {
+      id: '/admin/properties'
+      path: '/properties'
+      fullPath: '/admin/properties'
+      preLoaderRoute: typeof AdminPropertiesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/listings': {
+      id: '/admin/listings'
+      path: '/listings'
+      fullPath: '/admin/listings'
+      preLoaderRoute: typeof AdminListingsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_marketing/verify-email': {
       id: '/_marketing/verify-email'
@@ -305,6 +481,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingAboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/properties_/new': {
+      id: '/admin/properties_/new'
+      path: '/properties/new'
+      fullPath: '/admin/properties/new'
+      preLoaderRoute: typeof AdminPropertiesNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/properties_/$propertyId': {
+      id: '/admin/properties_/$propertyId'
+      path: '/properties/$propertyId'
+      fullPath: '/admin/properties/$propertyId'
+      preLoaderRoute: typeof AdminPropertiesPropertyIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/listings_/new': {
+      id: '/admin/listings_/new'
+      path: '/listings/new'
+      fullPath: '/admin/listings/new'
+      preLoaderRoute: typeof AdminListingsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/listings_/$listingId': {
+      id: '/admin/listings_/$listingId'
+      path: '/listings/$listingId'
+      fullPath: '/admin/listings/$listingId'
+      preLoaderRoute: typeof AdminListingsListingIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_marketing/properties_/$slug': {
       id: '/_marketing/properties_/$slug'
       path: '/properties/$slug'
@@ -312,10 +516,71 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingPropertiesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/properties_/$propertyId_/images': {
+      id: '/admin/properties_/$propertyId_/images'
+      path: '/properties/$propertyId/images'
+      fullPath: '/admin/properties/$propertyId/images'
+      preLoaderRoute: typeof AdminPropertiesPropertyIdImagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/properties_/$propertyId_/features': {
+      id: '/admin/properties_/$propertyId_/features'
+      path: '/properties/$propertyId/features'
+      fullPath: '/admin/properties/$propertyId/features'
+      preLoaderRoute: typeof AdminPropertiesPropertyIdFeaturesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/listings_/$listingId_/preview': {
+      id: '/admin/listings_/$listingId_/preview'
+      path: '/listings/$listingId/preview'
+      fullPath: '/admin/listings/$listingId/preview'
+      preLoaderRoute: typeof AdminListingsListingIdPreviewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/properties_/$propertyId_/listings/new': {
+      id: '/admin/properties_/$propertyId_/listings/new'
+      path: '/properties/$propertyId/listings/new'
+      fullPath: '/admin/properties/$propertyId/listings/new'
+      preLoaderRoute: typeof AdminPropertiesPropertyIdListingsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminListingsRoute: typeof AdminListingsRoute
+  AdminPropertiesRoute: typeof AdminPropertiesRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminListingsListingIdRoute: typeof AdminListingsListingIdRoute
+  AdminListingsNewRoute: typeof AdminListingsNewRoute
+  AdminPropertiesPropertyIdRoute: typeof AdminPropertiesPropertyIdRoute
+  AdminPropertiesNewRoute: typeof AdminPropertiesNewRoute
+  AdminListingsListingIdPreviewRoute: typeof AdminListingsListingIdPreviewRoute
+  AdminPropertiesPropertyIdFeaturesRoute: typeof AdminPropertiesPropertyIdFeaturesRoute
+  AdminPropertiesPropertyIdImagesRoute: typeof AdminPropertiesPropertyIdImagesRoute
+  AdminPropertiesPropertyIdListingsNewRoute: typeof AdminPropertiesPropertyIdListingsNewRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminListingsRoute: AdminListingsRoute,
+  AdminPropertiesRoute: AdminPropertiesRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminListingsListingIdRoute: AdminListingsListingIdRoute,
+  AdminListingsNewRoute: AdminListingsNewRoute,
+  AdminPropertiesPropertyIdRoute: AdminPropertiesPropertyIdRoute,
+  AdminPropertiesNewRoute: AdminPropertiesNewRoute,
+  AdminListingsListingIdPreviewRoute: AdminListingsListingIdPreviewRoute,
+  AdminPropertiesPropertyIdFeaturesRoute:
+    AdminPropertiesPropertyIdFeaturesRoute,
+  AdminPropertiesPropertyIdImagesRoute: AdminPropertiesPropertyIdImagesRoute,
+  AdminPropertiesPropertyIdListingsNewRoute:
+    AdminPropertiesPropertyIdListingsNewRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
+  AdminRoute: AdminRouteWithChildren,
   MarketingAboutRoute: MarketingAboutRoute,
   MarketingContactRoute: MarketingContactRoute,
   MarketingForgotPasswordRoute: MarketingForgotPasswordRoute,
