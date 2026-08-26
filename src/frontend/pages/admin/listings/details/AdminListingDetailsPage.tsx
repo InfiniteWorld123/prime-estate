@@ -441,7 +441,8 @@ export function AdminListingDetailsPage() {
 					<AdminListingMediaPanel
 						copy={page.copy}
 						listing={listing}
-						onCoverSelect={page.setCoverImage}
+						onFeaturesSave={page.setPropertyFeatures}
+						onImagesSave={page.setPropertyImages}
 					/>
 				</div>
 

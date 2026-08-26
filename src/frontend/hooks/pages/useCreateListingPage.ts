@@ -10,8 +10,10 @@ import {
 	getDemoListings,
 	getDemoProperties,
 	getDemoPropertyFeatures,
+	getDemoPropertyImages,
 } from "@/frontend/pages/admin/demo/admin-demo-workspace";
 import { createListingCopy } from "@/frontend/pages/admin/listings/create/create-listing.copy";
+import { getListingCreationPrefill } from "@/frontend/pages/admin/listings/create/create-listing.model";
 import { getListingTypeAvailability } from "@/frontend/pages/admin/listings/select-listing-property.model";
 
 const wait = (milliseconds: number) =>
@@ -28,10 +30,9 @@ export function useCreateListingPage() {
 	if (!property)
 		throw new Error("Property is unavailable in the demo workspace");
 	const referenceNumber = property.referenceNumber;
-	const availability = getListingTypeAvailability(
-		property.id,
-		getDemoListings(),
-	);
+	const demoListings = getDemoListings();
+	const availability = getListingTypeAvailability(property.id, demoListings);
+	const prefill = getListingCreationPrefill(property.id, demoListings);
 
 	const blocker = useBlocker({
 		enableBeforeUnload: isDirty,
@@ -41,14 +42,14 @@ export function useCreateListingPage() {
 
 	const form = useForm({
 		defaultValues: {
-			description: "",
-			listingType: "" as "" | "RENT" | "SALE",
+			description: prefill?.sourceListing.description ?? "",
+			listingType: prefill?.targetType ?? ("" as "" | "RENT" | "SALE"),
 			price: "",
 			seoDescription: "",
 			seoTitle: "",
-			showExactAddress: false,
+			showExactAddress: prefill?.sourceListing.showExactAddress ?? false,
 			slug: "",
-			title: "",
+			title: prefill?.sourceListing.title ?? "",
 		},
 		validationLogic: revalidateLogic({
 			mode: "submit",
@@ -63,7 +64,10 @@ export function useCreateListingPage() {
 			const listingId = `listing-${crypto.randomUUID()}`;
 			const now = new Date().toISOString();
 			const title = value.title.trim() || null;
-			const coverImage = property.coverImage;
+			const propertyImages = getDemoPropertyImages(property.id);
+			const coverImage =
+				propertyImages.find((image) => image.isCover)?.url ??
+				property.coverImage;
 			const listing: AdminListingDetailRecord = {
 				archiveOutcome: null,
 				archivedAt: null,
@@ -73,16 +77,19 @@ export function useCreateListingPage() {
 				description: value.description.trim() || null,
 				features: getDemoPropertyFeatures(property.id),
 				id: listingId,
-				images: coverImage
-					? [
-							{
-								altText: title,
-								id: `${property.id}-cover`,
-								isCover: true,
-								url: coverImage,
-							},
-						]
-					: [],
+				images:
+					propertyImages.length > 0
+						? propertyImages
+						: coverImage
+							? [
+									{
+										altText: title,
+										id: `${property.id}-cover`,
+										isCover: true,
+										url: coverImage,
+									},
+								]
+							: [],
 				listingType: value.listingType as "RENT" | "SALE",
 				priceAmount: value.price.trim() ? Number(value.price) : null,
 				property: {
@@ -134,6 +141,7 @@ export function useCreateListingPage() {
 		markDirty: () => setIsDirty(true),
 		property,
 		propertyId,
+		prefill,
 		referenceNumber,
 	};
 }

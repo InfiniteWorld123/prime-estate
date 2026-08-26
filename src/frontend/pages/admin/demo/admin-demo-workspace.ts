@@ -1,14 +1,19 @@
-import type { AdminListingDetailRecord } from "@/frontend/features/listings/admin-listing.types";
+import type {
+	AdminListingDetailRecord,
+	AdminPropertyImage,
+} from "@/frontend/features/listings/admin-listing.types";
 import type { AdminPropertyRecord } from "@/frontend/features/properties/admin-property.types";
 
 type DemoWorkspace = {
 	featuresByProperty: Record<string, Array<{ id: string; name: string }>>;
+	imagesByProperty: Record<string, AdminPropertyImage[]>;
 	listings: AdminListingDetailRecord[];
 	properties: AdminPropertyRecord[];
 };
 
 const workspace: DemoWorkspace = {
 	featuresByProperty: {},
+	imagesByProperty: {},
 	listings: [],
 	properties: [],
 };
@@ -34,10 +39,29 @@ export function setDemoPropertyFeatures(
 	features: Array<{ id: string; name: string }>,
 ) {
 	workspace.featuresByProperty[propertyId] = features;
+	workspace.listings = workspace.listings.map((listing) =>
+		listing.property.id === propertyId ? { ...listing, features } : listing,
+	);
 }
 
 export const getDemoPropertyFeatures = (propertyId: string) =>
 	workspace.featuresByProperty[propertyId] ?? [];
+
+export function setDemoPropertyImages(
+	propertyId: string,
+	images: AdminPropertyImage[],
+) {
+	workspace.imagesByProperty[propertyId] = images;
+	const coverImage = images.find((image) => image.isCover)?.url ?? null;
+	workspace.listings = workspace.listings.map((listing) =>
+		listing.property.id === propertyId
+			? { ...listing, coverImage, images }
+			: listing,
+	);
+}
+
+export const getDemoPropertyImages = (propertyId: string) =>
+	workspace.imagesByProperty[propertyId] ?? [];
 
 export function addDemoListing(listing: AdminListingDetailRecord) {
 	workspace.listings = [listing, ...workspace.listings];

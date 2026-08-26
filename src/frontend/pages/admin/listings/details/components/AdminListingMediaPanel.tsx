@@ -1,60 +1,47 @@
-import { Link } from "@tanstack/react-router";
 import { ImageOff, Images, ListChecks } from "lucide-react";
 
 import { Button } from "@/frontend/components/ui/button";
 import type { AdminListingDetailRecord } from "@/frontend/features/listings/admin-listing.types";
 import type { AdminListingDetailsCopy } from "../admin-listing-details.copy";
-import { QuickCoverDialog } from "./QuickCoverDialog";
+import { PropertyFeaturesDialog } from "./PropertyFeaturesDialog";
+import { PropertyImagesDialog } from "./PropertyImagesDialog";
 
 type AdminListingMediaPanelProps = {
 	copy: AdminListingDetailsCopy;
 	listing: AdminListingDetailRecord;
-	onCoverSelect: (cover: {
-		altText: string | null;
-		id: string;
-		url: string;
-	}) => void;
+	onFeaturesSave: (features: Array<{ id: string; name: string }>) => void;
+	onImagesSave: (images: AdminListingDetailRecord["images"]) => void;
 };
 
 export function AdminListingMediaPanel({
 	copy,
 	listing,
-	onCoverSelect,
+	onFeaturesSave,
+	onImagesSave,
 }: AdminListingMediaPanelProps) {
 	return (
 		<section className="rounded-lg border bg-background p-4 sm:p-6">
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-				<div>
-					<h2 className="font-heading text-lg font-semibold">{copy.media}</h2>
-					<p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-						{copy.imagesExplanation}
-					</p>
-				</div>
-				<Button asChild size="sm" variant="outline">
-					<Link
-						params={{ propertyId: listing.property.id }}
-						to="/admin/properties/$propertyId/images"
-					>
-						<Images />
-						{copy.manageImages}
-					</Link>
-				</Button>
+			<div>
+				<h2 className="font-heading text-lg font-semibold">{copy.media}</h2>
+				<p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+					{copy.imagesExplanation}
+				</p>
 			</div>
 
-			<div className="mt-5 grid gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
-				<QuickCoverDialog
+			<div className="mt-5 grid gap-4 md:grid-cols-[15rem_minmax(0,1fr)]">
+				<PropertyImagesDialog
 					copy={copy}
-					listing={listing}
-					onSelect={onCoverSelect}
+					images={listing.images}
+					onSave={onImagesSave}
 					trigger={
 						<button
-							className="group relative block aspect-[4/3] w-full overflow-hidden rounded-md bg-muted text-muted-foreground outline-none ring-offset-2 hover:bg-muted/75 focus-visible:ring-2 focus-visible:ring-ring"
+							className="group relative block aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted text-muted-foreground outline-none ring-offset-2 hover:border-primary/45 focus-visible:ring-2 focus-visible:ring-ring"
 							type="button"
 						>
 							{listing.coverImage ? (
 								<img
 									alt={listing.title ?? ""}
-									className="size-full object-cover transition-opacity group-hover:opacity-80"
+									className="size-full object-cover transition-transform duration-200 group-hover:scale-[1.02] motion-reduce:transition-none"
 									src={listing.coverImage}
 								/>
 							) : (
@@ -65,15 +52,40 @@ export function AdminListingMediaPanel({
 									</span>
 								</span>
 							)}
+							<span className="absolute inset-x-2 bottom-2 flex items-center justify-between gap-2 rounded-md bg-background/92 px-2.5 py-2 text-left text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+								<span className="inline-flex items-center gap-1.5">
+									<Images
+										aria-hidden="true"
+										className="size-3.5 text-primary"
+									/>
+									{copy.editImages}
+								</span>
+								<span className="font-mono text-muted-foreground">
+									{listing.images.length}/30
+								</span>
+							</span>
 						</button>
 					}
 				/>
-				<div className="rounded-md border p-4">
-					<p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-						{copy.features}
-					</p>
+				<div className="rounded-lg border p-4">
+					<div className="flex items-center justify-between gap-3">
+						<p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+							{copy.features}
+						</p>
+						<PropertyFeaturesDialog
+							copy={copy}
+							features={listing.features}
+							onSave={onFeaturesSave}
+							trigger={
+								<Button size="sm" type="button" variant="outline">
+									<ListChecks />
+									{copy.editFeatures}
+								</Button>
+							}
+						/>
+					</div>
 					{listing.features.length > 0 ? (
-						<div className="mt-3 flex flex-wrap gap-2">
+						<div className="mt-4 flex flex-wrap gap-2">
 							{listing.features.map((feature) => (
 								<span
 									className="rounded-full border bg-muted/35 px-2.5 py-1 text-xs"
@@ -88,15 +100,6 @@ export function AdminListingMediaPanel({
 							{copy.featuresEmpty}
 						</p>
 					)}
-					<Button asChild className="mt-4" size="sm" variant="ghost">
-						<Link
-							params={{ propertyId: listing.property.id }}
-							to="/admin/properties/$propertyId/features"
-						>
-							<ListChecks />
-							{copy.manageFeatures}
-						</Link>
-					</Button>
 				</div>
 			</div>
 		</section>

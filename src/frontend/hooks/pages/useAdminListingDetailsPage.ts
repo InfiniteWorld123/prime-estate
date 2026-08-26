@@ -8,6 +8,8 @@ import type {
 } from "@/frontend/features/listings/admin-listing.types";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 import {
+	setDemoPropertyFeatures,
+	setDemoPropertyImages,
 	updateDemoListing,
 	updateDemoProperty,
 } from "@/frontend/pages/admin/demo/admin-demo-workspace";
@@ -163,34 +165,42 @@ export function useAdminListingDetailsPage() {
 		markDirty,
 		publish,
 		publishOpen,
-		setCoverImage: (cover: {
-			altText: string | null;
-			id: string;
-			url: string;
-		}) => {
+		setPropertyFeatures: (features: Array<{ id: string; name: string }>) => {
 			if (!listing) return;
-			const imageExists = listing.images.some((image) => image.id === cover.id);
+			const updatedAt = new Date().toISOString();
 			const nextListing: AdminListingDetailRecord = {
 				...listing,
-				coverImage: cover.url,
-				images: imageExists
-					? listing.images.map((image) => ({
-							...image,
-							isCover: image.id === cover.id,
-						}))
-					: [
-							...listing.images.map((image) => ({ ...image, isCover: false })),
-							{ ...cover, isCover: true },
-						],
-				updatedAt: new Date().toISOString(),
+				features,
+				updatedAt,
 			};
 			setListing(nextListing);
+			setDemoPropertyFeatures(listing.property.id, features);
+			updateDemoListing(nextListing);
+			setFeedback(adminListingDetailsCopy[language].featuresSaved);
+		},
+		setPropertyImages: (images: AdminListingDetailRecord["images"]) => {
+			if (!listing) return;
+			const normalizedImages = images.map((image) => ({
+				...image,
+				altText: image.altText?.trim() || null,
+			}));
+			const coverImage =
+				normalizedImages.find((image) => image.isCover)?.url ?? null;
+			const updatedAt = new Date().toISOString();
+			const nextListing: AdminListingDetailRecord = {
+				...listing,
+				coverImage,
+				images: normalizedImages,
+				updatedAt,
+			};
+			setListing(nextListing);
+			setDemoPropertyImages(listing.property.id, normalizedImages);
 			updateDemoListing(nextListing);
 			updateDemoProperty(listing.property.id, {
-				coverImage: cover.url,
-				updatedAt: nextListing.updatedAt,
+				coverImage,
+				updatedAt,
 			});
-			setFeedback(adminListingDetailsCopy[language].coverSaved);
+			setFeedback(adminListingDetailsCopy[language].imagesSaved);
 		},
 		setArchiveOpen,
 		setArchiveOutcome,

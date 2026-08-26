@@ -2,6 +2,13 @@ export type AdminListingStatus = "ARCHIVED" | "DRAFT" | "PUBLISHED";
 export type AdminListingType = "RENT" | "SALE";
 export type AdminListingArchiveOutcome = "RENTED" | "SOLD" | "WITHDRAWN";
 
+export type AdminPropertyImage = {
+	altText: string | null;
+	id: string;
+	isCover: boolean;
+	url: string;
+};
+
 export type AdminListingSort =
 	| "newest"
 	| "oldest"
@@ -42,12 +49,7 @@ export type AdminListingRecord = {
 export type AdminListingDetailRecord = AdminListingRecord & {
 	description: string | null;
 	features: Array<{ id: string; name: string }>;
-	images: Array<{
-		altText: string | null;
-		id: string;
-		isCover: boolean;
-		url: string;
-	}>;
+	images: AdminPropertyImage[];
 	seoDescription: string | null;
 	seoTitle: string | null;
 	showExactAddress: boolean;

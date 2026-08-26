@@ -1,4 +1,4 @@
-import { Building2, House, ImageOff, ListPlus } from "lucide-react";
+import { Building2, CopyCheck, House, ImageOff, ListPlus } from "lucide-react";
 
 import {
 	Accordion,
@@ -113,6 +113,24 @@ export function CreateListingPage() {
 							</fieldset>
 						)}
 					</page.form.Field>
+
+					{page.prefill ? (
+						<div className="flex items-start gap-3 rounded-lg border border-primary/25 bg-primary/5 p-4">
+							<span className="grid size-8 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+								<CopyCheck aria-hidden="true" className="size-4" />
+							</span>
+							<div>
+								<p className="text-sm font-semibold">
+									{page.prefill.sourceListing.listingType === "RENT"
+										? page.copy.prefillTitle.rent
+										: page.copy.prefillTitle.sale}
+								</p>
+								<p className="mt-1 text-xs leading-5 text-muted-foreground">
+									{page.copy.prefillDescription}
+								</p>
+							</div>
+						</div>
+					) : null}
 
 					<page.form.Subscribe selector={(state) => state.values.listingType}>
 						{(listingType) => (

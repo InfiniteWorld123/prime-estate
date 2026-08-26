@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 import {
 	getDemoProperties,
+	setDemoPropertyImages,
 	updateDemoProperty,
 } from "@/frontend/pages/admin/demo/admin-demo-workspace";
 import { propertySetupCopy } from "@/frontend/pages/admin/properties/setup/property-setup.copy";
@@ -195,13 +196,21 @@ export function usePropertyImagesSetupPage() {
 		moveImage,
 		moveToImage,
 		navigateToFeatures: () => {
-			const cover = images.find(
-				(image) => image.isCover && image.status === "uploaded",
-			);
+			const uploadedImages = images
+				.filter((image) => image.status === "uploaded")
+				.map(({ altText, id, isCover, url }) => ({
+					altText: altText.trim() || null,
+					id,
+					isCover,
+					url,
+				}));
+			const cover = uploadedImages.find((image) => image.isCover);
+			setDemoPropertyImages(propertyId, uploadedImages);
 			updateDemoProperty(propertyId, {
 				coverImage: cover?.url ?? null,
 				updatedAt: new Date().toISOString(),
 			});
+			imagesRef.current = [];
 			void navigate({
 				params: { propertyId },
 				to: "/admin/properties/$propertyId/features",

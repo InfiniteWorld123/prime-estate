@@ -22,6 +22,12 @@ export const createListingCopy = {
 		listingType: "Vermarktungsart",
 		livingArea: "Wohnfläche",
 		price: { rent: "Monatliche Kaltmiete", sale: "Kaufpreis" },
+		prefillDescription:
+			"Titel, Beschreibung und Adressfreigabe wurden übernommen. Der Preis bleibt leer, da Verkauf und Vermietung unterschiedliche Beträge verwenden. Bitte prüfen Sie den Inhalt vor dem Anlegen.",
+		prefillTitle: {
+			rent: "Inhalte aus dem bestehenden Vermietungsinserat übernommen",
+			sale: "Inhalte aus dem bestehenden Verkaufsinserat übernommen",
+		},
 		propertyContext: "Immobilienkontext",
 		rent: "Vermietung",
 		rooms: "Zimmer",
@@ -67,6 +73,12 @@ export const createListingCopy = {
 		listingType: "Listing type",
 		livingArea: "Living area",
 		price: { rent: "Monthly base rent", sale: "Purchase price" },
+		prefillDescription:
+			"Title, description, and address visibility were reused. Price stays blank because Sale and Rent use different amounts. Review the content before creating the draft.",
+		prefillTitle: {
+			rent: "Content reused from the existing rent listing",
+			sale: "Content reused from the existing sale listing",
+		},
 		propertyContext: "Property context",
 		rent: "Rent",
 		rooms: "Rooms",

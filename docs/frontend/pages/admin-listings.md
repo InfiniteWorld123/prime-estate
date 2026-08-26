@@ -183,6 +183,27 @@ visibility switch controls only whether the eventual public Listing reveals
 street, house number, and unit. City and postal code remain public according to
 the existing public contract.
 
+### Reusing the Other Listing Type
+
+When the Property already has one non-archived Listing and the opposite type is
+the only remaining type, Create Listing prepares the second Draft from the
+existing public content:
+
+- Select the remaining Sale or Rent type automatically.
+- Prefill Title, Description, and exact-address visibility from the existing
+  Listing.
+- Continue using the Property-owned images, cover, and Features.
+- Leave Price blank because purchase price and monthly base rent are not
+  interchangeable.
+- Generate the new editable Slug visually from the reused Title rather than
+  copying the existing Listing Slug.
+- Keep SEO overrides blank; their visible automatic values follow the reused
+  Title and Description and remain `NULL` unless the admin customizes them.
+
+Show a concise explanation of what was reused and what still requires review.
+The content remains fully editable before creating the Draft. Archived Listing
+history is not an automatic content source.
+
 ### URL Slug
 
 The backend generates a Slug from the Listing Title without exposing the
@@ -260,8 +281,9 @@ integration stage.
 
 The approved lifecycle workspace below is implemented mock-first. Property
 images and the cover remain Property-owned, matching the backend contract. The
-Listing workspace displays them and links to the Property Image and Feature
-setup routes; it does not create a conflicting Listing-specific image store.
+Listing workspace displays and edits them through focused dialogs without
+returning the administrator to the initial Property setup journey. It does not
+create a conflicting Listing-specific image or Feature store.
 
 ### Route and State Ownership
 
@@ -319,6 +341,28 @@ The Draft status panel shows only real publication blockers:
 
 Features and custom SEO are optional and do not appear as blockers. Slug is not
 a blocker because the backend can generate it.
+
+### Property Images and Features
+
+The Listing Details workspace provides contextual Property editing without
+navigating away from the Listing:
+
+- `Edit images` opens one responsive dialog for multi-image drag-and-drop,
+  JPEG/PNG/WebP validation, the 30-image and 10-MB limits, Gallery ordering,
+  cover selection, alternative text, and removal.
+- Reordering supports both pointer drag-and-drop and explicit previous/next
+  controls for keyboard and touch users.
+- Image changes remain local to the dialog until `Save images`; Cancel discards
+  them.
+- `Edit features` opens one responsive dialog that shows selected Features as
+  removable chips, searches the existing catalog, selects or clears Features,
+  and creates a new non-duplicate Feature that is selected immediately.
+- Feature changes remain local to the dialog until `Save features`.
+
+These controls update the linked Property-owned collection, so every Listing
+for the same Property receives the same images, cover, and Features. The setup
+routes remain part of first-time Property creation only; Listing Details never
+sends the administrator back through Images, Features, and Create Listing.
 
 Each missing requirement directs the admin to its field or setup surface. The
 Publish action remains visually and behaviorally disabled until all
