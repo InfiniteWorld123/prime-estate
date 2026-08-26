@@ -207,16 +207,23 @@ src/frontend/
         `-- properties_.$slug.tsx           # non-nested detail route
 ```
 
-Future pages are siblings rather than children of the dashboard:
+Admin domain pages are siblings under one shared `/admin` layout rather than
+children of an additional dashboard page:
 
 ```text
-pages/admin/dashboard/
 pages/admin/properties/
 pages/admin/listings/
+pages/admin/inquiries/      # after its backend slice
+pages/admin/overview/       # deferred until the operational UI is complete
 pages/admin/blogging/       # deferred
 pages/admin/analytics/      # deferred
 pages/admin/users/          # deferred
 ```
+
+The shell direction and route model are defined in
+[`admin-shell.md`](admin-shell.md). Until the final Overview is specified,
+`/admin` redirects to `/admin/properties`; there is no redundant
+`/admin/dashboard` URL.
 
 ## Naming Conventions
 

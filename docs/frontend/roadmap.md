@@ -88,7 +88,7 @@ Detailed specification: [`pages/authentication.md`](pages/authentication.md)
 
 ## Stage 6: Administrative UI
 
-**Status:** Not started
+**Status:** In progress
 
 Plan and implement the administrative shell and the UI required by the
 approved MVP property and listing workflow. Mock data and local preview states
@@ -97,6 +97,43 @@ remain acceptable during this stage.
 The dashboard shell and property/listing management may become separate slices
 if their detailed planning shows that this is clearer. That decision is
 deliberately deferred until Stage 6 begins.
+
+The shared shell direction is now documented separately and intentionally does
+not define the Overview content or domain workflows:
+[`admin-shell.md`](admin-shell.md)
+
+### Approved Administrative Sequence
+
+This sequence is the durable Stage 6 checklist. Each item receives detailed
+planning before implementation; its position here does not invent missing UX
+or backend behavior.
+
+1. **Completed:** Build the shared Admin Shell using the approved Architectural
+   Operations Console direction.
+2. **Completed:** Build the administrative Properties collection with Table
+   and Grid desktop views and a responsive mobile collection. Detailed specification:
+   [`pages/admin-properties.md`](pages/admin-properties.md)
+3. **Completed:** Build the Create Property workflow. Detailed specification:
+   [`pages/admin-properties.md#create-property`](pages/admin-properties.md#create-property)
+4. **Completed:** Build Property Image Setup after creation or from an existing Property.
+   Detailed specification:
+   [`pages/admin-properties.md#property-image-setup`](pages/admin-properties.md#property-image-setup)
+5. **Completed:** Build Property Feature Setup after images or from an existing Property.
+   Detailed specification:
+   [`pages/admin-properties.md#property-feature-setup`](pages/admin-properties.md#property-feature-setup)
+6. **Completed:** Build the internal Property Details/Edit workspace for the backend-supported
+   property, contact, feature, image, archive, restore, and deletion behavior.
+7. **Completed:** Build the administrative Listings collection.
+8. **Completed:** Build Create Listing from an existing Property. Detailed specification:
+   [`pages/admin-listings.md#create-listing`](pages/admin-listings.md#create-listing)
+9. **Completed:** Build Listing Details/Edit, including content, price, SEO, address
+   visibility, publication, archive outcome, deletion rules, and public preview.
+   Detailed specification:
+   [`pages/admin-listings.md#listing-details-and-lifecycle`](pages/admin-listings.md#listing-details-and-lifecycle)
+10. Build administrative Inquiries only after its backend slice and final API
+   contract are implemented and verified.
+11. Design and build the Overview and any justified analytics after the
+   operational workflows are complete.
 
 Contacts, inquiries, and other approved administrative surfaces are added only
 when their documented workflow requires them. Blogging, analytics, general
@@ -133,6 +170,24 @@ later release work and are not silently included in Stage 7.
 
 Stages 3, 4, and 5 are completed: their combined mock-first implementation
 passes the code, type-check, build, route-smoke-test, and user visual-review
-gates. The next focus is detailed planning for Stage 6, the Administrative UI.
-Keep all real submissions, sessions, redirects, and backend connections in
-Stage 7.
+gates. Stage 6 planning has begun with the shared Admin Shell direction. The
+Properties collection, creation, image setup, Feature setup, Property selection
+for Listing creation, Create Listing, and the complete Listing lifecycle are
+planned. The Listing lifecycle specification covers Draft, Preview, Publish,
+Published editing, Archive, Archived display, Draft deletion, and page states.
+The shared Admin Shell, mock-first administrative Properties collection,
+Create Property, Property Image Setup, and Property Feature Setup are
+implemented and verified. A successful mock creation now hands off directly to
+`/admin/properties/:id/images`, then advances to
+`/admin/properties/:id/features`. The internal Property Details/Edit workspace
+at `/admin/properties/:id` is also implemented and linked from the collection.
+The independent Image and Feature setup routes are repaired, and the guided
+journey now continues through a mock-first Property-bound Create Listing page.
+The administrative Listings collection, active-Property selection route,
+Create Listing flow, and complete mock-first Listing lifecycle workspace are
+implemented and verified with focused model tests and browser checks. The next
+administrative slice is Inquiries after its backend contract is complete, or
+Stage 7 integration if that backend slice remains deferred. The Overview and
+analytics are deferred until the operational admin workflows are complete. Keep all real
+submissions, sessions, authorization redirects, Cloudinary uploads, and
+backend connections in Stage 7.
