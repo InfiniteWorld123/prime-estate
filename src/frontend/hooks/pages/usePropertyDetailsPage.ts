@@ -1,95 +1,67 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { ApiRequestError } from "@/frontend/api/utils";
+import { usePublicListingQuery } from "@/frontend/features/listings/hooks/usePublicListingQuery";
 import type {
 	PropertyDetailListing,
 	PropertyDetailsPreviewState,
 } from "@/frontend/features/listings/listing.types";
-import { mockPropertyDetail } from "@/frontend/pages/marketing/property-details/property-details.mock";
+import { toPropertyDetailListing } from "@/frontend/features/listings/public-listing.mapper";
 
 const brokenImageSource = "/images/properties/unavailable-property-image.jpg";
 
-function createPreviewListing(
-	previewState: PropertyDetailsPreviewState,
-	slug: string,
-): PropertyDetailListing {
-	const listing = { ...mockPropertyDetail, slug };
-
-	if (previewState === "sold") {
+function applyPreview(
+	listing: PropertyDetailListing,
+	state: PropertyDetailsPreviewState,
+) {
+	if (state === "sold")
+		return { ...listing, archiveOutcome: "SOLD" as const, isAvailable: false };
+	if (state === "rented")
 		return {
 			...listing,
-			archiveOutcome: "SOLD",
+			listingType: "RENT" as const,
+			archiveOutcome: "RENTED" as const,
 			isAvailable: false,
-			archivedAt: "2026-08-23T10:00:00.000Z",
 		};
-	}
-
-	if (previewState === "rented") {
+	if (state === "missing-image")
 		return {
 			...listing,
-			listingType: "RENT",
-			price: 1450,
-			archiveOutcome: "RENTED",
-			isAvailable: false,
-			archivedAt: "2026-08-23T10:00:00.000Z",
-		};
-	}
-
-	if (previewState === "missing-image") {
-		return {
-			...listing,
-			images: mockPropertyDetail.images.map((image, index) =>
-				index === 0
-					? {
-							...image,
-							src: brokenImageSource,
-						}
-					: image,
+			images: listing.images.map((image, index) =>
+				index === 0 ? { ...image, src: brokenImageSource } : image,
 			),
 		};
-	}
-
-	if (previewState === "all-images-missing") {
-		return {
-			...listing,
-			images: [],
-		};
-	}
-
+	if (state === "all-images-missing") return { ...listing, images: [] };
 	return listing;
 }
 
 export function usePropertyDetailsPage(slug: string) {
-	const [isInitialLoading, setIsInitialLoading] = useState(true);
+	const query = usePublicListingQuery(slug);
 	const [previewState, setPreviewState] =
 		useState<PropertyDetailsPreviewState>("ready");
-
-	useEffect(() => {
-		const loadingTimer = window.setTimeout(() => {
-			setIsInitialLoading(false);
-		}, 650);
-
-		return () => window.clearTimeout(loadingTimer);
-	}, []);
-
-	const isLoading = isInitialLoading || previewState === "loading";
-	const isError = previewState === "error";
-	const isNotFound = previewState === "not-found";
+	const isPreviewLoading = previewState === "loading";
+	const isPreviewError = previewState === "error";
+	const isPreviewNotFound = previewState === "not-found";
+	const isNotFound =
+		isPreviewNotFound ||
+		(query.error instanceof ApiRequestError && query.error.status === 404);
+	const isLoading = query.isPending || isPreviewLoading;
+	const isError =
+		isPreviewError || (query.isError && !isNotFound && !query.data);
 	const listing = useMemo(() => {
-		if (isLoading || isError || isNotFound) {
-			return null;
-		}
-
-		return createPreviewListing(previewState, slug);
-	}, [isError, isLoading, isNotFound, previewState, slug]);
+		if (!query.data || isLoading || isError || isNotFound) return null;
+		return applyPreview(toPropertyDetailListing(query.data), previewState);
+	}, [isError, isLoading, isNotFound, previewState, query.data]);
 
 	return {
-		hasBackgroundError: previewState === "background-error",
+		hasBackgroundError:
+			previewState === "background-error" ||
+			(query.isError && Boolean(query.data)),
 		isError,
-		isInitialLoading,
+		isInitialLoading: query.isPending,
 		isLoading,
 		isNotFound,
 		listing,
 		previewState,
-		retry: () => setPreviewState("ready"),
+		retry: query.refetch,
 		setPreviewState,
 	};
 }

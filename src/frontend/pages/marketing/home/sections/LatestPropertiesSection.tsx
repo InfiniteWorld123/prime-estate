@@ -10,15 +10,23 @@ import {
 	CarouselPrevious,
 } from "@/frontend/components/ui/carousel";
 import { PropertyCard } from "@/frontend/features/listings/components/PropertyCard";
+import { PropertyCardSkeleton } from "@/frontend/features/listings/components/PropertyCardSkeleton";
+import { PropertyResultsError } from "@/frontend/features/listings/components/PropertyResultsError";
+import type { PropertyCardListing } from "@/frontend/features/listings/listing.types";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
-import type { HomeListing } from "../home.mock";
 
 type LatestPropertiesSectionProps = {
-	listings: HomeListing[];
+	isError: boolean;
+	isLoading: boolean;
+	listings: PropertyCardListing[];
+	onRetry: () => void;
 };
 
 export function LatestPropertiesSection({
 	listings,
+	isError,
+	isLoading,
+	onRetry,
 }: LatestPropertiesSectionProps) {
 	const { copy } = useLanguage();
 	return (
@@ -68,16 +76,29 @@ export function LatestPropertiesSection({
 						</div>
 					</div>
 
-					<CarouselContent className="-ml-4">
-						{listings.map((listing) => (
-							<CarouselItem
-								className="basis-full pl-4 md:basis-1/2 lg:basis-1/3"
-								key={listing.id}
-							>
-								<PropertyCard listing={listing} />
-							</CarouselItem>
-						))}
-					</CarouselContent>
+					{isError ? (
+						<PropertyResultsError onRetry={onRetry} />
+					) : (
+						<CarouselContent className="-ml-4">
+							{isLoading
+								? ["latest-1", "latest-2", "latest-3"].map((id) => (
+										<CarouselItem
+											className="basis-full pl-4 md:basis-1/2 lg:basis-1/3"
+											key={id}
+										>
+											<PropertyCardSkeleton />
+										</CarouselItem>
+									))
+								: listings.map((listing) => (
+										<CarouselItem
+											className="basis-full pl-4 md:basis-1/2 lg:basis-1/3"
+											key={listing.id}
+										>
+											<PropertyCard listing={listing} />
+										</CarouselItem>
+									))}
+						</CarouselContent>
+					)}
 
 					<Button
 						asChild

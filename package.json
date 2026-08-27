@@ -6,9 +6,13 @@
   "imports": {
     "#/*": "./src/*"
   },
-  "scripts": {
-    "dev": "vite dev --port 3000",
-    "db:migrate": "bun src/backend/db/migrate.ts",
+	"scripts": {
+		"dev": "vite dev --port 3000",
+		"db:migrate": "bun src/backend/db/migrate.ts",
+		"db:seed": "bun src/backend/db/seed/seed.ts",
+		"db:seed:clear": "bun src/backend/db/seed/seed.ts --clear",
+		"db:seed:dry": "bun src/backend/db/seed/seed.ts --dry-run",
+		"db:seed:validate": "bun src/backend/db/seed/seed.ts --validate",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",

@@ -13,7 +13,10 @@ export function PropertiesPage() {
 		draftFilters,
 		features,
 		heading,
+		hasBackgroundError,
+		isFullError,
 		isInitialLoading,
+		isRefreshing,
 		listings,
 		locationError,
 		previewState,
@@ -46,7 +49,10 @@ export function PropertiesPage() {
 						features={features}
 						filters={draftFilters}
 						heading={heading}
+						hasQueryBackgroundError={hasBackgroundError}
+						hasQueryError={isFullError}
 						isInitialLoading={isInitialLoading}
+						isQueryRefreshing={isRefreshing}
 						listings={listings}
 						locationError={locationError}
 						onApplyFilters={applyFilters}

@@ -1,10 +1,14 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import type { PropertyFeatureOption } from "@/frontend/features/listings/listing.types";
-import { useLanguage } from "@/frontend/i18n/LanguageProvider";
+import type { ListPublicListingsQueryType } from "#/shared/types/public-listing.type";
+import { usePublicFeaturesQuery } from "@/frontend/features/listings/hooks/usePublicFeaturesQuery";
+import { usePublicListingsQuery } from "@/frontend/features/listings/hooks/usePublicListingsQuery";
 import {
-	mockPropertyFeatures,
-	mockPropertyListings,
-} from "@/frontend/pages/marketing/properties/properties.mock";
+	toPropertyFeatureOption,
+	toPropertySearchListing,
+} from "@/frontend/features/listings/public-listing.mapper";
+import { useLanguage } from "@/frontend/i18n/LanguageProvider";
+import { Route } from "@/frontend/routes/_marketing/properties";
 
 export type ListingIntent = "ALL" | "SALE" | "RENT";
 export type PropertyTypeFilter = "ALL" | "APARTMENT" | "HOUSE";
@@ -14,14 +18,12 @@ export type PropertySort =
 	| "price_desc"
 	| "living_area_asc"
 	| "living_area_desc";
-
 export type PropertyResultsPreviewState =
 	| "ready"
 	| "error"
 	| "refreshing"
 	| "background-error"
 	| "missing-image";
-
 export type PropertyFilters = {
 	listingType: ListingIntent;
 	location: string;
@@ -35,15 +37,9 @@ export type PropertyFilters = {
 	minBedrooms: string;
 	featureIds: string[];
 };
+export type PropertyFilterChip = { id: string; label: string };
 
-export type PropertyFilterChip = {
-	id: string;
-	label: string;
-};
-
-const PAGE_SIZE = 12;
-
-const initialFilters: PropertyFilters = {
+const emptyFilters: PropertyFilters = {
 	listingType: "ALL",
 	location: "",
 	propertyType: "ALL",
@@ -56,39 +52,121 @@ const initialFilters: PropertyFilters = {
 	minBedrooms: "",
 	featureIds: [],
 };
-
-const numberOrUndefined = (value: string) =>
-	value === "" ? undefined : Number(value);
-
-const matchesRange = (value: number, minimum: string, maximum?: string) => {
-	const min = numberOrUndefined(minimum);
-	const max = maximum === undefined ? undefined : numberOrUndefined(maximum);
-	return (
-		(min === undefined || value >= min) && (max === undefined || value <= max)
-	);
-};
+const numeric = (value: string) => (value === "" ? undefined : Number(value));
 
 export function usePropertiesPage() {
 	const { copy, language } = useLanguage();
+	const search = Route.useSearch();
+	const navigate = useNavigate({ from: "/properties" });
+	const appliedFilters = useMemo<PropertyFilters>(
+		() => ({
+			...emptyFilters,
+			listingType:
+				search.listingType === "SALE" || search.listingType === "RENT"
+					? search.listingType
+					: "ALL",
+			location: search.location ?? "",
+			propertyType:
+				search.propertyType === "APARTMENT" || search.propertyType === "HOUSE"
+					? search.propertyType
+					: "ALL",
+			minPrice: search.minPrice ?? "",
+			maxPrice: search.maxPrice ?? "",
+			minLivingArea: search.minLivingArea ?? "",
+			maxLivingArea: search.maxLivingArea ?? "",
+			minRooms: search.minRooms ?? "",
+			maxRooms: search.maxRooms ?? "",
+			minBedrooms: search.minBedrooms ?? "",
+			featureIds: search.featureIds ?? [],
+		}),
+		[
+			search.featureIds,
+			search.listingType,
+			search.location,
+			search.maxLivingArea,
+			search.maxPrice,
+			search.maxRooms,
+			search.minBedrooms,
+			search.minLivingArea,
+			search.minPrice,
+			search.minRooms,
+			search.propertyType,
+		],
+	);
 	const [draftFilters, setDraftFilters] =
-		useState<PropertyFilters>(initialFilters);
-	const [appliedFilters, setAppliedFilters] =
-		useState<PropertyFilters>(initialFilters);
-	const [sort, setSortState] = useState<PropertySort>("newest");
-	const [page, setPageState] = useState(1);
+		useState<PropertyFilters>(appliedFilters);
+	useEffect(() => {
+		setDraftFilters(appliedFilters);
+	}, [appliedFilters]);
 	const [locationError, setLocationError] = useState("");
-	const [isInitialLoading, setIsInitialLoading] = useState(true);
 	const [previewState, setPreviewState] =
 		useState<PropertyResultsPreviewState>("ready");
-
-	useEffect(() => {
-		const loadingTimer = window.setTimeout(() => {
-			setIsInitialLoading(false);
-		}, 650);
-
-		return () => window.clearTimeout(loadingTimer);
-	}, []);
-
+	const page = search.page ?? 1;
+	const sort = (search.sort ?? "newest") as PropertySort;
+	const location = appliedFilters.location.trim();
+	const apiQuery: ListPublicListingsQueryType = {
+		...(appliedFilters.listingType !== "ALL"
+			? { listing_type: appliedFilters.listingType }
+			: {}),
+		...(appliedFilters.propertyType !== "ALL"
+			? { property_type: appliedFilters.propertyType }
+			: {}),
+		...(/^\d{5}$/.test(location)
+			? { postal_code: location }
+			: location
+				? { city: location }
+				: {}),
+		...(numeric(appliedFilters.minPrice) !== undefined
+			? { min_price: numeric(appliedFilters.minPrice) }
+			: {}),
+		...(numeric(appliedFilters.maxPrice) !== undefined
+			? { max_price: numeric(appliedFilters.maxPrice) }
+			: {}),
+		...(numeric(appliedFilters.minLivingArea) !== undefined
+			? { min_living_area: numeric(appliedFilters.minLivingArea) }
+			: {}),
+		...(numeric(appliedFilters.maxLivingArea) !== undefined
+			? { max_living_area: numeric(appliedFilters.maxLivingArea) }
+			: {}),
+		...(numeric(appliedFilters.minRooms) !== undefined
+			? { min_rooms: numeric(appliedFilters.minRooms) }
+			: {}),
+		...(numeric(appliedFilters.maxRooms) !== undefined
+			? { max_rooms: numeric(appliedFilters.maxRooms) }
+			: {}),
+		...(numeric(appliedFilters.minBedrooms) !== undefined
+			? { min_bedrooms: numeric(appliedFilters.minBedrooms) }
+			: {}),
+		...(appliedFilters.featureIds.length
+			? { feature_ids: appliedFilters.featureIds }
+			: {}),
+		page,
+		page_size: 12,
+		sort,
+	};
+	const listingsQuery = usePublicListingsQuery(apiQuery);
+	const featuresQuery = usePublicFeaturesQuery();
+	const features = useMemo(
+		() => featuresQuery.data?.map(toPropertyFeatureOption) ?? [],
+		[featuresQuery.data],
+	);
+	const baseListings = useMemo(
+		() => listingsQuery.data?.items.map(toPropertySearchListing) ?? [],
+		[listingsQuery.data],
+	);
+	const listings =
+		previewState === "missing-image" && baseListings[0]
+			? [
+					{
+						...baseListings[0],
+						image: {
+							...baseListings[0].image,
+							src: "/images/properties/missing-preview-image.jpg",
+						},
+					},
+					...baseListings.slice(1),
+				]
+			: baseListings;
 	const updateDraftFilter = <Key extends keyof PropertyFilters>(
 		key: Key,
 		value: PropertyFilters[Key],
@@ -96,139 +174,69 @@ export function usePropertiesPage() {
 		setDraftFilters((current) => ({ ...current, [key]: value }));
 		if (key === "location") setLocationError("");
 	};
-
-	const setListingType = (listingType: ListingIntent) => {
-		setDraftFilters((current) => ({ ...current, listingType }));
-		setAppliedFilters((current) => ({ ...current, listingType }));
-		setPageState(1);
+	const writeSearch = (
+		filters: PropertyFilters,
+		overrides: { page?: number; sort?: PropertySort } = {},
+	) => {
+		void navigate({
+			search: {
+				...(filters.listingType !== "ALL"
+					? { listingType: filters.listingType }
+					: {}),
+				...(filters.location ? { location: filters.location } : {}),
+				...(filters.propertyType !== "ALL"
+					? { propertyType: filters.propertyType }
+					: {}),
+				...Object.fromEntries(
+					(
+						[
+							"minPrice",
+							"maxPrice",
+							"minLivingArea",
+							"maxLivingArea",
+							"minRooms",
+							"maxRooms",
+							"minBedrooms",
+						] as const
+					).flatMap((key) => (filters[key] ? [[key, filters[key]]] : [])),
+				),
+				...(filters.featureIds.length
+					? { featureIds: filters.featureIds }
+					: {}),
+				...((overrides.page ?? 1) > 1 ? { page: overrides.page } : {}),
+				...((overrides.sort ?? sort) !== "newest"
+					? { sort: overrides.sort ?? sort }
+					: {}),
+			},
+			replace: true,
+		});
 	};
-
-	const toggleFeature = (featureId: string) => {
+	const applyFilters = () => {
+		const nextLocation = draftFilters.location.trim();
+		if (/^\d+$/.test(nextLocation) && nextLocation.length !== 5) {
+			setLocationError(copy.properties.filters.postalCodeError);
+			return false;
+		}
+		const next = { ...draftFilters, location: nextLocation };
+		setDraftFilters(next);
+		setLocationError("");
+		writeSearch(next, { page: 1 });
+		return true;
+	};
+	const clearFilters = () => {
+		setDraftFilters(emptyFilters);
+		setLocationError("");
+		writeSearch(emptyFilters, { page: 1 });
+	};
+	const toggleFeature = (featureId: string) =>
 		setDraftFilters((current) => ({
 			...current,
 			featureIds: current.featureIds.includes(featureId)
 				? current.featureIds.filter((id) => id !== featureId)
 				: [...current.featureIds, featureId],
 		}));
-	};
-
-	const applyFilters = () => {
-		const location = draftFilters.location.trim();
-		if (/^\d+$/.test(location) && location.length !== 5) {
-			setLocationError(copy.properties.filters.postalCodeError);
-			return false;
-		}
-
-		setLocationError("");
-		setDraftFilters((current) => ({ ...current, location }));
-		setAppliedFilters({ ...draftFilters, location });
-		setPageState(1);
-		return true;
-	};
-
-	const clearFilters = () => {
-		setDraftFilters(initialFilters);
-		setAppliedFilters(initialFilters);
-		setLocationError("");
-		setPageState(1);
-	};
-
-	const filteredListings = useMemo(() => {
-		const location = appliedFilters.location.toLocaleLowerCase();
-		return mockPropertyListings.filter((listing) => {
-			if (
-				appliedFilters.listingType !== "ALL" &&
-				listing.listingType !== appliedFilters.listingType
-			)
-				return false;
-			if (
-				appliedFilters.propertyType !== "ALL" &&
-				listing.propertyType !== appliedFilters.propertyType
-			)
-				return false;
-			if (
-				location &&
-				listing.city.toLocaleLowerCase() !== location &&
-				listing.postalCode !== location
-			)
-				return false;
-			if (
-				!matchesRange(
-					listing.price,
-					appliedFilters.minPrice,
-					appliedFilters.maxPrice,
-				)
-			)
-				return false;
-			if (
-				!matchesRange(
-					listing.livingArea,
-					appliedFilters.minLivingArea,
-					appliedFilters.maxLivingArea,
-				)
-			)
-				return false;
-			if (
-				!matchesRange(
-					listing.rooms,
-					appliedFilters.minRooms,
-					appliedFilters.maxRooms,
-				)
-			)
-				return false;
-			if (!matchesRange(listing.bedrooms, appliedFilters.minBedrooms))
-				return false;
-			return appliedFilters.featureIds.every((featureId) =>
-				listing.featureIds.includes(featureId),
-			);
-		});
-	}, [appliedFilters]);
-
-	const sortedListings = useMemo(() => {
-		const items = [...filteredListings];
-		if (sort === "price_asc") items.sort((a, b) => a.price - b.price);
-		if (sort === "price_desc") items.sort((a, b) => b.price - a.price);
-		if (sort === "living_area_asc")
-			items.sort((a, b) => a.livingArea - b.livingArea);
-		if (sort === "living_area_desc")
-			items.sort((a, b) => b.livingArea - a.livingArea);
-		return items;
-	}, [filteredListings, sort]);
-
-	const totalPages = Math.max(1, Math.ceil(sortedListings.length / PAGE_SIZE));
-	const currentPage = Math.min(page, totalPages);
-	const pageListings = sortedListings.slice(
-		(currentPage - 1) * PAGE_SIZE,
-		currentPage * PAGE_SIZE,
-	);
-
-	const listings = (() => {
-		if (previewState !== "missing-image") {
-			return pageListings;
-		}
-
-		const [firstListing, ...remainingListings] = pageListings;
-
-		if (!firstListing) {
-			return pageListings;
-		}
-
-		return [
-			{
-				...firstListing,
-				image: {
-					...firstListing.image,
-					src: "/images/properties/missing-preview-image.jpg",
-				},
-			},
-			...remainingListings,
-		];
-	})();
-
 	const chips = useMemo<PropertyFilterChip[]>(() => {
 		const items: PropertyFilterChip[] = [];
-		const featureLabel = (feature: PropertyFeatureOption) =>
-			feature.label[language];
 		if (appliedFilters.listingType !== "ALL")
 			items.push({
 				id: "listingType",
@@ -255,97 +263,98 @@ export function usePropertiesPage() {
 			"minRooms",
 			"maxRooms",
 			"minBedrooms",
-		] as const) {
+		] as const)
 			if (appliedFilters[key])
 				items.push({
 					id: key,
 					label: `${copy.properties.chips[key]} ${appliedFilters[key]}`,
 				});
-		}
-		for (const featureId of appliedFilters.featureIds) {
-			const feature = mockPropertyFeatures.find(
-				(item) => item.id === featureId,
-			);
+		for (const id of appliedFilters.featureIds) {
+			const feature = features.find((item) => item.id === id);
 			if (feature)
-				items.push({
-					id: `feature:${featureId}`,
-					label: featureLabel(feature),
-				});
+				items.push({ id: `feature:${id}`, label: feature.label[language] });
 		}
 		return items;
-	}, [appliedFilters, copy, language]);
-
+	}, [appliedFilters, copy, features, language]);
 	const removeChip = (chipId: string) => {
-		let next = { ...appliedFilters };
-		if (chipId.startsWith("feature:")) {
-			const featureId = chipId.replace("feature:", "");
-			next = {
-				...next,
-				featureIds: next.featureIds.filter((id) => id !== featureId),
-			};
-		} else if (chipId === "listingType") next.listingType = "ALL";
+		const next = {
+			...appliedFilters,
+			featureIds: [...appliedFilters.featureIds],
+		};
+		if (chipId.startsWith("feature:"))
+			next.featureIds = next.featureIds.filter((id) => id !== chipId.slice(8));
+		else if (chipId === "listingType") next.listingType = "ALL";
 		else if (chipId === "propertyType") next.propertyType = "ALL";
-		else if (chipId in next) {
-			next = { ...next, [chipId]: "" };
-		}
-		setAppliedFilters(next);
+		else if (chipId in next) Object.assign(next, { [chipId]: "" });
 		setDraftFilters(next);
-		setPageState(1);
+		writeSearch(next, { page: 1 });
 	};
-
 	const headingLocation =
 		appliedFilters.location || copy.properties.defaultLocation;
-	const heading = (() => {
-		const type = appliedFilters.propertyType;
-		const intent = appliedFilters.listingType;
-		if (language === "de") {
-			const noun =
-				type === "HOUSE"
-					? "Häuser"
-					: type === "APARTMENT"
-						? "Wohnungen"
-						: "Immobilien";
-			const purpose =
-				intent === "SALE" ? " zum Kauf" : intent === "RENT" ? " zur Miete" : "";
-			return `${noun}${purpose} in ${headingLocation}`;
-		}
-		const noun =
-			type === "HOUSE"
+	const noun =
+		language === "de"
+			? appliedFilters.propertyType === "HOUSE"
+				? "Häuser"
+				: appliedFilters.propertyType === "APARTMENT"
+					? "Wohnungen"
+					: "Immobilien"
+			: appliedFilters.propertyType === "HOUSE"
 				? "Houses"
-				: type === "APARTMENT"
+				: appliedFilters.propertyType === "APARTMENT"
 					? "Apartments"
 					: "Properties";
-		const purpose =
-			intent === "SALE" ? " for sale" : intent === "RENT" ? " for rent" : "";
-		return `${noun}${purpose} in ${headingLocation}`;
-	})();
-
+	const purpose =
+		language === "de"
+			? appliedFilters.listingType === "SALE"
+				? " zum Kauf"
+				: appliedFilters.listingType === "RENT"
+					? " zur Miete"
+					: ""
+			: appliedFilters.listingType === "SALE"
+				? " for sale"
+				: appliedFilters.listingType === "RENT"
+					? " for rent"
+					: "";
 	return {
 		applyFilters,
 		chips,
 		clearFilters,
-		currentPage,
+		currentPage: listingsQuery.data?.page ?? page,
 		draftFilters,
-		features: mockPropertyFeatures,
-		heading,
+		features,
+		heading: `${noun}${purpose} in ${headingLocation}`,
+		hasBackgroundError: listingsQuery.isError && Boolean(listingsQuery.data),
+		isFullError:
+			(listingsQuery.isError && !listingsQuery.data) ||
+			previewState === "error",
+		isInitialLoading: listingsQuery.isPending,
+		isRefreshing:
+			(listingsQuery.isFetching && !listingsQuery.isPending) ||
+			previewState === "refreshing",
 		listings,
 		locationError,
+		previewState,
 		removeChip,
-		setListingType,
-		setPage: (nextPage: number) =>
-			setPageState(Math.min(Math.max(nextPage, 1), totalPages)),
-		setSort: (nextSort: PropertySort) => {
-			setSortState(nextSort);
-			setPageState(1);
+		retryResults: listingsQuery.refetch,
+		setListingType: (listingType: ListingIntent) => {
+			const next = { ...appliedFilters, listingType };
+			setDraftFilters(next);
+			writeSearch(next, { page: 1 });
 		},
+		setPage: (nextPage: number) =>
+			writeSearch(appliedFilters, {
+				page: Math.max(
+					1,
+					Math.min(nextPage, listingsQuery.data?.total_pages ?? 1),
+				),
+			}),
+		setPreviewState,
+		setSort: (nextSort: PropertySort) =>
+			writeSearch(appliedFilters, { page: 1, sort: nextSort }),
 		sort,
 		toggleFeature,
-		totalItems: sortedListings.length,
-		totalPages,
+		totalItems: listingsQuery.data?.total_items ?? 0,
+		totalPages: listingsQuery.data?.total_pages ?? 1,
 		updateDraftFilter,
-		isInitialLoading,
-		previewState,
-		retryResults: () => setPreviewState("ready"),
-		setPreviewState,
 	};
 }

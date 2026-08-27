@@ -2,10 +2,10 @@
 
 ## Purpose
 
-Deliver Prime Estate through an interface-first track followed by a separate
-integration track. Public and administrative experiences are designed,
-documented, and implemented with deterministic mock data before backend
-connections are introduced.
+Deliver Prime Estate through an interface-first track followed by small,
+verified integration slices. Public and administrative experiences may begin
+with deterministic presentation data, then replace that orchestration without
+changing the approved visual contract.
 
 This separation keeps visual and UX decisions focused while leaving React
 Query, URL state, authentication sessions, and API contracts for deliberate
@@ -76,10 +76,9 @@ Detailed specification: [`pages/contact.md`](pages/contact.md)
 **Status:** Completed
 
 The bilingual authentication UI covers sign-up, six-digit email verification,
-sign-in, forgot password, reset password, sign-out, and session-aware header
-previews. Email and password are active; Google is visibly deferred. The mock
-slice does not connect Better Auth, React Query mutations, sessions, or
-protected routes.
+sign-in, forgot password, reset password, sign-out, and session-aware headers.
+The Stage 7 integration now connects these screens to Better Auth and protects
+Admin routes. Email and password are active; Google is visibly deferred.
 
 After Stages 3, 4, and 5 are jointly approved, their mock-first UI
 implementations may be delivered together as one focused frontend batch.
@@ -142,7 +141,7 @@ current MVP.
 
 ## Stage 7: Application Integration
 
-**Status:** Not started
+**Status:** In progress
 
 Replace mock orchestration with real application behavior through small,
 independently verified integration slices. This stage includes, where required
@@ -163,31 +162,48 @@ data flow are explained, the user applies the initial changes, and the result
 is reviewed. Later repetitive integration work may then be implemented
 directly after its scope and contract are approved.
 
+### Completed integration work
+
+- Administrative Property collection uses backend filters, sorting,
+  pagination, archive state, mutations, and TanStack Router URL state.
+- Property creation, external-client contact creation, Property Details/Edit,
+  image upload and management, and Feature assignment use the implemented
+  backend APIs through React Query.
+- Administrative Listing collection, Property selection, Draft creation,
+  Details/Edit, Property-owned media and Features, protected preview,
+  publication, archive outcomes, and Draft deletion use the implemented
+  backend APIs.
+- Administrative loading, preserved-data updating, empty, recoverable error,
+  and authorization-error states are implemented for these slices.
+- Better Auth email/password sign-up, verification OTP, sign-in, password
+  recovery, real sessions, sign-out, safe redirects, session-aware headers, and
+  verified `ADMIN` route protection are implemented.
+- Administrative Listing collection, selection, creation, details, and preview
+  use structural Skeletons for initial loading rather than spinner-only states.
+- Home loads the latest seven public Listings from the real API. Public search
+  uses backend filters, sorting, pagination, Features, React Query preserved
+  data, and shareable TanStack Router URL state. Public Listing details load by
+  the real slug and preserve loading, not-found, retry, availability, image,
+  and metadata behavior.
+- Deterministic development seed tooling creates Contacts, Properties,
+  Features, Cloudinary-backed Property Images, and Listings without creating
+  authentication accounts or replacing non-seed business data.
+
+### Remaining integration work
+
+- General and Property inquiry persistence plus the administrative Inquiry
+  workflow after its backend contract is approved and implemented.
+
 Deployment, production legal identity, monitoring, backups, and hosting remain
 later release work and are not silently included in Stage 7.
 
 ## Current Focus
 
-Stages 3, 4, and 5 are completed: their combined mock-first implementation
-passes the code, type-check, build, route-smoke-test, and user visual-review
-gates. Stage 6 planning has begun with the shared Admin Shell direction. The
-Properties collection, creation, image setup, Feature setup, Property selection
-for Listing creation, Create Listing, and the complete Listing lifecycle are
-planned. The Listing lifecycle specification covers Draft, Preview, Publish,
-Published editing, Archive, Archived display, Draft deletion, and page states.
-The shared Admin Shell, mock-first administrative Properties collection,
-Create Property, Property Image Setup, and Property Feature Setup are
-implemented and verified. A successful mock creation now hands off directly to
-`/admin/properties/:id/images`, then advances to
-`/admin/properties/:id/features`. The internal Property Details/Edit workspace
-at `/admin/properties/:id` is also implemented and linked from the collection.
-The independent Image and Feature setup routes are repaired, and the guided
-journey now continues through a mock-first Property-bound Create Listing page.
-The administrative Listings collection, active-Property selection route,
-Create Listing flow, and complete mock-first Listing lifecycle workspace are
-implemented and verified with focused model tests and browser checks. The next
-administrative slice is Inquiries after its backend contract is complete, or
-Stage 7 integration if that backend slice remains deferred. The Overview and
-analytics are deferred until the operational admin workflows are complete. Keep all real
-submissions, sessions, authorization redirects, Cloudinary uploads, and
-backend connections in Stage 7.
+Stages 1 through 6 retain their approved UI scope. Stage 7 is active. The
+administrative Property, Listing, Authentication, Home, public search, and
+public Listing-detail workflows now use the real backend through plain API
+modules, focused React Query hooks, page orchestration hooks, and validated
+Router state. Unauthenticated Admin navigation redirects to Sign In with a safe
+local return destination, while the backend continues to authorize each private
+request. Inquiries follow as the next separate integration slice. Overview and
+analytics remain deferred.

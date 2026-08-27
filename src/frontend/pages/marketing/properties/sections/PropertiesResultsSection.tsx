@@ -59,9 +59,12 @@ type PropertiesResultsSectionProps = {
 	features: PropertyFeatureOption[];
 	filters: PropertyFiltersValue;
 	heading: string;
+	hasQueryBackgroundError: boolean;
+	hasQueryError: boolean;
 	listings: PropertySearchListing[];
 	locationError: string;
 	isInitialLoading: boolean;
+	isQueryRefreshing: boolean;
 	onApplyFilters: () => boolean;
 	onClearFilters: () => void;
 	onFilterChange: <Key extends keyof PropertyFiltersValue>(
@@ -103,6 +106,9 @@ export function PropertiesResultsSection({
 	features,
 	filters,
 	heading,
+	hasQueryBackgroundError,
+	hasQueryError,
+	isQueryRefreshing,
 	listings,
 	locationError,
 	onApplyFilters,
@@ -121,9 +127,10 @@ export function PropertiesResultsSection({
 }: PropertiesResultsSectionProps) {
 	const { copy } = useLanguage();
 	const pages = visiblePages(currentPage, totalPages);
-	const isFullError = previewState === "error";
-	const isRefreshing = previewState === "refreshing";
-	const hasBackgroundError = previewState === "background-error";
+	const isFullError = hasQueryError || previewState === "error";
+	const isRefreshing = isQueryRefreshing || previewState === "refreshing";
+	const hasBackgroundError =
+		hasQueryBackgroundError || previewState === "background-error";
 	return (
 		<section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
 			<PropertyResultsPreview

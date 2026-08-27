@@ -3,17 +3,18 @@ import { BedDouble, Building2, MapPin, Maximize2, Search } from "lucide-react";
 import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/frontend/components/ui/tabs";
+import type { PropertyCardListing } from "@/frontend/features/listings/listing.types";
 import type { ListingIntent } from "@/frontend/hooks/pages/useHomePage";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
-import type { HomeListing } from "../home.mock.ts";
 
 type HeroSectionProps = {
-	listing: HomeListing;
+	listing: PropertyCardListing | null;
 	listingIntent: ListingIntent;
 	location: string;
 	isSearchDisabled: boolean;
 	onListingIntentChange: (intent: ListingIntent) => void;
 	onLocationChange: (location: string) => void;
+	onSearch: () => void;
 };
 
 export function HeroSection({
@@ -23,14 +24,15 @@ export function HeroSection({
 	isSearchDisabled,
 	onListingIntentChange,
 	onLocationChange,
+	onSearch,
 }: HeroSectionProps) {
 	const { copy, language } = useLanguage();
 	const propertyType =
-		listing.propertyType === "HOUSE"
+		listing?.propertyType === "HOUSE"
 			? copy.property.house
 			: copy.property.apartment;
 	const listingLabel =
-		listing.listingType === "RENT"
+		listing?.listingType === "RENT"
 			? copy.property.forRent
 			: copy.property.forSale;
 	const priceFormatter = new Intl.NumberFormat(
@@ -74,7 +76,10 @@ export function HeroSection({
 
 					<form
 						className="mt-9 rounded-lg border bg-card p-3 shadow-sm sm:p-4"
-						onSubmit={(event) => event.preventDefault()}
+						onSubmit={(event) => {
+							event.preventDefault();
+							onSearch();
+						}}
 					>
 						<Tabs
 							onValueChange={(value) =>
@@ -132,62 +137,66 @@ export function HeroSection({
 						className="absolute -bottom-4 -right-4 hidden h-full w-full rounded-lg border border-primary/20 bg-accent lg:block"
 					/>
 
-					<article className="relative overflow-hidden rounded-lg border bg-card shadow-md">
-						<div className="relative aspect-[4/3] overflow-hidden bg-muted">
-							<img
-								alt={listing.image.alt[language]}
-								className="h-full w-full object-cover transition-transform duration-500 motion-reduce:transition-none lg:hover:scale-[1.02]"
-								decoding="async"
-								fetchPriority="high"
-								src={listing.image.src}
-							/>
+					{listing ? (
+						<article className="relative overflow-hidden rounded-lg border bg-card shadow-md">
+							<div className="relative aspect-[4/3] overflow-hidden bg-muted">
+								<img
+									alt={listing.image.alt[language]}
+									className="h-full w-full object-cover transition-transform duration-500 motion-reduce:transition-none lg:hover:scale-[1.02]"
+									decoding="async"
+									fetchPriority="high"
+									src={listing.image.src}
+								/>
 
-							<div className="absolute left-4 top-4 rounded-md bg-background/95 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-foreground shadow-sm backdrop-blur">
-								{copy.hero.recentlyAdded}
-							</div>
-
-							<div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/55 to-transparent" />
-
-							<p className="absolute bottom-4 left-4 text-sm font-medium text-white">
-								{listing.city}, {listing.postalCode}
-							</p>
-						</div>
-
-						<div className="p-5 sm:p-6">
-							<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-								<div>
-									<p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-										{propertyType} · {listingLabel}
-									</p>
-
-									<h2 className="mt-2 text-xl font-semibold tracking-tight">
-										{listing.title[language]}
-									</h2>
+								<div className="absolute left-4 top-4 rounded-md bg-background/95 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-foreground shadow-sm backdrop-blur">
+									{copy.hero.recentlyAdded}
 								</div>
 
-								<p className="shrink-0 text-xl font-semibold text-primary">
-									{priceFormatter.format(listing.price)}
+								<div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/55 to-transparent" />
+
+								<p className="absolute bottom-4 left-4 text-sm font-medium text-white">
+									{listing.city}, {listing.postalCode}
 								</p>
 							</div>
 
-							<div className="mt-5 flex flex-wrap gap-x-5 gap-y-3 border-t pt-4 text-sm text-muted-foreground">
-								<span className="inline-flex items-center gap-2">
-									<BedDouble aria-hidden="true" className="size-4" />
-									{listing.rooms} {copy.property.rooms}
-								</span>
+							<div className="p-5 sm:p-6">
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+									<div>
+										<p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+											{propertyType} · {listingLabel}
+										</p>
 
-								<span className="inline-flex items-center gap-2">
-									<Maximize2 aria-hidden="true" className="size-4" />
-									{listing.livingArea} m²
-								</span>
+										<h2 className="mt-2 text-xl font-semibold tracking-tight">
+											{listing.title[language]}
+										</h2>
+									</div>
 
-								<span className="inline-flex items-center gap-2">
-									<Building2 aria-hidden="true" className="size-4" />
-									{propertyType}
-								</span>
+									<p className="shrink-0 text-xl font-semibold text-primary">
+										{priceFormatter.format(listing.price)}
+									</p>
+								</div>
+
+								<div className="mt-5 flex flex-wrap gap-x-5 gap-y-3 border-t pt-4 text-sm text-muted-foreground">
+									<span className="inline-flex items-center gap-2">
+										<BedDouble aria-hidden="true" className="size-4" />
+										{listing.rooms} {copy.property.rooms}
+									</span>
+
+									<span className="inline-flex items-center gap-2">
+										<Maximize2 aria-hidden="true" className="size-4" />
+										{listing.livingArea} m²
+									</span>
+
+									<span className="inline-flex items-center gap-2">
+										<Building2 aria-hidden="true" className="size-4" />
+										{propertyType}
+									</span>
+								</div>
 							</div>
-						</div>
-					</article>
+						</article>
+					) : (
+						<div className="relative aspect-[4/3] animate-pulse rounded-lg border bg-muted motion-reduce:animate-none" />
+					)}
 				</div>
 			</div>
 		</section>

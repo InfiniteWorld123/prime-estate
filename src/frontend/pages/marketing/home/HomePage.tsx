@@ -1,7 +1,6 @@
 import { MarketingFooter } from "@/frontend/components/layout/MarketingFooter";
 import { MarketingHeader } from "@/frontend/components/layout/MarketingHeader";
 import { useHomePage } from "@/frontend/hooks/pages/useHomePage";
-import { heroListing, latestListings } from "./home.mock";
 import { ContactCtaSection } from "./sections/ContactCtaSection";
 import { HeroSection } from "./sections/HeroSection";
 import { HowItWorksSection } from "./sections/HowItWorksSection";
@@ -11,11 +10,16 @@ import { WhyPrimeEstateSection } from "./sections/WhyPrimeEstateSection";
 
 export function HomePage() {
 	const {
+		heroListing,
+		isError,
+		isLoading,
+		latestListings,
 		listingIntent,
 		location,
+		retry,
+		search,
 		setListingIntent,
 		setLocation,
-		isSearchDisabled,
 	} = useHomePage();
 
 	return (
@@ -24,15 +28,21 @@ export function HomePage() {
 
 			<main>
 				<HeroSection
-					isSearchDisabled={isSearchDisabled}
+					isSearchDisabled={false}
 					listing={heroListing}
 					listingIntent={listingIntent}
 					location={location}
 					onListingIntentChange={setListingIntent}
 					onLocationChange={setLocation}
+					onSearch={search}
 				/>
 
-				<LatestPropertiesSection listings={latestListings} />
+				<LatestPropertiesSection
+					isError={isError}
+					isLoading={isLoading}
+					listings={latestListings}
+					onRetry={() => void retry()}
+				/>
 				<WhyPrimeEstateSection />
 				<HowItWorksSection />
 				<LocalExpertiseSection />
