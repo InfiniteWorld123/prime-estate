@@ -2,15 +2,16 @@ import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useState } from "react";
 import {
 	isValidEmail,
-	mockDelay,
 	PENDING_PASSWORD_RESET_EMAIL_KEY,
-} from "@/frontend/features/auth/auth.mock";
+} from "@/frontend/features/auth/auth.utils";
+import { useForgotPasswordMutation } from "@/frontend/features/auth/hooks/useAuthMutations";
 import { authCopy } from "@/frontend/i18n/auth.copy";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 
 export function useForgotPasswordPage() {
 	const { language } = useLanguage();
 	const copy = authCopy[language];
+	const forgotPasswordMutation = useForgotPasswordMutation();
 	const [submissionState, setSubmissionState] = useState<
 		"form" | "error" | "success"
 	>("form");
@@ -26,15 +27,14 @@ export function useForgotPasswordPage() {
 			),
 		onSubmit: async ({ value }) => {
 			setSubmissionState("form");
-			await mockDelay();
-			if (value.email.trim().toLowerCase() === "error@prime-estate.test") {
+			const email = value.email.trim().toLowerCase();
+			try {
+				await forgotPasswordMutation.mutateAsync(email);
+			} catch {
 				setSubmissionState("error");
 				return;
 			}
-			window.sessionStorage.setItem(
-				PENDING_PASSWORD_RESET_EMAIL_KEY,
-				value.email.trim().toLowerCase(),
-			);
+			window.sessionStorage.setItem(PENDING_PASSWORD_RESET_EMAIL_KEY, email);
 			setSubmissionState("success");
 		},
 	});

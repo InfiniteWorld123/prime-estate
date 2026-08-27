@@ -4,16 +4,17 @@ import {
 	isValidEmail,
 	isValidOtp,
 	isValidPassword,
-	mockDelay,
 	PENDING_PASSWORD_RESET_EMAIL_KEY,
 	passwordChecks,
-} from "@/frontend/features/auth/auth.mock";
+} from "@/frontend/features/auth/auth.utils";
+import { useResetPasswordMutation } from "@/frontend/features/auth/hooks/useAuthMutations";
 import { authCopy } from "@/frontend/i18n/auth.copy";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 
 export function useResetPasswordPage() {
 	const { language } = useLanguage();
 	const copy = authCopy[language];
+	const resetPasswordMutation = useResetPasswordMutation();
 	const [hasRememberedEmail, setHasRememberedEmail] = useState(false);
 	const [submissionState, setSubmissionState] = useState<
 		"form" | "error" | "success"
@@ -30,8 +31,13 @@ export function useResetPasswordPage() {
 			),
 		onSubmit: async ({ value }) => {
 			setSubmissionState("form");
-			await mockDelay();
-			if (value.otp === "000000") {
+			try {
+				await resetPasswordMutation.mutateAsync({
+					email: value.email.trim().toLowerCase(),
+					otp: value.otp,
+					password: value.newPassword,
+				});
+			} catch {
 				setSubmissionState("error");
 				return;
 			}

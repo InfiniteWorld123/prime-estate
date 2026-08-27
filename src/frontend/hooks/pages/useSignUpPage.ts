@@ -4,10 +4,13 @@ import { useState } from "react";
 import {
 	isValidEmail,
 	isValidPassword,
-	mockDelay,
 	PENDING_VERIFICATION_EMAIL_KEY,
 	passwordChecks,
-} from "@/frontend/features/auth/auth.mock";
+} from "@/frontend/features/auth/auth.utils";
+import {
+	useSendVerificationCodeMutation,
+	useSignUpMutation,
+} from "@/frontend/features/auth/hooks/useAuthMutations";
 import { authCopy } from "@/frontend/i18n/auth.copy";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 
@@ -15,6 +18,8 @@ export function useSignUpPage() {
 	const { language } = useLanguage();
 	const copy = authCopy[language];
 	const navigate = useNavigate();
+	const signUpMutation = useSignUpMutation();
+	const sendVerificationMutation = useSendVerificationCodeMutation();
 	const [hasServerError, setHasServerError] = useState(false);
 	const form = useForm({
 		defaultValues: {
@@ -34,13 +39,24 @@ export function useSignUpPage() {
 			),
 		onSubmit: async ({ value }) => {
 			setHasServerError(false);
-			await mockDelay();
 			const email = value.email.trim().toLowerCase();
-			if (email === "error@prime-estate.test") {
+			try {
+				await signUpMutation.mutateAsync({
+					email,
+					name: value.fullName.trim(),
+					password: value.password,
+				});
+			} catch {
 				setHasServerError(true);
 				return;
 			}
+
 			window.sessionStorage.setItem(PENDING_VERIFICATION_EMAIL_KEY, email);
+			try {
+				await sendVerificationMutation.mutateAsync(email);
+			} catch {
+				// The account already exists. Continue so the verification page can retry.
+			}
 			await navigate({ to: "/verify-email" });
 		},
 	});

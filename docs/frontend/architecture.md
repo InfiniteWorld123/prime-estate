@@ -7,11 +7,10 @@ keeping route files thin, page composition explicit, and server interaction
 separate from visual components.
 
 Frontend work is delivered in mock-first and integration passes when useful.
-The public marketing and property experiences currently use mock presentation
-data. About, Contact, and the authentication UI are completed as a combined
-mock-first batch. Public API integration, real
-authentication behavior, and administrative screens remain separate roadmap
-work. Current status lives in [`roadmap.md`](roadmap.md).
+The administrative Property, Listing, and Authentication slices are
+server-connected. Public property experiences and Contact submission still
+have separate integration work. Current status lives in
+[`roadmap.md`](roadmap.md).
 
 ## Core Principles
 
@@ -116,7 +115,7 @@ Use these primitives selectively. Brand and domain components remain custom.
 
 ## API and Hook Data Flow
 
-The eventual server-connected flow is:
+The server-connected flow is:
 
 ```text
 Backend API
@@ -140,6 +139,12 @@ The API function is plain asynchronous TypeScript. The focused hook adds React
 Query behavior. The page hook coordinates the form, mutation, navigation, and
 page-specific presentation state.
 
+Administrative transport uses a same-origin Eden client from
+`api/client.ts`. Browser modules never import `shared/env.ts` or server secrets.
+The `/api/$` route owns only request forwarding to the backend application.
+This boundary prevents values such as `BETTER_AUTH_SECRET` and `DATABASE_URL`
+from entering the client bundle.
+
 ## Hook Rules
 
 - Every React hook name starts with `use`.
@@ -152,17 +157,24 @@ page-specific presentation state.
 - Components destructure that view model and remain focused on rendering.
 - React Query hooks do not live in `api/`; API modules remain React-free.
 
-The existing `src/frontend/api/queries/auth.query.ts` is a temporary starting
-point. Its future refactor will separate plain auth requests from hooks such as
-`useSignUp` and `useSignIn`. That refactor belongs to the authentication slice,
-not the static home-page slice.
+Authentication follows the same boundary: `api/auth.api.ts` owns Better Auth
+transport, focused hooks under `features/auth/hooks/` own React Query, and page
+hooks coordinate TanStack Form and navigation. Route access checks use a
+server function so server rendering receives the incoming session cookie;
+backend guards remain authoritative for private data.
 
 ## Directory Structure
 
 ```text
 src/frontend/
 |-- api/
-|   |-- auth.api.ts                     # later
+|   |-- client.ts                       # same-origin typed Eden client
+|   |-- contacts.api.ts
+|   |-- features.api.ts
+|   |-- listings.api.ts
+|   |-- properties.api.ts
+|   |-- property-images.api.ts
+|   |-- auth.api.ts                     # Better Auth browser transport
 |   `-- public-listing.api.ts           # later
 |-- components/
 |   |-- layout/
@@ -175,11 +187,15 @@ src/frontend/
 |       `-- ...
 |-- features/
 |   |-- auth/
+|   |   |-- hooks/                      # session and auth mutations
+|   |   `-- server/                     # route-session server function
+|   |-- contacts/
+|   |-- properties/
 |   `-- listings/
 |       |-- components/
 |       |   |-- PropertyCard.tsx
 |       |   `-- PropertyCardSkeleton.tsx
-|       `-- hooks/                      # added during API integration
+|       `-- hooks/
 |-- hooks/
 |   `-- pages/
 |       |-- useHomePage.ts
@@ -253,8 +269,7 @@ For a mock-first public slice:
 
 ## Authentication Boundary
 
-Authentication will be designed and implemented as its own slice. It will
-eventually include:
+The connected Authentication slice includes:
 
 - Sign up
 - Email verification
@@ -264,11 +279,13 @@ eventually include:
 - Sign out
 - Session-aware navigation
 - Administrative access protection
-- Future customer account capabilities such as appointments and inquiries
+- Administrative access protection
 
-The marketing header reserves visual placement for `Sign in` and `Sign up`, but
-the static home-page slice does not implement authentication or create backend
-connections.
+The backend validates every administrative request independently. Router
+protection improves navigation and prevents unusable screens from rendering;
+it is not treated as the security boundary. The marketing header queries the
+real session, shows the authenticated identity or sign-in actions, and uses the
+real sign-out mutation. Future customer account capabilities remain deferred.
 
 ## Quality Gate Per Slice
 

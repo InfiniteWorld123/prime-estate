@@ -2,10 +2,10 @@
 
 ## Status
 
-Completed. The complete bilingual mock-first authentication UI and local
-session preview pass the automated quality gates and have received visual
-approval. Real Better Auth calls, sessions, redirects, and route protection
-remain Stage 7 integration work.
+Completed. The bilingual authentication UI is connected to Better Auth for
+email/password sign-up, verification OTP, sign-in, password recovery, session
+queries, sign-out, session-aware navigation, and administrative route
+protection. Google authentication and customer account tools remain deferred.
 
 ## Slice Job
 
@@ -25,9 +25,10 @@ not be presented as working destinations.
 - `/forgot-password`
 - `/reset-password`
 
-Successful customer sign-in returns to `/` unless a safe approved destination
-was supplied. Administrative redirection and protected routes are finalized
-with the Admin UI and Stage 7 integration.
+Successful customer sign-in returns to `/` unless a safe same-origin relative
+destination was supplied. A verified Admin defaults to `/admin/properties`,
+and protected Admin routes preserve the requested local destination through
+Sign In.
 
 ## Visual Direction
 
@@ -111,9 +112,10 @@ state as the visitor types after interaction. Do not reduce them to a vague
 strength meter.
 
 The current backend sign-up schema does not persist Terms or Privacy acceptance.
-The mock UI includes the required control, but Stage 7 must explicitly decide
-and align the consent contract before real submission. Links must not point to
-nonexistent legal pages in a published build.
+The UI requires the visitor to accept the existing Terms and Privacy pages
+before submission, but this is not a persisted legal-consent record. Production
+legal compliance and any durable consent evidence require a separate approved
+contract rather than an implicit authentication migration.
 
 Successful sign-up does not imply a verified account. The next action requests
 an email-verification OTP and opens `/verify-email`.
@@ -160,9 +162,9 @@ attempts, and verified status.
 +---------------------------------------------+
 ```
 
-On success, show a short confirmation and a clear path to sign in. Do not
-silently claim an authenticated session unless the Stage 7 backend response
-actually establishes one.
+On success, show a short confirmation and a clear path to sign in. Email
+verification does not claim a signed-in session; the visitor continues through
+the explicit Sign In flow.
 
 ## Sign In
 
@@ -231,9 +233,9 @@ Replace those actions with a circular account trigger:
 
 ### Signed In Admin
 
-The future integrated dropdown may additionally expose the Admin Dashboard to
-a verified `ADMIN`. Authorization is enforced by the backend and protected
-route behavior, never by merely hiding or showing a menu item.
+The integrated dropdown exposes Administration to a verified `ADMIN`.
+Authorization is enforced by the backend and protected route behavior, never
+by merely hiding or showing a menu item.
 
 ### Sign Out
 
@@ -259,8 +261,7 @@ Every flow defines the relevant states:
 - Already authenticated visitor
 
 An already authenticated customer visiting a sign-in or sign-up route is
-redirected home during Stage 7. An authenticated admin follows the approved
-admin destination when that route exists.
+redirected home. An authenticated Admin is redirected to `/admin/properties`.
 
 ## Language, Theme, and Accessibility
 
@@ -281,28 +282,23 @@ admin destination when that route exists.
 Route files remain thin and render page components. Reusable authentication
 form fields and state feedback live under the authentication feature; page-only
 compositions stay under the authentication pages. Page hooks coordinate their
-forms and, during Stage 7, consume plain auth API/React Query operations rather
-than calling the backend directly from UI components.
+forms and consume plain auth API/React Query operations rather than calling the
+backend directly from UI components.
 
 The existing auth transport and validation code must be reviewed rather than
 duplicated when integration begins.
 
-## Mock-First Boundary
+## Connected Boundary
 
-The combined UI batch may use deterministic local preview states for all auth
-screens. It must not send emails, create users, establish sessions, or imply
-that disabled Google authentication works.
-
-Stage 7 owns:
-
-- Better Auth and existing auth endpoint integration
-- Sending and verifying OTPs
-- Real sign-up, sign-in, password reset, and sign-out
-- Session queries and session-aware header behavior
-- Safe callback destinations
-- Admin authorization and route protection
-- Terms and Privacy consent contract alignment
-- Error mapping, rate-limit behavior, and integration tests
+- Better Auth owns session cookies and email/password authentication.
+- The email OTP plugin owns verification and password-reset codes.
+- Plain frontend auth transport is consumed through focused React Query hooks.
+- Only same-origin relative callback destinations are accepted.
+- `/admin` validates the session, verified email, and `ADMIN` role before
+  rendering. The backend Admin Guard remains the actual data-security boundary.
+- Header account state and sign-out use the real session rather than local
+  preview storage.
+- The disabled Google action remains presentation-only and never starts OAuth.
 
 ## Deferred
 

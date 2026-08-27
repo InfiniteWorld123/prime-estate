@@ -1,5 +1,10 @@
-import { Link } from "@tanstack/react-router";
-import { Building2, LogOut, Menu, ShieldCheck } from "lucide-react";
+import {
+	Building2,
+	LoaderCircle,
+	LogOut,
+	Menu,
+	ShieldCheck,
+} from "lucide-react";
 
 import { ThemeToggle } from "@/frontend/components/theme/ThemeToggle";
 import { Button } from "@/frontend/components/ui/button";
@@ -19,6 +24,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/frontend/components/ui/sheet";
+import { useAuthNavigation } from "@/frontend/features/auth/hooks/useAuthNavigation";
 import { LanguageToggle } from "@/frontend/i18n/LanguageToggle";
 import { AdminNavigation } from "./AdminNavigation";
 import type { AdminShellCopy } from "./admin-shell.copy";
@@ -36,6 +42,14 @@ export function AdminTopBar({
 	isMobileNavigationOpen,
 	onMobileNavigationChange,
 }: AdminTopBarProps) {
+	const authNavigation = useAuthNavigation();
+	const initials = authNavigation.user?.name
+		.split(" ")
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((part) => part[0]?.toUpperCase())
+		.join("");
+
 	return (
 		<header className="sticky top-0 z-30 flex h-17 items-center border-b bg-background/88 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/78 sm:px-6">
 			<div className="flex min-w-0 flex-1 items-center gap-3">
@@ -100,7 +114,7 @@ export function AdminTopBar({
 							variant="outline"
 						>
 							<span className="grid size-7 place-items-center rounded-full bg-primary text-[0.65rem] font-semibold text-primary-foreground">
-								PE
+								{initials || "PE"}
 							</span>
 						</Button>
 					</DropdownMenuTrigger>
@@ -111,19 +125,29 @@ export function AdminTopBar({
 									aria-hidden="true"
 									className="size-4 text-primary"
 								/>
-								Prime Estate Admin
+								{authNavigation.user?.name ?? "Prime Estate Admin"}
 							</span>
 							<span className="mt-1 block text-xs font-normal text-muted-foreground">
-								{copy.account}
+								{authNavigation.user?.email ?? copy.account}
 							</span>
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem asChild>
-							<Link to="/sign-in">
+						<DropdownMenuItem
+							disabled={authNavigation.isSigningOut}
+							onSelect={() => void authNavigation.signOut()}
+						>
+							{authNavigation.isSigningOut ? (
+								<LoaderCircle className="animate-spin motion-reduce:animate-none" />
+							) : (
 								<LogOut aria-hidden="true" />
-								{copy.signOut}
-							</Link>
+							)}
+							{copy.signOut}
 						</DropdownMenuItem>
+						{authNavigation.signOutError ? (
+							<p className="px-2 py-1.5 text-xs text-destructive" role="alert">
+								{authNavigation.signOutError}
+							</p>
+						) : null}
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>

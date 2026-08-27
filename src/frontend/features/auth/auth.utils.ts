@@ -2,25 +2,6 @@ export const PENDING_VERIFICATION_EMAIL_KEY =
 	"prime-estate-pending-verification-email";
 export const PENDING_PASSWORD_RESET_EMAIL_KEY =
 	"prime-estate-pending-password-reset-email";
-export const AUTH_PREVIEW_USER_KEY = "prime-estate-auth-preview-user";
-
-export type AuthPreviewUser = {
-	email: string;
-	name: string;
-};
-
-export const createPreviewUser = (email: string): AuthPreviewUser => {
-	const localPart = email.split("@")[0] ?? "Prime Estate User";
-	const name = localPart
-		.split(/[._-]+/)
-		.filter(Boolean)
-		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-		.join(" ");
-	return { email, name: name || "Prime Estate User" };
-};
-
-export const mockDelay = (milliseconds = 850) =>
-	new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
 
 export const isValidEmail = (value: string) =>
 	/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());

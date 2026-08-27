@@ -19,7 +19,8 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/frontend/components/ui/sheet";
-import { useAuthPreview } from "@/frontend/features/auth/hooks/useAuthPreview";
+import { Skeleton } from "@/frontend/components/ui/skeleton";
+import { useAuthNavigation } from "@/frontend/features/auth/hooks/useAuthNavigation";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 import { LanguageToggle } from "@/frontend/i18n/LanguageToggle";
 
@@ -104,7 +105,7 @@ function DesktopNavigation() {
 	);
 }
 
-type AccountNavigationProps = ReturnType<typeof useAuthPreview>;
+type AccountNavigationProps = ReturnType<typeof useAuthNavigation>;
 
 function initials(name: string) {
 	return name
@@ -116,11 +117,20 @@ function initials(name: string) {
 }
 
 function AccountNavigation({
+	isLoading,
 	isSigningOut,
 	signOut,
+	signOutError,
 	user,
 }: AccountNavigationProps) {
 	const { copy } = useLanguage();
+	if (isLoading)
+		return (
+			<div className="hidden items-center gap-2 lg:flex" aria-hidden="true">
+				<Skeleton className="h-9 w-16" />
+				<Skeleton className="h-9 w-24" />
+			</div>
+		);
 	if (!user)
 		return (
 			<div className="hidden items-center gap-2 lg:flex">
@@ -154,6 +164,11 @@ function AccountNavigation({
 						</span>
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
+					{user.role === "ADMIN" ? (
+						<DropdownMenuItem asChild>
+							<Link to="/admin/properties">{copy.header.administration}</Link>
+						</DropdownMenuItem>
+					) : null}
 					<DropdownMenuItem
 						disabled={isSigningOut}
 						onSelect={() => void signOut()}
@@ -168,6 +183,11 @@ function AccountNavigation({
 						)}
 						{isSigningOut ? copy.header.signingOut : copy.header.signOut}
 					</DropdownMenuItem>
+					{signOutError ? (
+						<p className="px-2 py-1.5 text-xs text-destructive" role="alert">
+							{signOutError}
+						</p>
+					) : null}
 				</DropdownMenuContent>
 			</DropdownMenu>
 		</div>
@@ -175,8 +195,10 @@ function AccountNavigation({
 }
 
 function MobileNavigation({
+	isLoading,
 	isSigningOut,
 	signOut,
+	signOutError,
 	user,
 }: AccountNavigationProps) {
 	const { copy } = useLanguage();
@@ -239,14 +261,27 @@ function MobileNavigation({
 					>
 						{copy.header.contact}
 					</Link>
-					{user ? (
+					{isLoading ? (
+						<div className="space-y-2 rounded-md border p-3" aria-hidden="true">
+							<Skeleton className="h-4 w-28" />
+							<Skeleton className="h-4 w-40" />
+							<Skeleton className="mt-3 h-9 w-full" />
+						</div>
+					) : user ? (
 						<div className="rounded-md border bg-muted/35 p-3">
 							<p className="truncate text-sm font-medium">{user.name}</p>
 							<p className="mt-1 truncate text-xs text-muted-foreground">
 								{user.email}
 							</p>
+							{user.role === "ADMIN" ? (
+								<Button asChild className="mt-3 w-full" variant="outline">
+									<Link to="/admin/properties">
+										{copy.header.administration}
+									</Link>
+								</Button>
+							) : null}
 							<Button
-								className="mt-3 w-full"
+								className="mt-2 w-full"
 								disabled={isSigningOut}
 								onClick={() => void signOut()}
 								type="button"
@@ -262,6 +297,11 @@ function MobileNavigation({
 								)}
 								{isSigningOut ? copy.header.signingOut : copy.header.signOut}
 							</Button>
+							{signOutError ? (
+								<p className="mt-2 text-xs text-destructive" role="alert">
+									{signOutError}
+								</p>
+							) : null}
 						</div>
 					) : (
 						<>
@@ -287,7 +327,7 @@ function MobileNavigation({
 }
 
 export function MarketingHeader() {
-	const authPreview = useAuthPreview();
+	const authNavigation = useAuthNavigation();
 	return (
 		<header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
 			<div className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -301,9 +341,9 @@ export function MarketingHeader() {
 					<LanguageToggle />
 					<ThemeToggle />
 
-					<AccountNavigation {...authPreview} />
+					<AccountNavigation {...authNavigation} />
 
-					<MobileNavigation {...authPreview} />
+					<MobileNavigation {...authNavigation} />
 				</div>
 			</div>
 		</header>
