@@ -10,6 +10,7 @@ export type AppErrorCode =
 	| "CONFLICT"
 	| "VALIDATION_ERROR"
 	| "BAD_REQUEST"
+	| "RATE_LIMITED"
 	| "INTERNAL_ERROR";
 
 type AppErrorOptions = {
@@ -104,6 +105,18 @@ export const badRequestError = (
 	return new AppError({
 		status: HttpStatusCode.BAD_REQUEST,
 		code: "BAD_REQUEST",
+		message,
+		details,
+	});
+};
+
+export const rateLimitedError = (
+	message = "Too many requests",
+	details?: unknown,
+): AppError => {
+	return new AppError({
+		status: HttpStatusCode.TOO_MANY_REQUESTS,
+		code: "RATE_LIMITED",
 		message,
 		details,
 	});

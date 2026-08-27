@@ -10,9 +10,8 @@ The MVP serves one real-estate agency. Registered users may exist, but only the
 single admin can access administrative routes. Properties are never exposed
 directly through the public API.
 
-Phases 1 through 6 are implemented. Phase 0 is implemented except for the
-automatic first-account bootstrap described below. Property inquiries are the
-next documented backend slice and remain planned rather than implemented.
+Phases 1 through 7 are implemented. Phase 0 is implemented except for the
+automatic first-account bootstrap described below.
 
 Property and listing domain rules live in
 [`property-listings.md`](property-listings.md).
@@ -192,16 +191,46 @@ Rules:
 Current status: the Public Listings and public Feature options routes are
 implemented. The first backend vertical slice is complete.
 
+## Phase 7: Inquiries
+
+Public route:
+
+- `POST /api/inquiries`
+
+Administrative routes:
+
+- `GET /api/admin/inquiries`
+- `GET /api/admin/inquiries/:id`
+- `POST /api/admin/inquiries/:id/read`
+- `PATCH /api/admin/inquiries/:id/status`
+- `POST /api/admin/inquiries/:id/archive`
+- `POST /api/admin/inquiries/:id/unarchive`
+
+Rules:
+
+- Support both general contact inquiries and inquiries linked to a currently
+  published Listing.
+- Resolve public Listing Slugs on the server and do not expose hidden Listing
+  state.
+- Keep read, lead status, and archive state independent.
+- Do not permanently delete inquiries.
+- Apply the documented honeypot, duplicate-submit, privacy-consent, and
+  database-backed rate-limit rules.
+- Require verified `ADMIN` access for all management routes.
+
+Detailed contract: [`inquiries.md`](inquiries.md).
+
+Current status: the complete backend inquiry slice is implemented. Public and
+Admin frontend integration remains.
+
 ## Later Vertical Slices
 
 After the property/listing slice is complete:
 
-1. Inquiries and basic lead management, following
-   [`inquiries.md`](inquiries.md).
-2. Viewing availability and bookings.
-3. Admin and public frontend screens for each completed backend capability.
-4. Blogging.
-5. Analytics selected from real product questions.
+1. Viewing availability and bookings.
+2. Admin and public frontend screens for each completed backend capability.
+3. Blogging.
+4. Analytics selected from real product questions.
 
 ## Implementation Order Inside Each Phase
 
@@ -221,10 +250,9 @@ The property and listing backend vertical slice is complete, including
 Cloudinary-backed property images, bulk property archiving, administrative
 listing lifecycle routes, and public listing discovery.
 
-The next documented backend capability is property inquiries and basic lead
-management. It is planned but not implemented; PostgreSQL and the Admin
-Dashboard will be the primary notification surface, while Resend and real-time
-transport remain deferred.
+The inquiry and basic lead-management backend slice is complete. PostgreSQL and
+the Admin Dashboard are the primary notification surface, while email and
+real-time transport remain deferred.
 
 The current product work continues in the frontend roadmap. Runtime API smoke
 tests must be repeated before deployment against the final production

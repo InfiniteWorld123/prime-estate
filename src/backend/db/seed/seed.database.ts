@@ -20,6 +20,10 @@ const clearSeedRows = async (client: PoolClient, data: SeedData) => {
 	const contactIds = data.contacts.map((item) => item.id);
 	const featureIds = data.features.map((item) => item.id);
 
+	await client.query(
+		"DELETE FROM inquiries WHERE listing_id = ANY($1::uuid[])",
+		[listingIds],
+	);
 	await client.query("DELETE FROM listings WHERE id = ANY($1::uuid[])", [
 		listingIds,
 	]);
