@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import {
+	AlertTriangle,
 	ArrowLeft,
 	ArrowRight,
 	Building2,
@@ -13,6 +14,7 @@ import { Button } from "@/frontend/components/ui/button";
 import { Input } from "@/frontend/components/ui/input";
 import { useSelectListingPropertyPage } from "@/frontend/hooks/pages/useSelectListingPropertyPage";
 import { cn } from "@/frontend/lib/utils";
+import { ListingSelectionSkeleton } from "../components/AdminListingSkeletons";
 
 export function SelectListingPropertyPage() {
 	const page = useSelectListingPropertyPage();
@@ -45,7 +47,22 @@ export function SelectListingPropertyPage() {
 				/>
 			</div>
 
-			{page.properties.length === 0 ? (
+			{page.isLoading ? (
+				<ListingSelectionSkeleton label={page.copy.loading} />
+			) : page.loadError ? (
+				<div className="mt-5 grid min-h-64 place-items-center rounded-lg border border-destructive/25 bg-destructive/5 p-6 text-center">
+					<div className="max-w-md">
+						<AlertTriangle className="mx-auto size-7 text-destructive" />
+						<p className="mt-3 font-medium">{page.copy.loadError}</p>
+						<p className="mt-1 text-sm text-muted-foreground">
+							{page.loadError}
+						</p>
+						<Button className="mt-4" onClick={() => void page.refetch()}>
+							{page.copy.retry}
+						</Button>
+					</div>
+				</div>
+			) : page.properties.length === 0 ? (
 				<div className="mt-5 grid min-h-64 place-items-center rounded-lg border bg-background p-6 text-center text-sm text-muted-foreground">
 					{page.copy.empty}
 				</div>

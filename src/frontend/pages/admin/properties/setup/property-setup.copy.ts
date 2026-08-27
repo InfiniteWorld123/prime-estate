@@ -16,7 +16,9 @@ export const propertySetupCopy = {
 			leaveDescription:
 				"Ihre nicht gespeicherte Merkmalsauswahl geht verloren.",
 			leaveTitle: "Einrichtung verlassen?",
-			mockNotice: "Diese Vorschau speichert Änderungen nur lokal.",
+			loadError: "Die Einrichtungsdaten konnten nicht geladen werden.",
+			retry: "Erneut versuchen",
+			statusNotice: "Änderungen werden im Agenturbestand gespeichert.",
 			stay: "Hier bleiben",
 		},
 		images: {
@@ -96,7 +98,9 @@ export const propertySetupCopy = {
 			finishLater: "Finish later",
 			leaveDescription: "Your unsaved feature selection will be lost.",
 			leaveTitle: "Leave property setup?",
-			mockNotice: "This preview stores changes locally only.",
+			loadError: "The property setup data could not be loaded.",
+			retry: "Try again",
+			statusNotice: "Changes are saved to the agency inventory.",
 			stay: "Stay here",
 		},
 		images: {

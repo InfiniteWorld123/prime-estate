@@ -23,6 +23,7 @@ import { AdminPropertyFiltersSheet } from "./AdminPropertyFiltersSheet";
 type AdminPropertiesToolbarProps = {
 	activeAdvancedFilterCount: number;
 	archiveStatus: AdminPropertyArchiveFilter;
+	contacts: Array<{ id: string; label: string }>;
 	copy: AdminPropertiesCopy;
 	draftFilters: AdminPropertyAdvancedFilters;
 	filterError: string;
@@ -113,6 +114,7 @@ export function AdminPropertiesToolbar(props: AdminPropertiesToolbarProps) {
 				</Select>
 				<AdminPropertyFiltersSheet
 					activeCount={props.activeAdvancedFilterCount}
+					contacts={props.contacts}
 					copy={copy}
 					filters={props.draftFilters}
 					filterError={props.filterError}

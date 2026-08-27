@@ -126,9 +126,15 @@ export const adminPropertyMocks: AdminPropertyRecord[] = Array.from(
 					? 4
 					: Math.max(1, Math.floor(seed.rooms - 1)),
 			coverImage: number === 9 ? null : seed.coverImage,
+			floorNumber: seed.propertyType === "APARTMENT" ? (index % 4) + 1 : null,
 			houseNumber: `${seed.houseNumber}${index >= propertySeeds.length ? `-${Math.floor(index / propertySeeds.length) + 1}` : ""}`,
 			id: `property-${String(number).padStart(3, "0")}`,
+			primaryContactId:
+				seed.propertySource === "EXTERNAL_CLIENT"
+					? `contact-${(index % 3) + 1}`
+					: null,
 			referenceNumber: `PE-${String(1000 + number)}`,
+			totalFloors: seed.propertyType === "APARTMENT" ? 4 : 2,
 			unitNumber:
 				seed.propertyType === "APARTMENT" ? `${(index % 4) + 1}. OG` : null,
 			updatedAt: `2026-08-${String(24 - (index % 18)).padStart(2, "0")}T${String(8 + (index % 9)).padStart(2, "0")}:30:00.000Z`,

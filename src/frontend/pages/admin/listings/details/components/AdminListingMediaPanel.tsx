@@ -1,21 +1,30 @@
 import { ImageOff, Images, ListChecks } from "lucide-react";
-
+import type { FeatureType } from "#/shared/types/feature.type";
 import { Button } from "@/frontend/components/ui/button";
 import type { AdminListingDetailRecord } from "@/frontend/features/listings/admin-listing.types";
+import type { PropertyImageDraft } from "@/frontend/features/properties/hooks/usePropertyImages";
 import type { AdminListingDetailsCopy } from "../admin-listing-details.copy";
 import { PropertyFeaturesDialog } from "./PropertyFeaturesDialog";
 import { PropertyImagesDialog } from "./PropertyImagesDialog";
 
 type AdminListingMediaPanelProps = {
+	availableFeatures: Array<Pick<FeatureType, "code" | "id" | "name">>;
 	copy: AdminListingDetailsCopy;
 	listing: AdminListingDetailRecord;
-	onFeaturesSave: (features: Array<{ id: string; name: string }>) => void;
-	onImagesSave: (images: AdminListingDetailRecord["images"]) => void;
+	onFeatureCreate: (
+		name: string,
+	) => Promise<Pick<FeatureType, "code" | "id" | "name">>;
+	onFeaturesSave: (
+		features: Array<{ id: string; name: string }>,
+	) => Promise<void>;
+	onImagesSave: (images: PropertyImageDraft[]) => Promise<void>;
 };
 
 export function AdminListingMediaPanel({
+	availableFeatures,
 	copy,
 	listing,
+	onFeatureCreate,
 	onFeaturesSave,
 	onImagesSave,
 }: AdminListingMediaPanelProps) {
@@ -73,8 +82,10 @@ export function AdminListingMediaPanel({
 							{copy.features}
 						</p>
 						<PropertyFeaturesDialog
+							availableFeatures={availableFeatures}
 							copy={copy}
 							features={listing.features}
+							onCreate={onFeatureCreate}
 							onSave={onFeaturesSave}
 							trigger={
 								<Button size="sm" type="button" variant="outline">

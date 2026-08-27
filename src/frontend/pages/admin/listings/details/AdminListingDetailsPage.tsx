@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import {
+	AlertTriangle,
 	ArrowLeft,
 	Check,
 	ExternalLink,
@@ -34,6 +35,7 @@ import {
 	createSeoDescription,
 } from "@/frontend/features/listings/listing-slug";
 import { useAdminListingDetailsPage } from "@/frontend/hooks/pages/useAdminListingDetailsPage";
+import { ListingWorkspaceSkeleton } from "../components/AdminListingSkeletons";
 import { AdminListingLifecyclePanel } from "./components/AdminListingLifecyclePanel";
 import { AdminListingMediaPanel } from "./components/AdminListingMediaPanel";
 
@@ -93,6 +95,27 @@ export function AdminListingDetailsPage() {
 	const page = useAdminListingDetailsPage();
 	const listing = page.listing;
 
+	if (page.isLoading) {
+		return <ListingWorkspaceSkeleton label={page.copy.loading} />;
+	}
+
+	if (page.loadError && !page.isNotFound) {
+		return (
+			<div className="mx-auto grid min-h-[60vh] max-w-3xl place-items-center px-4 py-10 text-center">
+				<div className="max-w-md rounded-lg border border-destructive/25 bg-destructive/5 p-6">
+					<AlertTriangle className="mx-auto size-8 text-destructive" />
+					<h1 className="mt-4 font-heading text-2xl font-semibold">
+						{page.copy.loadError}
+					</h1>
+					<p className="mt-2 text-sm text-muted-foreground">{page.loadError}</p>
+					<Button className="mt-5" onClick={() => void page.refetch()}>
+						{page.copy.retry}
+					</Button>
+				</div>
+			</div>
+		);
+	}
+
 	if (!listing) {
 		return (
 			<div className="mx-auto grid min-h-[60vh] max-w-3xl place-items-center px-4 py-10 text-center">
@@ -151,6 +174,11 @@ export function AdminListingDetailsPage() {
 					<p className="inline-flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">
 						<Check className="size-4" />
 						{page.feedback}
+					</p>
+				) : null}
+				{page.operationError ? (
+					<p className="text-sm font-medium text-destructive" role="alert">
+						{page.operationError}
 					</p>
 				) : null}
 			</div>
@@ -433,14 +461,21 @@ export function AdminListingDetailsPage() {
 									)}
 								</page.form.Subscribe>
 							</div>
+							{page.formError ? (
+								<p className="mt-3 text-sm text-destructive" role="alert">
+									{page.formError}
+								</p>
+							) : null}
 						</section>
 					) : (
 						<ArchivedContent copy={page.copy} listing={listing} />
 					)}
 
 					<AdminListingMediaPanel
+						availableFeatures={page.availableFeatures}
 						copy={page.copy}
 						listing={listing}
+						onFeatureCreate={page.createPropertyFeature}
 						onFeaturesSave={page.setPropertyFeatures}
 						onImagesSave={page.setPropertyImages}
 					/>
@@ -475,6 +510,11 @@ export function AdminListingDetailsPage() {
 							{formatPrice(listing)} · {publicUrl}
 						</span>
 					</div>
+					{page.operationError ? (
+						<p className="text-sm text-destructive" role="alert">
+							{page.operationError}
+						</p>
+					) : null}
 					<DialogFooter>
 						<Button
 							disabled={page.isLifecyclePending}
@@ -533,6 +573,11 @@ export function AdminListingDetailsPage() {
 							))}
 						</div>
 					</fieldset>
+					{page.operationError ? (
+						<p className="text-sm text-destructive" role="alert">
+							{page.operationError}
+						</p>
+					) : null}
 					<DialogFooter>
 						<Button
 							disabled={page.isLifecyclePending}
@@ -565,6 +610,11 @@ export function AdminListingDetailsPage() {
 						<DialogTitle>{page.copy.deleteTitle}</DialogTitle>
 						<DialogDescription>{page.copy.deleteDescription}</DialogDescription>
 					</DialogHeader>
+					{page.operationError ? (
+						<p className="text-sm text-destructive" role="alert">
+							{page.operationError}
+						</p>
+					) : null}
 					<DialogFooter>
 						<Button
 							disabled={page.isLifecyclePending}

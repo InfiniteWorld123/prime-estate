@@ -21,6 +21,7 @@ import {
 } from "@/frontend/components/ui/dialog";
 import { Input } from "@/frontend/components/ui/input";
 import type { AdminPropertyImage } from "@/frontend/features/listings/admin-listing.types";
+import type { PropertyImageDraft } from "@/frontend/features/properties/hooks/usePropertyImages";
 import { cn } from "@/frontend/lib/utils";
 import type { AdminListingDetailsCopy } from "../admin-listing-details.copy";
 import {
@@ -36,7 +37,7 @@ import {
 type PropertyImagesDialogProps = {
 	copy: AdminListingDetailsCopy;
 	images: AdminPropertyImage[];
-	onSave: (images: AdminPropertyImage[]) => void;
+	onSave: (images: PropertyImageDraft[]) => Promise<void>;
 	trigger: React.ReactNode;
 };
 
@@ -49,8 +50,9 @@ export function PropertyImagesDialog({
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const createdUrlsRef = useRef(new Set<string>());
 	const [open, setOpen] = useState(false);
-	const [draftImages, setDraftImages] = useState<AdminPropertyImage[]>([]);
+	const [draftImages, setDraftImages] = useState<PropertyImageDraft[]>([]);
 	const [errors, setErrors] = useState<string[]>([]);
+	const [isSaving, setIsSaving] = useState(false);
 	const [isDraggingFiles, setIsDraggingFiles] = useState(false);
 	const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
 
@@ -72,6 +74,7 @@ export function PropertyImagesDialog({
 	};
 
 	const handleOpenChange = (nextOpen: boolean) => {
+		if (isSaving) return;
 		if (nextOpen) {
 			setDraftImages(images.map((image) => ({ ...image })));
 			setErrors([]);
@@ -109,6 +112,7 @@ export function PropertyImagesDialog({
 			createdUrlsRef.current.add(url);
 			return {
 				altText: null,
+				file,
 				id: `property-image-${crypto.randomUUID()}`,
 				isCover: !hasCover && index === 0,
 				url,
@@ -126,11 +130,20 @@ export function PropertyImagesDialog({
 		setDraftImages((current) => removePropertyImage(current, id));
 	};
 
-	const save = () => {
-		onSave(draftImages);
-		createdUrlsRef.current.clear();
-		setOpen(false);
+	const save = async () => {
+		setIsSaving(true);
 		setErrors([]);
+		try {
+			await onSave(draftImages);
+			discardCreatedUrls();
+			setOpen(false);
+		} catch (error) {
+			setErrors([
+				error instanceof Error ? error.message : copy.imageManager.saveError,
+			]);
+		} finally {
+			setIsSaving(false);
+		}
 	};
 
 	return (
@@ -360,14 +373,19 @@ export function PropertyImagesDialog({
 						{copy.imageManager.unsaved}
 					</p>
 					<Button
+						disabled={isSaving}
 						onClick={() => handleOpenChange(false)}
 						type="button"
 						variant="outline"
 					>
 						{copy.cancel}
 					</Button>
-					<Button disabled={!isDirty} onClick={save} type="button">
-						{copy.imageManager.save}
+					<Button
+						disabled={!isDirty || isSaving}
+						onClick={() => void save()}
+						type="button"
+					>
+						{isSaving ? copy.imageManager.saving : copy.imageManager.save}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

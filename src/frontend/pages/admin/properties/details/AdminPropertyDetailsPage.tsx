@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import {
+	AlertCircle,
 	Archive,
 	ArrowLeft,
 	Building2,
 	CheckCircle2,
 	FileText,
 	ImageIcon,
+	LoaderCircle,
 	Pencil,
 	RotateCcw,
 	Sparkles,
@@ -28,16 +30,41 @@ import { PropertyFormField } from "../create/components/PropertyFormField";
 
 export function AdminPropertyDetailsPage() {
 	const page = useAdminPropertyDetailsPage();
+	if (page.isLoading) {
+		return (
+			<div className="grid min-h-[60vh] place-items-center px-4 py-10">
+				<output className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+					<LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
+					{page.copy.loading}
+				</output>
+			</div>
+		);
+	}
 	if (!page.record) {
 		return (
 			<div className="mx-auto grid min-h-[60vh] max-w-3xl place-items-center px-4 py-10 text-center">
 				<div>
+					{!page.isNotFound ? (
+						<AlertCircle className="mx-auto mb-3 size-6 text-destructive" />
+					) : null}
 					<h1 className="font-heading text-2xl font-semibold">
-						{page.copy.notFound}
+						{page.isNotFound ? page.copy.notFound : page.copy.loadError}
 					</h1>
-					<Button asChild className="mt-5" variant="outline">
-						<Link to="/admin/properties">{page.copy.back}</Link>
-					</Button>
+					{page.loadError && !page.isNotFound ? (
+						<p className="mt-2 text-sm text-muted-foreground">
+							{page.loadError}
+						</p>
+					) : null}
+					<div className="mt-5 flex justify-center gap-2">
+						{!page.isNotFound ? (
+							<Button onClick={() => void page.refetch()}>
+								{page.copy.retry}
+							</Button>
+						) : null}
+						<Button asChild variant="outline">
+							<Link to="/admin/properties">{page.copy.back}</Link>
+						</Button>
+					</div>
 				</div>
 			</div>
 		);
@@ -104,17 +131,26 @@ export function AdminPropertyDetailsPage() {
 						</Button>
 					) : null}
 					{isArchived ? (
-						<Button onClick={() => page.setAction("restore")} variant="outline">
+						<Button
+							disabled={page.isActionPending}
+							onClick={() => page.setAction("restore")}
+							variant="outline"
+						>
 							<RotateCcw />
 							{page.copy.restore}
 						</Button>
 					) : (
-						<Button onClick={() => page.setAction("archive")} variant="outline">
+						<Button
+							disabled={page.isActionPending}
+							onClick={() => page.setAction("archive")}
+							variant="outline"
+						>
 							<Archive />
 							{page.copy.archive}
 						</Button>
 					)}
 					<Button
+						disabled={page.isActionPending}
 						onClick={() => page.setAction("delete")}
 						variant="destructive"
 					>
@@ -203,7 +239,9 @@ export function AdminPropertyDetailsPage() {
 											? record.plotArea
 												? `${record.plotArea} m²`
 												: "—"
-											: "2"
+											: record.floorNumber == null
+												? "—"
+												: String(record.floorNumber)
 									}
 								/>
 							</DetailSection>
@@ -268,14 +306,24 @@ export function AdminPropertyDetailsPage() {
 						<DialogDescription>{actionCopy.description}</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
-						<Button onClick={() => page.setAction(null)} variant="outline">
+						{page.actionError ? (
+							<p className="mr-auto text-sm text-destructive" role="alert">
+								{page.actionError}
+							</p>
+						) : null}
+						<Button
+							disabled={page.isActionPending}
+							onClick={() => page.setAction(null)}
+							variant="outline"
+						>
 							{page.copy.cancel}
 						</Button>
 						<Button
+							disabled={page.isActionPending}
 							onClick={page.confirmAction}
 							variant={page.action === "delete" ? "destructive" : "default"}
 						>
-							{actionCopy.label}
+							{page.isActionPending ? `${actionCopy.label}…` : actionCopy.label}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
@@ -406,12 +454,11 @@ function EditPropertyForm({
 												value={field.state.value}
 											>
 												<option value="">—</option>
-												<option value="contact-katharina">
-													Katharina Vogel · Thüringer Wohnraum GmbH
-												</option>
-												<option value="contact-miriam">
-													Miriam Koch · Residenz Immobilien KG
-												</option>
+												{page.contacts.map((contact) => (
+													<option key={contact.id} value={contact.id}>
+														{contact.label}
+													</option>
+												))}
 											</select>
 											{field.state.meta.errors[0] ? (
 												<span className="block text-sm text-destructive">
@@ -527,6 +574,11 @@ function EditPropertyForm({
 					)}
 				</page.form.Subscribe>
 			</div>
+			{page.formError ? (
+				<p className="border-t px-5 py-4 text-sm text-destructive" role="alert">
+					{page.formError}
+				</p>
+			) : null}
 			<div className="flex flex-col-reverse gap-3 border-t p-4 sm:flex-row sm:justify-end">
 				<Button
 					onClick={() => page.setIsEditing(false)}

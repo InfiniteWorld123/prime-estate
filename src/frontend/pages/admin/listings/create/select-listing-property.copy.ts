@@ -11,9 +11,12 @@ export const selectListingPropertyCopy = {
 		missingImage: "Kein Titelbild",
 		noTypeAvailable:
 			"Für diese Immobilie bestehen bereits Verkauf und Vermietung.",
+		loadError: "Die Immobilien konnten nicht geladen werden.",
+		loading: "Immobilien werden geladen …",
 		rent: "Vermietung",
 		sale: "Verkauf",
 		search: "Referenz, Adresse oder Stadt suchen",
+		retry: "Erneut versuchen",
 		subtitle:
 			"Wählen Sie zuerst die aktive Immobilie, für die ein neues Inserat angelegt werden soll.",
 		title: "Immobilie auswählen",
@@ -29,9 +32,12 @@ export const selectListingPropertyCopy = {
 		house: "House",
 		missingImage: "No cover image",
 		noTypeAvailable: "This property already has both sale and rental listings.",
+		loadError: "The properties could not be loaded.",
+		loading: "Loading properties…",
 		rent: "Rent",
 		sale: "Sale",
 		search: "Search reference, address, or city",
+		retry: "Try again",
 		subtitle:
 			"First choose the active property that should receive a new listing.",
 		title: "Select a property",

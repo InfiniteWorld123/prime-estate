@@ -4,11 +4,6 @@ import type {
 	AdminListingPublishBlocker,
 	AdminListingType,
 } from "@/frontend/features/listings/admin-listing.types";
-import { getDemoListings } from "@/frontend/pages/admin/demo/admin-demo-workspace";
-
-export function getAdminListingDetailMock(listingId: string) {
-	return getDemoListings().find((item) => item.id === listingId) ?? null;
-}
 
 export function getPublishBlockers(
 	listing: Pick<

@@ -12,7 +12,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/frontend/components/ui/dialog";
-import type { MockPropertyContact } from "@/frontend/hooks/pages/useCreatePropertyPage";
+import type { CreatePropertyContactInput } from "@/frontend/hooks/pages/useCreatePropertyPage";
 import type { CreatePropertyCopy } from "../create-property.copy";
 import { PropertyFormField } from "./PropertyFormField";
 
@@ -20,13 +20,13 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function CreateContactDialog({
 	copy,
-	onCreated,
+	onCreate,
 }: {
 	copy: CreatePropertyCopy;
-	onCreated: (contact: MockPropertyContact) => void;
+	onCreate: (contact: CreatePropertyContactInput) => Promise<void>;
 }) {
 	const [open, setOpen] = useState(false);
-	const [serverError, setServerError] = useState(false);
+	const [serverError, setServerError] = useState<string | null>(null);
 	const form = useForm({
 		defaultValues: { company: "", email: "", fullName: "", phone: "" },
 		validationLogic: revalidateLogic({
@@ -42,21 +42,21 @@ export function CreateContactDialog({
 					?.focus(),
 			),
 		onSubmit: async ({ value }) => {
-			setServerError(false);
-			await new Promise((resolve) => window.setTimeout(resolve, 550));
-			if (value.email.trim().toLowerCase() === "error@prime-estate.test") {
-				setServerError(true);
-				return;
+			setServerError(null);
+			try {
+				await onCreate({
+					company: value.company.trim() || null,
+					email: value.email.trim() || null,
+					fullName: value.fullName.trim(),
+					phone: value.phone.trim() || null,
+				});
+				form.reset();
+				setOpen(false);
+			} catch (error) {
+				setServerError(
+					error instanceof Error ? error.message : copy.serverError,
+				);
 			}
-			onCreated({
-				company: value.company.trim() || null,
-				email: value.email.trim() || null,
-				fullName: value.fullName.trim(),
-				id: `contact-${Date.now()}`,
-				phone: value.phone.trim() || null,
-			});
-			form.reset();
-			setOpen(false);
 		},
 	});
 	return (
@@ -166,7 +166,7 @@ export function CreateContactDialog({
 					</div>
 					{serverError ? (
 						<p className="text-sm text-destructive" role="alert">
-							{copy.serverError}
+							{serverError}
 						</p>
 					) : null}
 					<DialogFooter className="mt-2">

@@ -37,6 +37,8 @@ export const adminPropertyDetailsCopy = {
 		listings: "Inserate",
 		listingsDescription:
 			"Öffnen Sie den Inserate-Bereich, um Entwürfe, Veröffentlichungen und Archivierungen für diese Immobilie zu verwalten.",
+		loadError: "Die Immobilie konnte nicht geladen werden.",
+		loading: "Immobilie wird geladen",
 		notFound: "Diese Immobilie wurde nicht gefunden.",
 		property: "Immobiliendaten",
 		required: "Dieses Feld ist erforderlich.",
@@ -44,6 +46,7 @@ export const adminPropertyDetailsCopy = {
 		restoreDescription:
 			"Die Immobilie wird wieder für Verwaltungsaktionen verfügbar.",
 		restoreTitle: "Immobilie wiederherstellen?",
+		retry: "Erneut versuchen",
 		save: "Änderungen speichern",
 		saving: "Änderungen werden gespeichert",
 		source: "Quelle",
@@ -91,6 +94,8 @@ export const adminPropertyDetailsCopy = {
 		listings: "Listings",
 		listingsDescription:
 			"Open the Listings workspace to manage drafts, publication, and archive status for this property.",
+		loadError: "The property could not be loaded.",
+		loading: "Loading property",
 		notFound: "This property could not be found.",
 		property: "Property details",
 		required: "This field is required.",
@@ -98,6 +103,7 @@ export const adminPropertyDetailsCopy = {
 		restoreDescription:
 			"The property becomes available for management actions again.",
 		restoreTitle: "Restore this property?",
+		retry: "Try again",
 		save: "Save changes",
 		saving: "Saving changes",
 		source: "Source",

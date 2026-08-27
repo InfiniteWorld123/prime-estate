@@ -1,14 +1,24 @@
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-
+import type { ListPropertiesQueryType } from "#/shared/types/property.type";
+import { useContactsQuery } from "@/frontend/features/contacts/hooks/useContactsQuery";
 import type {
+	AdminPropertiesSearch,
 	AdminPropertyAdvancedFilters,
 	AdminPropertyArchiveFilter,
 	AdminPropertySort,
 	AdminPropertyTypeFilter,
 	AdminPropertyView,
 } from "@/frontend/features/properties/admin-property.types";
+import { useAdminPropertiesQuery } from "@/frontend/features/properties/hooks/useAdminPropertiesQuery";
+import {
+	useArchivePropertyMutation,
+	useBulkArchivePropertiesMutation,
+	useDeletePropertyMutation,
+	useRestorePropertyMutation,
+} from "@/frontend/features/properties/hooks/usePropertyActions";
+import { toAdminPropertyRecord } from "@/frontend/features/properties/property.mapper";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
-import { getDemoProperties } from "@/frontend/pages/admin/demo/admin-demo-workspace";
 import { adminPropertiesCopy } from "@/frontend/pages/admin/properties/admin-properties.copy";
 
 const VIEW_STORAGE_KEY = "prime-estate-admin-properties-view";
@@ -28,94 +38,135 @@ export const initialAdminPropertyFilters: AdminPropertyAdvancedFilters = {
 	minRooms: "",
 	minYearBuilt: "",
 	postalCode: "",
-	primaryContact: "",
+	primaryContactId: "",
 	propertySource: "ALL",
 };
 
 export type AdminPropertyAction = "archive" | "delete" | "restore";
 
 const numericValue = (value: string) => (value ? Number(value) : undefined);
+const searchValue = (value: string) => value.trim() || undefined;
 
-function matchesRange(value: number | null, minimum: string, maximum: string) {
-	const min = numericValue(minimum);
-	const max = numericValue(maximum);
-	if (value === null) return min === undefined && max === undefined;
-	return (
-		(min === undefined || value >= min) && (max === undefined || value <= max)
-	);
-}
+const filtersFromSearch = (
+	search: AdminPropertiesSearch,
+): AdminPropertyAdvancedFilters => ({
+	city: search.city ?? "",
+	maxBathrooms: search.maxBathrooms ?? "",
+	maxBedrooms: search.maxBedrooms ?? "",
+	maxLivingArea: search.maxLivingArea ?? "",
+	maxPlotArea: search.maxPlotArea ?? "",
+	maxRooms: search.maxRooms ?? "",
+	maxYearBuilt: search.maxYearBuilt ?? "",
+	minBathrooms: search.minBathrooms ?? "",
+	minBedrooms: search.minBedrooms ?? "",
+	minLivingArea: search.minLivingArea ?? "",
+	minPlotArea: search.minPlotArea ?? "",
+	minRooms: search.minRooms ?? "",
+	minYearBuilt: search.minYearBuilt ?? "",
+	postalCode: search.postalCode ?? "",
+	primaryContactId: search.primaryContactId ?? "",
+	propertySource: search.propertySource ?? "ALL",
+});
+
+const toApiQuery = (
+	search: AdminPropertiesSearch,
+): ListPropertiesQueryType => ({
+	archive_status: search.archive ?? "active",
+	city: search.city,
+	max_bathrooms: numericValue(search.maxBathrooms ?? ""),
+	max_bedrooms: numericValue(search.maxBedrooms ?? ""),
+	max_living_area: numericValue(search.maxLivingArea ?? ""),
+	max_plot_area: numericValue(search.maxPlotArea ?? ""),
+	max_rooms: numericValue(search.maxRooms ?? ""),
+	max_year_built: numericValue(search.maxYearBuilt ?? ""),
+	min_bathrooms: numericValue(search.minBathrooms ?? ""),
+	min_bedrooms: numericValue(search.minBedrooms ?? ""),
+	min_living_area: numericValue(search.minLivingArea ?? ""),
+	min_plot_area: numericValue(search.minPlotArea ?? ""),
+	min_rooms: numericValue(search.minRooms ?? ""),
+	min_year_built: numericValue(search.minYearBuilt ?? ""),
+	page: search.page ?? 1,
+	page_size: search.pageSize ?? 20,
+	postal_code: search.postalCode,
+	primary_contact_id: search.primaryContactId,
+	property_source: search.propertySource,
+	property_type: search.propertyType,
+	search: search.search,
+	sort: search.sort ?? "newest",
+});
 
 export function useAdminPropertiesPage() {
 	const { language } = useLanguage();
 	const copy = adminPropertiesCopy[language];
-	const [properties, setProperties] = useState(getDemoProperties);
-	const [searchInput, setSearchInput] = useState("");
-	const [search, setSearch] = useState("");
-	const [archiveStatus, setArchiveStatus] =
-		useState<AdminPropertyArchiveFilter>("active");
-	const [propertyType, setPropertyType] =
-		useState<AdminPropertyTypeFilter>("ALL");
-	const [sort, setSort] = useState<AdminPropertySort>("newest");
+	const search = useSearch({ from: "/admin/properties" });
+	const navigate = useNavigate({ from: "/admin/properties" });
+	const [searchInput, setSearchInput] = useState(search.search ?? "");
 	const [view, setViewState] = useState<AdminPropertyView>("table");
-	const [page, setPage] = useState(1);
-	const [pageSize, setPageSize] = useState(20);
-	const [draftFilters, setDraftFilters] = useState(initialAdminPropertyFilters);
-	const [appliedFilters, setAppliedFilters] = useState(
-		initialAdminPropertyFilters,
+	const [draftFilters, setDraftFilters] = useState(() =>
+		filtersFromSearch(search),
 	);
 	const [filterError, setFilterError] = useState("");
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
-	const [isInitialLoading, setIsInitialLoading] = useState(true);
 	const [pendingAction, setPendingAction] = useState<{
 		action: AdminPropertyAction;
 		ids: string[];
 	} | null>(null);
 
+	const apiQuery = useMemo(() => toApiQuery(search), [search]);
+	const propertiesQuery = useAdminPropertiesQuery(apiQuery);
+	const contactsQuery = useContactsQuery("");
+	const archiveMutation = useArchivePropertyMutation();
+	const restoreMutation = useRestorePropertyMutation();
+	const deleteMutation = useDeletePropertyMutation();
+	const bulkArchiveMutation = useBulkArchivePropertiesMutation();
+
 	useEffect(() => {
 		const storedView = window.localStorage.getItem(VIEW_STORAGE_KEY);
 		if (storedView === "grid" || storedView === "table")
 			setViewState(storedView);
-		const timer = window.setTimeout(() => setIsInitialLoading(false), 500);
-		return () => window.clearTimeout(timer);
 	}, []);
 
 	useEffect(() => {
+		if ((search.search ?? "") !== searchInput)
+			setSearchInput(search.search ?? "");
+	}, [search.search, searchInput]);
+
+	useEffect(() => {
 		const timer = window.setTimeout(() => {
-			setSearch(searchInput.trim());
-			setPage(1);
+			const nextSearch = searchValue(searchInput);
+			if (nextSearch === search.search) return;
+			void navigate({
+				replace: true,
+				search: (current) => ({
+					...current,
+					page: undefined,
+					search: nextSearch,
+				}),
+			});
 			setSelectedIds([]);
 		}, 300);
 		return () => window.clearTimeout(timer);
-	}, [searchInput]);
+	}, [navigate, search.search, searchInput]);
 
-	const setView = (nextView: AdminPropertyView) => {
-		setViewState(nextView);
-		window.localStorage.setItem(VIEW_STORAGE_KEY, nextView);
-	};
-
-	const clearCollectionState = () => {
-		setPage(1);
+	useEffect(() => {
+		setDraftFilters(filtersFromSearch(search));
 		setSelectedIds([]);
-	};
+	}, [search]);
 
-	const updateArchiveStatus = (value: AdminPropertyArchiveFilter) => {
-		setArchiveStatus(value);
-		clearCollectionState();
-	};
+	useEffect(() => {
+		const totalPages = propertiesQuery.data?.total_pages;
+		if (!totalPages || !search.page || search.page <= totalPages) return;
+		void navigate({
+			replace: true,
+			search: (current) => ({ ...current, page: totalPages }),
+		});
+	}, [navigate, propertiesQuery.data?.total_pages, search.page]);
 
-	const updatePropertyType = (value: AdminPropertyTypeFilter) => {
-		setPropertyType(value);
-		clearCollectionState();
-	};
-
-	const updateSort = (value: AdminPropertySort) => {
-		setSort(value);
-		clearCollectionState();
-	};
-
-	const updatePageSize = (value: number) => {
-		setPageSize(value);
-		clearCollectionState();
+	const setUrlSearch = (patch: Partial<AdminPropertiesSearch>) => {
+		void navigate({
+			search: (current) => ({ ...current, ...patch, page: undefined }),
+		});
+		setSelectedIds([]);
 	};
 
 	const updateDraftFilter = <Key extends keyof AdminPropertyAdvancedFilters>(
@@ -158,167 +209,64 @@ export function useAdminPropertiesPage() {
 			}
 		}
 
-		setAppliedFilters({ ...draftFilters });
 		setFilterError("");
-		clearCollectionState();
+		setUrlSearch({
+			city: searchValue(draftFilters.city),
+			maxBathrooms: searchValue(draftFilters.maxBathrooms),
+			maxBedrooms: searchValue(draftFilters.maxBedrooms),
+			maxLivingArea: searchValue(draftFilters.maxLivingArea),
+			maxPlotArea: searchValue(draftFilters.maxPlotArea),
+			maxRooms: searchValue(draftFilters.maxRooms),
+			maxYearBuilt: searchValue(draftFilters.maxYearBuilt),
+			minBathrooms: searchValue(draftFilters.minBathrooms),
+			minBedrooms: searchValue(draftFilters.minBedrooms),
+			minLivingArea: searchValue(draftFilters.minLivingArea),
+			minPlotArea: searchValue(draftFilters.minPlotArea),
+			minRooms: searchValue(draftFilters.minRooms),
+			minYearBuilt: searchValue(draftFilters.minYearBuilt),
+			postalCode: searchValue(draftFilters.postalCode),
+			primaryContactId: searchValue(draftFilters.primaryContactId),
+			propertySource:
+				draftFilters.propertySource === "ALL"
+					? undefined
+					: draftFilters.propertySource,
+		});
 		return true;
 	};
 
 	const resetAdvancedFilters = () => {
 		setDraftFilters(initialAdminPropertyFilters);
-		setAppliedFilters(initialAdminPropertyFilters);
 		setFilterError("");
-		clearCollectionState();
+		setUrlSearch({
+			city: undefined,
+			maxBathrooms: undefined,
+			maxBedrooms: undefined,
+			maxLivingArea: undefined,
+			maxPlotArea: undefined,
+			maxRooms: undefined,
+			maxYearBuilt: undefined,
+			minBathrooms: undefined,
+			minBedrooms: undefined,
+			minLivingArea: undefined,
+			minPlotArea: undefined,
+			minRooms: undefined,
+			minYearBuilt: undefined,
+			postalCode: undefined,
+			primaryContactId: undefined,
+			propertySource: undefined,
+		});
 	};
 
 	const resetAllFilters = () => {
 		setSearchInput("");
-		setSearch("");
-		setArchiveStatus("active");
-		setPropertyType("ALL");
 		setDraftFilters(initialAdminPropertyFilters);
-		setAppliedFilters(initialAdminPropertyFilters);
 		setFilterError("");
-		clearCollectionState();
+		void navigate({ search: {} });
+		setSelectedIds([]);
 	};
 
-	const filteredProperties = useMemo(() => {
-		const normalizedSearch = search.toLocaleLowerCase();
-		const contactSearch = appliedFilters.primaryContact.toLocaleLowerCase();
-		return properties.filter((property) => {
-			const statusMatches =
-				archiveStatus === "all" ||
-				(archiveStatus === "active" && property.archivedAt === null) ||
-				(archiveStatus === "archived" && property.archivedAt !== null);
-			if (!statusMatches) return false;
-			if (propertyType !== "ALL" && property.propertyType !== propertyType)
-				return false;
-			if (
-				normalizedSearch &&
-				![
-					property.referenceNumber,
-					property.streetName,
-					property.houseNumber,
-					property.city,
-					property.postalCode,
-					property.contactName ?? "",
-					property.contactCompany ?? "",
-				].some((value) => value.toLocaleLowerCase().includes(normalizedSearch))
-			)
-				return false;
-			if (
-				appliedFilters.propertySource !== "ALL" &&
-				property.propertySource !== appliedFilters.propertySource
-			)
-				return false;
-			if (
-				appliedFilters.city &&
-				property.city.toLocaleLowerCase() !==
-					appliedFilters.city.toLocaleLowerCase()
-			)
-				return false;
-			if (
-				appliedFilters.postalCode &&
-				property.postalCode !== appliedFilters.postalCode
-			)
-				return false;
-			if (
-				contactSearch &&
-				!`${property.contactName ?? ""} ${property.contactCompany ?? ""}`
-					.toLocaleLowerCase()
-					.includes(contactSearch)
-			)
-				return false;
-			if (
-				!matchesRange(
-					property.livingArea,
-					appliedFilters.minLivingArea,
-					appliedFilters.maxLivingArea,
-				)
-			)
-				return false;
-			if (
-				!matchesRange(
-					property.plotArea,
-					appliedFilters.minPlotArea,
-					appliedFilters.maxPlotArea,
-				)
-			)
-				return false;
-			if (
-				!matchesRange(
-					property.rooms,
-					appliedFilters.minRooms,
-					appliedFilters.maxRooms,
-				)
-			)
-				return false;
-			if (
-				!matchesRange(
-					property.bedrooms,
-					appliedFilters.minBedrooms,
-					appliedFilters.maxBedrooms,
-				)
-			)
-				return false;
-			if (
-				!matchesRange(
-					property.bathrooms,
-					appliedFilters.minBathrooms,
-					appliedFilters.maxBathrooms,
-				)
-			)
-				return false;
-			return matchesRange(
-				property.yearBuilt,
-				appliedFilters.minYearBuilt,
-				appliedFilters.maxYearBuilt,
-			);
-		});
-	}, [appliedFilters, archiveStatus, properties, propertyType, search]);
-
-	const sortedProperties = useMemo(() => {
-		const items = [...filteredProperties];
-		const compareText = (a: string, b: string) => a.localeCompare(b, language);
-		items.sort((a, b) => {
-			switch (sort) {
-				case "oldest":
-					return compareText(a.referenceNumber, b.referenceNumber);
-				case "recently_updated":
-					return b.updatedAt.localeCompare(a.updatedAt);
-				case "reference_asc":
-					return compareText(a.referenceNumber, b.referenceNumber);
-				case "reference_desc":
-					return compareText(b.referenceNumber, a.referenceNumber);
-				case "living_area_asc":
-					return a.livingArea - b.livingArea;
-				case "living_area_desc":
-					return b.livingArea - a.livingArea;
-				case "rooms_asc":
-					return a.rooms - b.rooms;
-				case "rooms_desc":
-					return b.rooms - a.rooms;
-				case "year_built_asc":
-					return (a.yearBuilt ?? 0) - (b.yearBuilt ?? 0);
-				case "year_built_desc":
-					return (b.yearBuilt ?? 0) - (a.yearBuilt ?? 0);
-				case "city_asc":
-					return compareText(a.city, b.city);
-				case "city_desc":
-					return compareText(b.city, a.city);
-				default:
-					return compareText(b.referenceNumber, a.referenceNumber);
-			}
-		});
-		return items;
-	}, [filteredProperties, language, sort]);
-
-	const totalPages = Math.max(1, Math.ceil(sortedProperties.length / pageSize));
-	const currentPage = Math.min(page, totalPages);
-	const visibleProperties = sortedProperties.slice(
-		(currentPage - 1) * pageSize,
-		currentPage * pageSize,
-	);
+	const visibleProperties =
+		propertiesQuery.data?.items.map(toAdminPropertyRecord) ?? [];
 	const selectableIds = visibleProperties.map((property) => property.id);
 	const allVisibleSelected =
 		selectableIds.length > 0 &&
@@ -332,75 +280,102 @@ export function useAdminPropertiesPage() {
 		);
 	};
 
-	const toggleSelectAll = () => {
-		setSelectedIds(allVisibleSelected ? [] : selectableIds);
-	};
-
-	const requestAction = (action: AdminPropertyAction, ids: string[]) =>
-		setPendingAction({ action, ids });
-	const confirmAction = () => {
+	const confirmAction = async () => {
 		if (!pendingAction) return;
-		setProperties((current) => {
-			if (pendingAction.action === "delete")
-				return current.filter(
-					(property) => !pendingAction.ids.includes(property.id),
-				);
-			return current.map((property) =>
-				pendingAction.ids.includes(property.id)
-					? {
-							...property,
-							archivedAt:
-								pendingAction.action === "archive"
-									? new Date().toISOString()
-									: null,
-						}
-					: property,
-			);
-		});
-		setSelectedIds([]);
-		setPendingAction(null);
+		const { action, ids } = pendingAction;
+		try {
+			if (action === "archive" && ids.length > 1) {
+				await bulkArchiveMutation.mutateAsync({ property_ids: ids });
+			} else {
+				const mutation =
+					action === "archive"
+						? archiveMutation
+						: action === "restore"
+							? restoreMutation
+							: deleteMutation;
+				await mutation.mutateAsync(ids[0]);
+			}
+			setSelectedIds([]);
+			setPendingAction(null);
+		} catch {
+			// The active mutation exposes the server message to the dialog.
+		}
 	};
 
-	const activeAdvancedFilterCount = Object.values(appliedFilters).filter(
-		(value) => value !== "" && value !== "ALL",
-	).length;
+	const actionMutation =
+		pendingAction?.action === "archive" && pendingAction.ids.length > 1
+			? bulkArchiveMutation
+			: pendingAction?.action === "archive"
+				? archiveMutation
+				: pendingAction?.action === "restore"
+					? restoreMutation
+					: deleteMutation;
+
+	const activeAdvancedFilterCount = Object.values(
+		filtersFromSearch(search),
+	).filter((value) => value !== "" && value !== "ALL").length;
 
 	return {
+		actionError: actionMutation.error?.message ?? null,
 		activeAdvancedFilterCount,
 		allVisibleSelected,
 		applyAdvancedFilters,
-		archiveStatus,
+		archiveStatus: search.archive ?? "active",
 		confirmAction,
+		contacts:
+			contactsQuery.data?.items.map((contact) => ({
+				id: contact.id,
+				label: contact.company_name
+					? `${contact.full_name} · ${contact.company_name}`
+					: contact.full_name,
+			})) ?? [],
 		copy,
-		currentPage,
+		currentPage: propertiesQuery.data?.page ?? search.page ?? 1,
 		draftFilters,
 		filterError,
-		isInitialLoading,
-		pageSize,
+		isActionPending: actionMutation.isPending,
+		isInitialLoading: propertiesQuery.isPending,
+		isUpdating: propertiesQuery.isFetching && !propertiesQuery.isPending,
+		loadError: propertiesQuery.error?.message ?? null,
+		pageSize: search.pageSize ?? 20,
 		pendingAction,
-		propertyType,
-		requestAction,
+		propertyType: (search.propertyType ?? "ALL") as AdminPropertyTypeFilter,
+		refetch: propertiesQuery.refetch,
+		requestAction: (action: AdminPropertyAction, ids: string[]) => {
+			actionMutation.reset();
+			setPendingAction({ action, ids });
+		},
 		resetAdvancedFilters,
 		resetAllFilters,
 		searchInput,
 		selectedIds,
-		setPage: (nextPage: number) => {
-			setPage(Math.min(Math.max(nextPage, 1), totalPages));
-			setSelectedIds([]);
-		},
+		setPage: (page: number) =>
+			setUrlSearch({ page: page <= 1 ? undefined : page }),
 		setPendingAction,
 		setSearchInput,
-		setView,
-		sort,
-		toggleSelectAll,
+		setView: (nextView: AdminPropertyView) => {
+			setViewState(nextView);
+			window.localStorage.setItem(VIEW_STORAGE_KEY, nextView);
+		},
+		sort: search.sort ?? "newest",
+		toggleSelectAll: () =>
+			setSelectedIds(allVisibleSelected ? [] : selectableIds),
 		toggleSelection,
-		totalItems: sortedProperties.length,
-		totalPages,
-		updateArchiveStatus,
+		totalItems: propertiesQuery.data?.total_items ?? 0,
+		totalPages: Math.max(1, propertiesQuery.data?.total_pages ?? 1),
+		updateArchiveStatus: (archive: AdminPropertyArchiveFilter) =>
+			setUrlSearch({ archive: archive === "active" ? undefined : archive }),
 		updateDraftFilter,
-		updatePageSize,
-		updatePropertyType,
-		updateSort,
+		updatePageSize: (pageSize: number) =>
+			setUrlSearch({
+				pageSize: pageSize === 20 ? undefined : (pageSize as 50 | 100),
+			}),
+		updatePropertyType: (propertyType: AdminPropertyTypeFilter) =>
+			setUrlSearch({
+				propertyType: propertyType === "ALL" ? undefined : propertyType,
+			}),
+		updateSort: (sort: AdminPropertySort) =>
+			setUrlSearch({ sort: sort === "newest" ? undefined : sort }),
 		view,
 		visibleProperties,
 	};

@@ -1,6 +1,6 @@
 import { Check, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
-
+import type { FeatureType } from "#/shared/types/feature.type";
 import { Button } from "@/frontend/components/ui/button";
 import { Checkbox } from "@/frontend/components/ui/checkbox";
 import {
@@ -15,33 +15,28 @@ import {
 import { Input } from "@/frontend/components/ui/input";
 import { cn } from "@/frontend/lib/utils";
 import type { AdminListingDetailsCopy } from "../admin-listing-details.copy";
-import {
-	createFeatureCode,
-	hasFeatureName,
-} from "../admin-listing-media.model";
+import { hasFeatureName } from "../admin-listing-media.model";
 
-type PropertyFeature = { code?: string; id: string; name: string };
-
-const defaultFeatures: PropertyFeature[] = [
-	{ code: "BALCONY", id: "feature-balcony", name: "Balcony" },
-	{ code: "GARDEN", id: "feature-garden", name: "Garden" },
-	{ code: "ELEVATOR", id: "feature-elevator", name: "Elevator" },
-	{ code: "PARKING", id: "feature-parking", name: "Parking space" },
-	{ code: "FITTED_KITCHEN", id: "feature-kitchen", name: "Fitted kitchen" },
-	{ code: "BASEMENT", id: "feature-basement", name: "Basement" },
-	{ code: "ACCESSIBLE", id: "feature-accessible", name: "Accessible" },
-	{ code: "GUEST_WC", id: "feature-guest-wc", name: "Guest WC" },
-];
+type PropertyFeature = {
+	code?: FeatureType["code"];
+	id: FeatureType["id"];
+	name: FeatureType["name"];
+};
 
 type PropertyFeaturesDialogProps = {
+	availableFeatures: PropertyFeature[];
 	copy: AdminListingDetailsCopy;
 	features: Array<{ id: string; name: string }>;
-	onSave: (features: Array<{ id: string; name: string }>) => void;
+	onCreate: (name: string) => Promise<PropertyFeature>;
+	onSave: (features: Array<{ id: string; name: string }>) => Promise<void>;
 	trigger: React.ReactNode;
 };
 
-function mergeCatalog(features: Array<{ id: string; name: string }>) {
-	const catalog = [...defaultFeatures];
+function mergeCatalog(
+	availableFeatures: PropertyFeature[],
+	features: Array<{ id: string; name: string }>,
+) {
+	const catalog = [...availableFeatures];
 	for (const feature of features) {
 		if (!catalog.some((item) => item.id === feature.id)) catalog.push(feature);
 	}
@@ -49,8 +44,10 @@ function mergeCatalog(features: Array<{ id: string; name: string }>) {
 }
 
 export function PropertyFeaturesDialog({
+	availableFeatures,
 	copy,
 	features,
+	onCreate,
 	onSave,
 	trigger,
 }: PropertyFeaturesDialogProps) {
@@ -60,6 +57,9 @@ export function PropertyFeaturesDialog({
 	const [search, setSearch] = useState("");
 	const [newFeatureName, setNewFeatureName] = useState("");
 	const [createError, setCreateError] = useState("");
+	const [saveError, setSaveError] = useState("");
+	const [isCreating, setIsCreating] = useState(false);
+	const [isSaving, setIsSaving] = useState(false);
 
 	const selectedFeatures = catalog.filter((feature) =>
 		selectedIds.has(feature.id),
@@ -81,12 +81,14 @@ export function PropertyFeaturesDialog({
 	const isDirty = originalIds !== selectedKey;
 
 	const handleOpenChange = (nextOpen: boolean) => {
+		if (isCreating || isSaving) return;
 		if (nextOpen) {
-			setCatalog(mergeCatalog(features));
+			setCatalog(mergeCatalog(availableFeatures, features));
 			setSelectedIds(new Set(features.map((feature) => feature.id)));
 			setSearch("");
 			setNewFeatureName("");
 			setCreateError("");
+			setSaveError("");
 		}
 		setOpen(nextOpen);
 	};
@@ -99,7 +101,7 @@ export function PropertyFeaturesDialog({
 			return next;
 		});
 
-	const createFeature = () => {
+	const createFeature = async () => {
 		const name = newFeatureName.trim();
 		if (!name) {
 			setCreateError(copy.featureManager.required);
@@ -109,24 +111,41 @@ export function PropertyFeaturesDialog({
 			setCreateError(copy.featureManager.duplicate);
 			return;
 		}
-		const feature = {
-			code: createFeatureCode(name),
-			id: `feature-${crypto.randomUUID()}`,
-			name,
-		};
-		setCatalog((current) => [...current, feature]);
-		setSelectedIds((current) => new Set([...current, feature.id]));
-		setNewFeatureName("");
-		setCreateError("");
+		setIsCreating(true);
+		try {
+			const feature = await onCreate(name);
+			setCatalog((current) => [...current, feature]);
+			setSelectedIds((current) => new Set([...current, feature.id]));
+			setNewFeatureName("");
+			setCreateError("");
+		} catch (error) {
+			setCreateError(
+				error instanceof Error
+					? error.message
+					: copy.featureManager.createError,
+			);
+		} finally {
+			setIsCreating(false);
+		}
 	};
 
-	const save = () => {
-		onSave(
-			catalog
-				.filter((feature) => selectedIds.has(feature.id))
-				.map(({ id, name }) => ({ id, name })),
-		);
-		setOpen(false);
+	const save = async () => {
+		setIsSaving(true);
+		setSaveError("");
+		try {
+			await onSave(
+				catalog
+					.filter((feature) => selectedIds.has(feature.id))
+					.map(({ id, name }) => ({ id, name })),
+			);
+			setOpen(false);
+		} catch (error) {
+			setSaveError(
+				error instanceof Error ? error.message : copy.featureManager.saveError,
+			);
+		} finally {
+			setIsSaving(false);
+		}
 	};
 
 	return (
@@ -218,7 +237,7 @@ export function PropertyFeaturesDialog({
 									onKeyDown={(event) => {
 										if (event.key === "Enter") {
 											event.preventDefault();
-											createFeature();
+											void createFeature();
 										}
 									}}
 									placeholder={copy.featureManager.namePlaceholder}
@@ -230,9 +249,16 @@ export function PropertyFeaturesDialog({
 									</p>
 								) : null}
 							</div>
-							<Button onClick={createFeature} type="button" variant="outline">
+							<Button
+								disabled={isCreating}
+								onClick={() => void createFeature()}
+								type="button"
+								variant="outline"
+							>
 								<Plus />
-								{copy.featureManager.create}
+								{isCreating
+									? copy.featureManager.creating
+									: copy.featureManager.create}
 							</Button>
 						</div>
 					</section>
@@ -307,15 +333,28 @@ export function PropertyFeaturesDialog({
 				</div>
 
 				<DialogFooter className="mx-0 mb-0 shrink-0 rounded-none px-4 py-3 sm:px-6">
+					{saveError ? (
+						<p
+							className="mr-auto self-center text-sm text-destructive"
+							role="alert"
+						>
+							{saveError}
+						</p>
+					) : null}
 					<Button
+						disabled={isSaving}
 						onClick={() => handleOpenChange(false)}
 						type="button"
 						variant="outline"
 					>
 						{copy.cancel}
 					</Button>
-					<Button disabled={!isDirty} onClick={save} type="button">
-						{copy.featureManager.save}
+					<Button
+						disabled={!isDirty || isSaving}
+						onClick={() => void save()}
+						type="button"
+					>
+						{isSaving ? copy.featureManager.saving : copy.featureManager.save}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

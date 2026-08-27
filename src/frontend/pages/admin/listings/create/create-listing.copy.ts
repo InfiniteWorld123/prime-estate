@@ -21,6 +21,8 @@ export const createListingCopy = {
 		house: "Haus",
 		listingType: "Vermarktungsart",
 		livingArea: "Wohnfläche",
+		loadError: "Das Inserat kann nicht vorbereitet werden.",
+		loading: "Inserat wird vorbereitet …",
 		price: { rent: "Monatliche Kaltmiete", sale: "Kaufpreis" },
 		prefillDescription:
 			"Titel, Beschreibung und Adressfreigabe wurden übernommen. Der Preis bleibt leer, da Verkauf und Vermietung unterschiedliche Beträge verwenden. Bitte prüfen Sie den Inhalt vor dem Anlegen.",
@@ -32,6 +34,7 @@ export const createListingCopy = {
 		rent: "Vermietung",
 		rooms: "Zimmer",
 		requiredType: "Wählen Sie Verkauf oder Vermietung.",
+		retry: "Erneut versuchen",
 		sale: "Verkauf",
 		seo: "SEO-Einstellungen",
 		seoDescription: "SEO-Beschreibung (optional)",
@@ -72,6 +75,8 @@ export const createListingCopy = {
 		house: "House",
 		listingType: "Listing type",
 		livingArea: "Living area",
+		loadError: "The listing could not be prepared.",
+		loading: "Preparing listing…",
 		price: { rent: "Monthly base rent", sale: "Purchase price" },
 		prefillDescription:
 			"Title, description, and address visibility were reused. Price stays blank because Sale and Rent use different amounts. Review the content before creating the draft.",
@@ -83,6 +88,7 @@ export const createListingCopy = {
 		rent: "Rent",
 		rooms: "Rooms",
 		requiredType: "Choose Sale or Rent.",
+		retry: "Try again",
 		sale: "Sale",
 		seo: "SEO settings",
 		seoDescription: "SEO description (optional)",

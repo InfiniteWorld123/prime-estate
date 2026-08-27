@@ -1,5 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { Archive, Plus, X } from "lucide-react";
+import {
+	AlertCircle,
+	Archive,
+	LoaderCircle,
+	Plus,
+	RefreshCw,
+	X,
+} from "lucide-react";
 
 import { Button } from "@/frontend/components/ui/button";
 import { useAdminPropertiesPage } from "@/frontend/hooks/pages/useAdminPropertiesPage";
@@ -37,6 +44,7 @@ export function AdminPropertiesPage() {
 			<AdminPropertiesToolbar
 				activeAdvancedFilterCount={page.activeAdvancedFilterCount}
 				archiveStatus={page.archiveStatus}
+				contacts={page.contacts}
 				copy={page.copy}
 				draftFilters={page.draftFilters}
 				filterError={page.filterError}
@@ -100,8 +108,30 @@ export function AdminPropertiesPage() {
 				)}
 			</div>
 
-			<div className="mt-3">
-				{!page.isInitialLoading && page.visibleProperties.length === 0 ? (
+			<div className="relative mt-3">
+				{page.isUpdating ? (
+					<output className="absolute -top-9 right-0 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+						<LoaderCircle className="size-3.5 animate-spin motion-reduce:animate-none" />
+						{page.copy.updating}
+					</output>
+				) : null}
+				{page.loadError && page.visibleProperties.length === 0 ? (
+					<div className="grid min-h-80 place-items-center rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
+						<div>
+							<AlertCircle className="mx-auto size-6 text-destructive" />
+							<p className="mt-3 font-heading text-lg font-semibold">
+								{page.copy.loadError}
+							</p>
+							<p className="mt-1 text-sm text-muted-foreground">
+								{page.loadError}
+							</p>
+							<Button className="mt-4" onClick={() => void page.refetch()}>
+								<RefreshCw />
+								{page.copy.retry}
+							</Button>
+						</div>
+					</div>
+				) : !page.isInitialLoading && page.visibleProperties.length === 0 ? (
 					<div className="grid min-h-80 place-items-center rounded-lg border bg-background p-6 text-center">
 						<div>
 							<p className="font-heading text-lg font-semibold">
@@ -143,12 +173,14 @@ export function AdminPropertiesPage() {
 
 			<AdminPropertyActionDialog
 				action={page.pendingAction?.action ?? null}
+				actionError={page.actionError}
 				copy={page.copy}
 				count={page.pendingAction?.ids.length ?? 0}
 				onConfirm={page.confirmAction}
 				onOpenChange={(open) => {
 					if (!open) page.setPendingAction(null);
 				}}
+				isPending={page.isActionPending}
 			/>
 		</div>
 	);

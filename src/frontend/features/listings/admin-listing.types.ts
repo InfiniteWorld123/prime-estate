@@ -70,3 +70,16 @@ export type AdminListingFilters = {
 	search: string;
 	status: "ALL" | AdminListingStatus;
 };
+
+export type AdminListingsSearch = {
+	archiveOutcome?: AdminListingArchiveOutcome;
+	city?: string;
+	listingType?: AdminListingType;
+	maxPrice?: string;
+	minPrice?: string;
+	page?: number;
+	pageSize?: 20 | 50 | 100;
+	search?: string;
+	sort?: AdminListingSort;
+	status?: AdminListingStatus;
+};

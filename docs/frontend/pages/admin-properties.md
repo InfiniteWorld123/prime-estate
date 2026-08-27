@@ -2,7 +2,7 @@
 
 ## Status
 
-**Collection and the guided Property setup UI are completed.** The mock-first
+**Collection, guided setup, and backend integration are completed.** The
 `/admin/properties` collection is implemented with responsive Table, Grid, and
 mobile-card representations, deterministic data, quick and advanced filters,
 sorting, pagination, selection, local archive/restore/delete previews,
@@ -13,19 +13,19 @@ selection and local contact creation, unsaved-change protection, mock submit
 states, and direct success navigation to `/admin/properties/:id/images`.
 
 The Image Setup implements local multi-file selection, format/size/capacity
-validation, a three-item upload queue, cover selection, ordering, alt-text
-editing, deletion, retry behavior, and navigation to Features. Feature Setup
-implements catalog search, persistent hidden selections, local feature
-creation, complete-set saving, unsaved-change protection, and direct navigation
-to `/admin/properties/:id/listings/new`. The setup routes are independent Admin
-pages rather than nested render children of Property Details. Cloudinary,
-React Query, backend mutations, and server-owned errors remain Stage 7 work.
+validation, a three-item upload queue, real upload, cover selection, ordering,
+alt-text editing, deletion, retry behavior, and navigation to Features. Feature
+Setup implements catalog search, backend Feature creation, complete-set saving,
+unsaved-change protection, and direct navigation to
+`/admin/properties/:id/listings/new`. The setup routes are independent Admin
+pages rather than nested render children of Property Details.
 
 Property Details/Edit will be added to this document after its separate
 discussion is approved.
 
-Real API calls, React Query, TanStack Router URL ownership, authorization, and
-server mutations belong to the later integration stage.
+Plain API transport, React Query queries and mutations, TanStack Router URL
+ownership, loading, empty, retry, and server-error behavior are implemented.
+Better Auth route protection and redirects remain a separate Stage 7 slice.
 
 ## Purpose
 
@@ -224,8 +224,7 @@ matching properties across every page. There is no archive-everything action.
 - On failure, preserve selection and show a useful message without exposing
   technical internals.
 
-The mock-first pass may preview pending, success, and failure states without
-calling the backend.
+Pending, success, and failure states use the backend bulk-archive mutation.
 
 ## Row and Card Actions
 
@@ -330,7 +329,8 @@ integration contract needs one of these explicitly approved solutions:
 2. Keep the missing-image/Property-type fallback for records without a cover.
 
 Do not issue one image request per result item. That would create an N+1 HTTP
-pattern. No backend change is made during the mock-first UI stage.
+pattern. The integrated collection keeps the missing-image fallback until its
+backend response receives an approved nullable cover-image summary.
 
 ## Bilingual Behavior
 
@@ -572,9 +572,8 @@ Properties are never publicly exposed.
 - Successful creation and navigation
 - Unsaved-changes confirmation
 
-The mock-first UI may preview these states with deterministic local behavior.
-Real Contact search, Contact creation, Property creation, cache updates, and
-navigation after a server response belong to the integration stage.
+Contact search, Contact creation, Property creation, cache invalidation, and
+navigation from the returned Property ID are implemented.
 
 ## Property Image Setup
 
@@ -715,9 +714,10 @@ not-yet-persisted queue items.
 - Delete confirmation, pending, success, and rejected deletion
 - Entire image collection loading and error
 
-The mock-first pass demonstrates these states locally. Cloudinary uploads,
-progress transport, React Query mutations, invalidation, and server business
-errors belong to the integration stage.
+Cloudinary-backed upload, React Query mutations, cache updates, retry, and
+server business errors are implemented. The visible queue progress remains a
+coarse waiting/uploading/completed indicator because the current transport does
+not expose byte-level progress.
 
 ## Property Feature Setup
 
@@ -759,9 +759,8 @@ large icons, and pill-heavy presentation. Mobile uses one column and comfortable
 touch targets.
 
 Search filters the available catalog without clearing hidden selections. A
-plain selected-count summary makes that behavior visible. The mock-first pass
-uses deterministic options; integration uses the existing Feature options or
-paginated Feature contract according to the final data volume.
+plain selected-count summary makes that behavior visible. The implementation
+uses the existing backend Feature options contract.
 
 ### Draft and Save Behavior
 
@@ -831,9 +830,8 @@ Listing is optional and is always created as a Draft first.
 - Create Feature validation, pending, success, and conflict error
 - Unsaved-change confirmation
 
-The mock-first pass demonstrates these states locally. Real catalog queries,
-Feature creation, replacement mutation, cache updates, and server validation
-belong to the integration stage.
+Catalog queries, Feature creation, complete replacement mutation, cache
+updates, and server validation are implemented.
 
 ## Property Details and Edit
 
@@ -859,9 +857,9 @@ only fields supported by the backend update contract. Apartment and House
 conditional fields remain mutually valid, External client requires a primary
 Contact, and submit-first validation preserves entered values after errors.
 
-The mock-first save updates the displayed record locally and returns to read
-mode. Real detail loading, Contact search, PATCH mutation, cache invalidation,
-conflict mapping, and authorization remain Stage 7 work.
+Detail loading, Contact search, PATCH mutation, cache invalidation, server
+conflict messages, and authorization-error presentation are implemented.
+Better Auth route protection remains separate Stage 7 work.
 
 ### Lifecycle Actions
 

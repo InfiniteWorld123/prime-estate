@@ -25,6 +25,7 @@ import type { AdminPropertiesCopy } from "../admin-properties.copy";
 
 type AdminPropertyFiltersSheetProps = {
 	activeCount: number;
+	contacts: Array<{ id: string; label: string }>;
 	copy: AdminPropertiesCopy;
 	filters: AdminPropertyAdvancedFilters;
 	filterError: string;
@@ -47,6 +48,7 @@ const rangeFields = [
 
 export function AdminPropertyFiltersSheet({
 	activeCount,
+	contacts,
 	copy,
 	filters,
 	filterError,
@@ -109,13 +111,24 @@ export function AdminPropertyFiltersSheet({
 						<Label htmlFor="admin-filter-contact">
 							{copy.advanced.contact}
 						</Label>
-						<Input
-							id="admin-filter-contact"
-							value={filters.primaryContact}
-							onChange={(event) =>
-								onChange("primaryContact", event.target.value)
+						<Select
+							value={filters.primaryContactId || "ALL"}
+							onValueChange={(value) =>
+								onChange("primaryContactId", value === "ALL" ? "" : value)
 							}
-						/>
+						>
+							<SelectTrigger className="w-full" id="admin-filter-contact">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="ALL">{copy.all}</SelectItem>
+								{contacts.map((contact) => (
+									<SelectItem key={contact.id} value={contact.id}>
+										{contact.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
 					<div className="grid gap-2">
 						<Label htmlFor="admin-filter-city">{copy.advanced.city}</Label>

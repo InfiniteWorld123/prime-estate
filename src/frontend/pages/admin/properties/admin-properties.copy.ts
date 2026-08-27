@@ -35,6 +35,7 @@ export const adminPropertiesCopy = {
 			title: "Auswahl archivieren?",
 		},
 		actionDialog: {
+			actionFailed: "Die Aktion konnte nicht abgeschlossen werden.",
 			archiveDescription:
 				"Die Immobilie wird aus dem aktiven Bestand entfernt.",
 			archiveTitle: "Immobilie archivieren?",
@@ -46,6 +47,9 @@ export const adminPropertiesCopy = {
 				"Die Immobilie wird wieder im aktiven Bestand angezeigt.",
 			restoreTitle: "Immobilie wiederherstellen?",
 		},
+		loadError: "Die Immobilien konnten nicht geladen werden.",
+		retry: "Erneut versuchen",
+		updating: "Immobilien werden aktualisiert",
 		archived: "Archiviert",
 		bulkArchive: "Auswahl archivieren",
 		clearSelection: "Auswahl aufheben",
@@ -137,6 +141,7 @@ export const adminPropertiesCopy = {
 			title: "Archive selection?",
 		},
 		actionDialog: {
+			actionFailed: "The action could not be completed.",
 			archiveDescription:
 				"The property will be removed from the active inventory.",
 			archiveTitle: "Archive property?",
@@ -147,6 +152,9 @@ export const adminPropertiesCopy = {
 			restoreDescription: "The property will return to the active inventory.",
 			restoreTitle: "Restore property?",
 		},
+		loadError: "The properties could not be loaded.",
+		retry: "Try again",
+		updating: "Updating properties",
 		archived: "Archived",
 		bulkArchive: "Archive selection",
 		clearSelection: "Clear selection",

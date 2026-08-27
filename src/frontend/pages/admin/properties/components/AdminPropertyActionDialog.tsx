@@ -14,18 +14,22 @@ import type { AdminPropertiesCopy } from "../admin-properties.copy";
 
 type AdminPropertyActionDialogProps = {
 	action: AdminPropertyAction | null;
+	actionError: string | null;
 	copy: AdminPropertiesCopy;
 	count: number;
 	onConfirm: () => void;
 	onOpenChange: (open: boolean) => void;
+	isPending: boolean;
 };
 
 export function AdminPropertyActionDialog({
 	action,
+	actionError,
 	copy,
 	count,
 	onConfirm,
 	onOpenChange,
+	isPending,
 }: AdminPropertyActionDialogProps) {
 	if (!action) return null;
 	const isBulkArchive = action === "archive" && count > 1;
@@ -68,7 +72,13 @@ export function AdminPropertyActionDialog({
 					<DialogDescription>{content.description}</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
+					{actionError ? (
+						<p className="mr-auto text-sm text-destructive" role="alert">
+							{actionError || copy.actionDialog.actionFailed}
+						</p>
+					) : null}
 					<Button
+						disabled={isPending}
 						onClick={() => onOpenChange(false)}
 						type="button"
 						variant="outline"
@@ -76,11 +86,12 @@ export function AdminPropertyActionDialog({
 						{copy.actionDialog.cancel}
 					</Button>
 					<Button
+						disabled={isPending}
 						onClick={onConfirm}
 						type="button"
 						variant={action === "delete" ? "destructive" : "default"}
 					>
-						{content.label}
+						{isPending ? `${content.label}…` : content.label}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

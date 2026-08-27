@@ -159,7 +159,7 @@ export function CreatePropertyPage() {
 														</div>
 														<CreateContactDialog
 															copy={page.copy}
-															onCreated={page.addContact}
+															onCreate={page.addContact}
 														/>
 													</div>
 													<div className="relative">
@@ -595,7 +595,7 @@ export function CreatePropertyPage() {
 						role="alert"
 					>
 						<AlertCircle aria-hidden="true" className="mt-0.5 size-4" />
-						{page.copy.serverError}
+						{page.serverError}
 					</p>
 				) : null}
 				<div className="sticky bottom-3 z-10 flex flex-col-reverse gap-3 rounded-lg border bg-background/92 p-3 shadow-sm backdrop-blur sm:flex-row sm:justify-end">

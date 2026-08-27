@@ -1,12 +1,15 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 import {
-	getDemoProperties,
-	setDemoPropertyImages,
-	updateDemoProperty,
-} from "@/frontend/pages/admin/demo/admin-demo-workspace";
+	useDeletePropertyImageMutation,
+	usePropertyImagesQuery,
+	useReorderPropertyImagesMutation,
+	useSetPropertyCoverImageMutation,
+	useUpdatePropertyImageMutation,
+	useUploadPropertyImageMutation,
+} from "@/frontend/features/properties/hooks/usePropertyImages";
+import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 import { propertySetupCopy } from "@/frontend/pages/admin/properties/setup/property-setup.copy";
 
 export type PropertyImageDraft = {
@@ -31,35 +34,43 @@ export function usePropertyImagesSetupPage() {
 	const copy = propertySetupCopy[language];
 	const { propertyId } = useParams({ strict: false }) as { propertyId: string };
 	const navigate = useNavigate();
-	const [images, setImages] = useState<PropertyImageDraft[]>(() => {
-		const property = getDemoProperties().find((item) => item.id === propertyId);
-		if (!property?.coverImage) return [];
-		return [
-			{
-				altText: "",
-				file: null,
-				id: `${property.id}-existing-cover`,
-				isCover: true,
-				name: property.coverImage.split("/").at(-1) ?? "property-cover.jpg",
-				progress: 100,
-				status: "uploaded",
-				url: property.coverImage,
-			},
-		];
-	});
+	const imagesQuery = usePropertyImagesQuery(propertyId);
+	const uploadMutation = useUploadPropertyImageMutation();
+	const updateMutation = useUpdatePropertyImageMutation();
+	const deleteMutation = useDeletePropertyImageMutation();
+	const reorderMutation = useReorderPropertyImagesMutation();
+	const coverMutation = useSetPropertyCoverImageMutation();
+	const [images, setImages] = useState<PropertyImageDraft[]>([]);
 	const [rejections, setRejections] = useState<Rejection[]>([]);
+	const [operationError, setOperationError] = useState<string | null>(null);
 	const [isDragging, setIsDragging] = useState(false);
 	const [altImageId, setAltImageId] = useState<string | null>(null);
 	const [deleteImageId, setDeleteImageId] = useState<string | null>(null);
 	const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
 	const imagesRef = useRef(images);
+	const hydratedRef = useRef(false);
 	const processingIdsRef = useRef(new Set<string>());
-	const uploadTimersRef = useRef<number[]>([]);
 	imagesRef.current = images;
+
+	useEffect(() => {
+		if (!imagesQuery.data || hydratedRef.current) return;
+		hydratedRef.current = true;
+		setImages(
+			imagesQuery.data.map((image) => ({
+				altText: image.alt_text ?? "",
+				file: null,
+				id: image.id,
+				isCover: image.is_cover,
+				name: image.storage_key.split("/").at(-1) ?? "property-image",
+				progress: 100,
+				status: "uploaded",
+				url: image.url,
+			})),
+		);
+	}, [imagesQuery.data]);
 
 	useEffect(
 		() => () => {
-			for (const timer of uploadTimersRef.current) window.clearTimeout(timer);
 			for (const image of imagesRef.current) {
 				if (image.file) URL.revokeObjectURL(image.url);
 			}
@@ -72,44 +83,60 @@ export function usePropertyImagesSetupPage() {
 		const waiting = images
 			.filter(
 				(image) =>
-					image.status === "waiting" && !processingIdsRef.current.has(image.id),
+					image.status === "waiting" &&
+					image.file &&
+					!processingIdsRef.current.has(image.id),
 			)
 			.slice(0, available);
 		if (waiting.length === 0) return;
 
-		const waitingIds = new Set(waiting.map((image) => image.id));
-		for (const id of waitingIds) processingIdsRef.current.add(id);
-		setImages((current) =>
-			current.map((image) =>
-				waitingIds.has(image.id)
-					? { ...image, progress: 35, status: "uploading" }
-					: image,
-			),
-		);
-
-		const timers = waiting.map((image) =>
-			window.setTimeout(() => {
-				processingIdsRef.current.delete(image.id);
-				setImages((current) => {
-					const shouldFail = image.name.toLocaleLowerCase().includes("fail");
-					const hasCover = current.some(
-						(item) => item.isCover && item.status === "uploaded",
+		for (const image of waiting) {
+			processingIdsRef.current.add(image.id);
+			setImages((current) =>
+				current.map((item) =>
+					item.id === image.id
+						? { ...item, progress: 35, status: "uploading" }
+						: item,
+				),
+			);
+			void uploadMutation
+				.mutateAsync({ file: image.file as File, propertyId })
+				.then((uploaded) => {
+					processingIdsRef.current.delete(image.id);
+					URL.revokeObjectURL(image.url);
+					setImages((current) =>
+						current.map((item) =>
+							item.id === image.id
+								? {
+										...item,
+										altText: uploaded.alt_text ?? "",
+										file: null,
+										id: uploaded.id,
+										isCover: uploaded.is_cover,
+										progress: 100,
+										status: "uploaded",
+										url: uploaded.url,
+									}
+								: item,
+						),
 					);
-					return current.map((item) =>
-						item.id === image.id
-							? {
-									...item,
-									isCover: shouldFail ? false : !hasCover,
-									progress: shouldFail ? 35 : 100,
-									status: shouldFail ? "failed" : "uploaded",
-								}
-							: item,
+					setOperationError(null);
+				})
+				.catch((error: unknown) => {
+					processingIdsRef.current.delete(image.id);
+					setImages((current) =>
+						current.map((item) =>
+							item.id === image.id
+								? { ...item, progress: 35, status: "failed" }
+								: item,
+						),
+					);
+					setOperationError(
+						error instanceof Error ? error.message : copy.images.failed,
 					);
 				});
-			}, 700),
-		);
-		uploadTimersRef.current.push(...timers);
-	}, [images]);
+		}
+	}, [copy.images.failed, images, propertyId, uploadMutation]);
 
 	const addFiles = (files: FileList | File[]) => {
 		const nextFiles = Array.from(files);
@@ -166,19 +193,66 @@ export function usePropertyImagesSetupPage() {
 		setDraggedImageId(null);
 	};
 
-	const deleteImage = () => {
-		if (!deleteImageId) return;
-		setImages((current) => {
-			const deleting = current.find((image) => image.id === deleteImageId);
-			if (deleting?.file) URL.revokeObjectURL(deleting.url);
-			const next = current.filter((image) => image.id !== deleteImageId);
-			if (deleting?.isCover) {
-				const firstUploaded = next.find((image) => image.status === "uploaded");
-				if (firstUploaded) firstUploaded.isCover = true;
-			}
-			return [...next];
+	const persistOrder = async () => {
+		const imageIds = imagesRef.current
+			.filter((image) => image.status === "uploaded")
+			.map((image) => image.id);
+		if (imageIds.length === 0) return;
+		await reorderMutation.mutateAsync({
+			input: { image_ids: imageIds },
+			propertyId,
 		});
-		setDeleteImageId(null);
+	};
+
+	const deleteImage = async () => {
+		if (!deleteImageId) return;
+		const deleting = imagesRef.current.find(
+			(image) => image.id === deleteImageId,
+		);
+		if (!deleting) return;
+		try {
+			if (deleting.status === "uploaded") {
+				await deleteMutation.mutateAsync({ imageId: deleting.id, propertyId });
+			}
+			if (deleting.file) URL.revokeObjectURL(deleting.url);
+			setImages((current) => {
+				const next = current.filter((image) => image.id !== deleting.id);
+				if (deleting.isCover && next[0])
+					next[0] = { ...next[0], isCover: true };
+				return next;
+			});
+			setDeleteImageId(null);
+			setOperationError(null);
+		} catch (error) {
+			setOperationError(
+				error instanceof Error ? error.message : copy.images.deleteDescription,
+			);
+		}
+	};
+
+	const navigateAfterSaving = async (
+		destination: "features" | "collection",
+	) => {
+		if (
+			imagesRef.current.some(
+				(image) => image.status === "uploading" || image.status === "waiting",
+			)
+		)
+			return;
+		try {
+			await persistOrder();
+			setOperationError(null);
+			if (destination === "features") {
+				void navigate({
+					params: { propertyId },
+					to: "/admin/properties/$propertyId/features",
+				});
+			} else void navigate({ to: "/admin/properties" });
+		} catch (error) {
+			setOperationError(
+				error instanceof Error ? error.message : copy.images.failed,
+			);
+		}
 	};
 
 	return {
@@ -190,33 +264,20 @@ export function usePropertyImagesSetupPage() {
 			images.find((image) => image.id === deleteImageId) ?? null,
 		dismissRejection: (id: string) =>
 			setRejections((current) => current.filter((item) => item.id !== id)),
-		finishLater: () => void navigate({ to: "/admin/properties" }),
+		finishLater: () => void navigateAfterSaving("collection"),
 		images,
+		isBusy:
+			images.some((image) => ["waiting", "uploading"].includes(image.status)) ||
+			reorderMutation.isPending,
 		isDragging,
+		isLoading: imagesQuery.isPending,
+		loadError: imagesQuery.error?.message ?? null,
 		moveImage,
 		moveToImage,
-		navigateToFeatures: () => {
-			const uploadedImages = images
-				.filter((image) => image.status === "uploaded")
-				.map(({ altText, id, isCover, url }) => ({
-					altText: altText.trim() || null,
-					id,
-					isCover,
-					url,
-				}));
-			const cover = uploadedImages.find((image) => image.isCover);
-			setDemoPropertyImages(propertyId, uploadedImages);
-			updateDemoProperty(propertyId, {
-				coverImage: cover?.url ?? null,
-				updatedAt: new Date().toISOString(),
-			});
-			imagesRef.current = [];
-			void navigate({
-				params: { propertyId },
-				to: "/admin/properties/$propertyId/features",
-			});
-		},
+		navigateToFeatures: () => void navigateAfterSaving("features"),
+		operationError,
 		propertyId,
+		refetch: imagesQuery.refetch,
 		rejections,
 		retry: (id: string) =>
 			setImages((current) =>
@@ -226,20 +287,43 @@ export function usePropertyImagesSetupPage() {
 						: image,
 				),
 			),
-		saveAltText: (value: string) => {
+		saveAltText: async (value: string) => {
 			if (!altImageId) return;
-			setImages((current) =>
-				current.map((image) =>
-					image.id === altImageId ? { ...image, altText: value.trim() } : image,
-				),
-			);
-			setAltImageId(null);
+			try {
+				const updated = await updateMutation.mutateAsync({
+					imageId: altImageId,
+					input: { alt_text: value.trim() || null },
+					propertyId,
+				});
+				setImages((current) =>
+					current.map((image) =>
+						image.id === altImageId
+							? { ...image, altText: updated.alt_text ?? "" }
+							: image,
+					),
+				);
+				setAltImageId(null);
+				setOperationError(null);
+			} catch (error) {
+				setOperationError(
+					error instanceof Error ? error.message : copy.images.failed,
+				);
+			}
 		},
 		setAltImageId,
-		setCover: (id: string) =>
-			setImages((current) =>
-				current.map((image) => ({ ...image, isCover: image.id === id })),
-			),
+		setCover: async (id: string) => {
+			try {
+				await coverMutation.mutateAsync({ imageId: id, propertyId });
+				setImages((current) =>
+					current.map((image) => ({ ...image, isCover: image.id === id })),
+				);
+				setOperationError(null);
+			} catch (error) {
+				setOperationError(
+					error instanceof Error ? error.message : copy.images.failed,
+				);
+			}
+		},
 		setDeleteImageId,
 		setDraggedImageId,
 		setIsDragging,

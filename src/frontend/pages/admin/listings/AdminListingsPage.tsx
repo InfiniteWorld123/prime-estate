@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Building2, ListPlus } from "lucide-react";
+import { AlertTriangle, Building2, ListPlus, LoaderCircle } from "lucide-react";
 
 import { Button } from "@/frontend/components/ui/button";
 import { useAdminListingsPage } from "@/frontend/hooks/pages/useAdminListingsPage";
+import { AdminListingsPageSkeleton } from "./components/AdminListingSkeletons";
 import { AdminListingsCollection } from "./components/AdminListingsCollection";
 import { AdminListingsPagination } from "./components/AdminListingsPagination";
 import { AdminListingsToolbar } from "./components/AdminListingsToolbar";
@@ -39,7 +40,24 @@ export function AdminListingsPage() {
 				</Button>
 			</header>
 
-			{!page.hasAnyProperties || !page.hasAnyListings ? (
+			{page.isInitialLoading ? (
+				<AdminListingsPageSkeleton label={page.copy.loading} />
+			) : page.loadError ? (
+				<section className="mt-8 grid min-h-80 place-items-center rounded-lg border border-destructive/25 bg-destructive/5 p-6 text-center">
+					<div className="max-w-md">
+						<AlertTriangle className="mx-auto size-8 text-destructive" />
+						<h2 className="mt-4 font-heading text-xl font-semibold">
+							{page.copy.loadError}
+						</h2>
+						<p className="mt-2 text-sm text-muted-foreground">
+							{page.loadError}
+						</p>
+						<Button className="mt-5" onClick={() => void page.refetch()}>
+							{page.copy.retry}
+						</Button>
+					</div>
+				</section>
+			) : !page.hasAnyProperties || !page.hasAnyListings ? (
 				<section className="mt-8 grid min-h-80 place-items-center rounded-lg border bg-background p-6 text-center">
 					<div className="max-w-md">
 						<div className="mx-auto grid size-12 place-items-center rounded-lg bg-primary/8 text-primary">
@@ -85,6 +103,12 @@ export function AdminListingsPage() {
 						<p className="text-sm font-medium" aria-live="polite">
 							{page.copy.resultCount(page.totalItems)}
 						</p>
+						{page.isUpdating ? (
+							<p className="flex items-center gap-2 text-xs text-muted-foreground">
+								<LoaderCircle className="size-3.5 animate-spin" />
+								{page.copy.updating}
+							</p>
+						) : null}
 					</div>
 					<AdminListingsCollection copy={page.copy} listings={page.listings} />
 					<AdminListingsPagination

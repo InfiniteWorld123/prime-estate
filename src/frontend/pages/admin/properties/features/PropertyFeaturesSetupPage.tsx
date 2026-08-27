@@ -1,4 +1,12 @@
-import { CheckCircle2, Plus, Search, Sparkles, X } from "lucide-react";
+import {
+	CheckCircle2,
+	CircleAlert,
+	LoaderCircle,
+	Plus,
+	Search,
+	Sparkles,
+	X,
+} from "lucide-react";
 
 import { Button } from "@/frontend/components/ui/button";
 import { Checkbox } from "@/frontend/components/ui/checkbox";
@@ -17,6 +25,32 @@ import { PropertySetupJourney } from "../setup/PropertySetupJourney";
 
 export function PropertyFeaturesSetupPage() {
 	const page = usePropertyFeaturesSetupPage();
+	if (page.isLoading) {
+		return (
+			<div className="grid min-h-[60vh] place-items-center px-4 py-10">
+				<output className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+					<LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
+					{page.copy.features.saving}
+				</output>
+			</div>
+		);
+	}
+	if (page.loadError) {
+		return (
+			<div className="grid min-h-[60vh] place-items-center px-4 py-10 text-center">
+				<div>
+					<CircleAlert className="mx-auto size-6 text-destructive" />
+					<p className="mt-3 font-heading text-lg font-semibold">
+						{page.copy.common.loadError}
+					</p>
+					<p className="mt-1 text-sm text-muted-foreground">{page.loadError}</p>
+					<Button className="mt-4" onClick={() => void page.refetch()}>
+						{page.copy.common.retry}
+					</Button>
+				</div>
+			</div>
+		);
+	}
 	return (
 		<div className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
 			<header className="max-w-3xl">
@@ -117,6 +151,11 @@ export function PropertyFeaturesSetupPage() {
 					{page.copy.features.success}
 				</output>
 			) : null}
+			{page.saveError ? (
+				<p className="mt-5 text-sm text-destructive" role="alert">
+					{page.saveError}
+				</p>
+			) : null}
 
 			<footer className="sticky bottom-3 z-10 mt-8 flex flex-col-reverse gap-3 rounded-lg border bg-background/95 p-3 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between">
 				<div>
@@ -124,7 +163,7 @@ export function PropertyFeaturesSetupPage() {
 						{page.copy.common.finishLater}
 					</Button>
 					<p className="mt-1 text-xs text-muted-foreground">
-						{page.copy.common.mockNotice}
+						{page.copy.common.statusNotice}
 					</p>
 				</div>
 				<Button
@@ -189,6 +228,11 @@ export function PropertyFeaturesSetupPage() {
 									{page.createConflict ? (
 										<span className="block text-sm text-destructive">
 											{page.copy.features.conflict}
+										</span>
+									) : null}
+									{page.createError ? (
+										<span className="block text-sm text-destructive">
+											{page.createError}
 										</span>
 									) : null}
 									<span className="block text-xs font-normal text-muted-foreground">

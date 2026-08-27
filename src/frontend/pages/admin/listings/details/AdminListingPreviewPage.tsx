@@ -1,16 +1,46 @@
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Eye, ImageOff, LockKeyhole } from "lucide-react";
+import {
+	AlertTriangle,
+	ArrowLeft,
+	Eye,
+	ImageOff,
+	LockKeyhole,
+} from "lucide-react";
 
 import { Button } from "@/frontend/components/ui/button";
+import { useAdminListingQuery } from "@/frontend/features/listings/hooks/useAdminListingQuery";
+import { toAdminListingDetailRecord } from "@/frontend/features/listings/listing.mapper";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
+import { ListingPreviewSkeleton } from "../components/AdminListingSkeletons";
 import { adminListingDetailsCopy } from "./admin-listing-details.copy";
-import { getAdminListingDetailMock } from "./admin-listing-details.model";
 
 export function AdminListingPreviewPage() {
 	const { language } = useLanguage();
 	const copy = adminListingDetailsCopy[language];
 	const { listingId } = useParams({ strict: false }) as { listingId: string };
-	const listing = getAdminListingDetailMock(listingId);
+	const listingQuery = useAdminListingQuery(listingId);
+	const listing = listingQuery.data
+		? toAdminListingDetailRecord(listingQuery.data)
+		: null;
+
+	if (listingQuery.isPending)
+		return <ListingPreviewSkeleton label={copy.loading} />;
+
+	if (listingQuery.error)
+		return (
+			<div className="grid min-h-[60vh] place-items-center px-4 text-center">
+				<div className="max-w-md rounded-lg border border-destructive/25 bg-destructive/5 p-6">
+					<AlertTriangle className="mx-auto size-8 text-destructive" />
+					<p className="mt-4 font-medium">{copy.loadError}</p>
+					<p className="mt-2 text-sm text-muted-foreground">
+						{listingQuery.error.message}
+					</p>
+					<Button className="mt-5" onClick={() => void listingQuery.refetch()}>
+						{copy.retry}
+					</Button>
+				</div>
+			</div>
+		);
 
 	if (!listing) return null;
 

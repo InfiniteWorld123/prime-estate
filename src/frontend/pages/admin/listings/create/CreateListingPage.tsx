@@ -1,4 +1,11 @@
-import { Building2, CopyCheck, House, ImageOff, ListPlus } from "lucide-react";
+import {
+	AlertTriangle,
+	Building2,
+	CopyCheck,
+	House,
+	ImageOff,
+	ListPlus,
+} from "lucide-react";
 
 import {
 	Accordion,
@@ -28,11 +35,36 @@ import { useCreateListingPage } from "@/frontend/hooks/pages/useCreateListingPag
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 import { PropertySetupJourney } from "@/frontend/pages/admin/properties/setup/PropertySetupJourney";
 import { propertySetupCopy } from "@/frontend/pages/admin/properties/setup/property-setup.copy";
+import { ListingWorkspaceSkeleton } from "../components/AdminListingSkeletons";
 
 export function CreateListingPage() {
 	const page = useCreateListingPage();
 	const { language } = useLanguage();
 	const journeyCopy = propertySetupCopy[language];
+
+	if (page.isLoading)
+		return <ListingWorkspaceSkeleton label={page.copy.loading} />;
+
+	if (page.loadError || !page.property)
+		return (
+			<div className="mx-auto grid min-h-[60vh] w-full max-w-6xl place-items-center px-4 py-8">
+				<div className="max-w-md rounded-lg border border-destructive/25 bg-destructive/5 p-6 text-center">
+					<AlertTriangle className="mx-auto size-8 text-destructive" />
+					<h1 className="mt-4 font-heading text-xl font-semibold">
+						{page.copy.loadError}
+					</h1>
+					{page.loadError ? (
+						<p className="mt-2 text-sm text-muted-foreground">
+							{page.loadError}
+						</p>
+					) : null}
+					<Button className="mt-5" onClick={() => void page.refetch()}>
+						{page.copy.retry}
+					</Button>
+				</div>
+			</div>
+		);
+
 	const TypeIcon = page.property.propertyType === "HOUSE" ? House : Building2;
 
 	return (
@@ -358,6 +390,11 @@ export function CreateListingPage() {
 							)}
 						</page.form.Subscribe>
 					</div>
+					{page.formError ? (
+						<p className="text-sm text-destructive" role="alert">
+							{page.formError}
+						</p>
+					) : null}
 				</section>
 
 				<aside className="rounded-lg border bg-background p-4 lg:sticky lg:top-24">

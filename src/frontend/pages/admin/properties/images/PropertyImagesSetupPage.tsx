@@ -49,6 +49,34 @@ export function PropertyImagesSetupPage() {
 		if (fileInputRef.current) fileInputRef.current.value = "";
 	};
 
+	if (page.isLoading) {
+		return (
+			<div className="grid min-h-[60vh] place-items-center px-4 py-10">
+				<output className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+					<LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
+					{page.copy.images.uploading}
+				</output>
+			</div>
+		);
+	}
+
+	if (page.loadError) {
+		return (
+			<div className="grid min-h-[60vh] place-items-center px-4 py-10 text-center">
+				<div>
+					<CircleAlert className="mx-auto size-6 text-destructive" />
+					<p className="mt-3 font-heading text-lg font-semibold">
+						{page.copy.common.loadError}
+					</p>
+					<p className="mt-1 text-sm text-muted-foreground">{page.loadError}</p>
+					<Button className="mt-4" onClick={() => void page.refetch()}>
+						{page.copy.common.retry}
+					</Button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
 			<header className="max-w-3xl">
@@ -150,6 +178,15 @@ export function PropertyImagesSetupPage() {
 				) : null}
 			</section>
 
+			{page.operationError ? (
+				<p
+					className="mt-5 rounded-lg border border-destructive/25 bg-destructive/5 p-4 text-sm text-destructive"
+					role="alert"
+				>
+					{page.operationError}
+				</p>
+			) : null}
+
 			<section className="mt-7" aria-labelledby="image-collection-title">
 				<div className="flex items-end justify-between gap-4">
 					<div>
@@ -182,7 +219,7 @@ export function PropertyImagesSetupPage() {
 								onDragStart={() => page.setDraggedImageId(image.id)}
 								onDrop={() => page.moveToImage(image.id)}
 								onEditAlt={() => page.setAltImageId(image.id)}
-								onMakeCover={() => page.setCover(image.id)}
+								onMakeCover={() => void page.setCover(image.id)}
 								onMove={(direction) => page.moveImage(image.id, direction)}
 								onRetry={() => page.retry(image.id)}
 							/>
@@ -197,10 +234,14 @@ export function PropertyImagesSetupPage() {
 						{page.copy.common.finishLater}
 					</Button>
 					<p className="mt-1 text-xs text-muted-foreground">
-						{page.copy.common.mockNotice}
+						{page.copy.common.statusNotice}
 					</p>
 				</div>
-				<Button onClick={page.navigateToFeatures} type="button">
+				<Button
+					disabled={page.isBusy}
+					onClick={page.navigateToFeatures}
+					type="button"
+				>
 					{page.copy.images.continue}
 					<ArrowRight aria-hidden="true" />
 				</Button>
@@ -233,7 +274,7 @@ export function PropertyImagesSetupPage() {
 						<Button onClick={() => page.setAltImageId(null)} variant="outline">
 							{page.copy.images.cancel}
 						</Button>
-						<Button onClick={() => page.saveAltText(altText)}>
+						<Button onClick={() => void page.saveAltText(altText)}>
 							{page.copy.images.save}
 						</Button>
 					</DialogFooter>
@@ -261,7 +302,10 @@ export function PropertyImagesSetupPage() {
 						>
 							{page.copy.images.cancel}
 						</Button>
-						<Button onClick={page.deleteImage} variant="destructive">
+						<Button
+							onClick={() => void page.deleteImage()}
+							variant="destructive"
+						>
 							{page.copy.images.delete}
 						</Button>
 					</DialogFooter>

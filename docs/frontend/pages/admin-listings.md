@@ -2,16 +2,19 @@
 
 ## Status
 
-**Mock-first administrative Listings workflow implemented.** The Listings
+**Administrative Listings UI and backend integration are implemented.** The Listings
 collection, active-Property selection, direct Property-to-Listing creation,
 Listing Details/Edit, protected Preview, publication, archive outcomes,
-Archived record, and Draft deletion are implemented as local UI states.
+Archived record, Draft deletion, and Property-owned image and Feature editing
+use the implemented backend APIs through React Query.
 The guided Property setup reaches
 `/admin/properties/:propertyId/listings/new`, creates a local Draft, and
 navigates to its administrative Listing route.
 
-Real API calls, React Query, TanStack Router URL ownership, authorization, and
-server mutations belong to the later integration stage.
+Collection filters, sorting, pagination, and search are URL-owned through
+TanStack Router. Loading, preserved-data updating, empty, retry, server-error,
+and authorization-error states are implemented. Better Auth route protection
+and redirects remain a separate Stage 7 slice.
 
 ## Domain Boundary
 
@@ -39,9 +42,8 @@ implemented backend query contract without adding decorative view modes.
 - Pagination supports 20, 50, or 100 records per page.
 - Empty results preserve the filters and offer a reset path.
 
-The mock-first pass owns this state locally. During integration, TanStack
-Router will own shareable filter and pagination URL state, while React Query
-will own the server collection and preserved-data loading behavior. A Grid
+TanStack Router owns shareable filter and pagination URL state, while React
+Query owns the server collection and preserved-data loading behavior. A Grid
 toggle, bulk lifecycle actions, and global search are not part of this slice.
 
 ## Create Listing
@@ -273,13 +275,12 @@ and show the business or validation error without exposing technical internals.
 - Unsaved-changes confirmation
 - Property-context image missing
 
-The mock-first UI demonstrates these states locally. Real linked-Listing
-availability, Draft creation, cache updates, and server navigation belong to the
-integration stage.
+Linked-Listing availability, Draft creation, cache invalidation, server errors,
+and navigation from the returned Listing ID are implemented.
 
 ## Listing Details and Lifecycle
 
-The approved lifecycle workspace below is implemented mock-first. Property
+The approved lifecycle workspace below is server-connected. Property
 images and the cover remain Property-owned, matching the backend contract. The
 Listing workspace displays and edits them through focused dialogs without
 returning the administrator to the initial Property setup journey. It does not

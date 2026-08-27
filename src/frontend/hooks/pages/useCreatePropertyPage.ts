@@ -1,12 +1,14 @@
 import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useBlocker, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { useContactsQuery } from "@/frontend/features/contacts/hooks/useContactsQuery";
+import { useCreateContactMutation } from "@/frontend/features/contacts/hooks/useCreateContactMutation";
+import { useCreatePropertyMutation } from "@/frontend/features/properties/hooks/useCreatePropertyMutation";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
-import { addDemoProperty } from "@/frontend/pages/admin/demo/admin-demo-workspace";
 import { createPropertyCopy } from "@/frontend/pages/admin/properties/create/create-property.copy";
 
-export type MockPropertyContact = {
+export type PropertyContactOption = {
 	company: string | null;
 	email: string | null;
 	fullName: string;
@@ -14,32 +16,8 @@ export type MockPropertyContact = {
 	phone: string | null;
 };
 
-const initialContacts: MockPropertyContact[] = [
-	{
-		company: "Thüringer Wohnraum GmbH",
-		email: "k.vogel@thueringer-wohnraum.de",
-		fullName: "Katharina Vogel",
-		id: "contact-katharina",
-		phone: null,
-	},
-	{
-		company: "Residenz Immobilien KG",
-		email: "m.koch@residenz.immo",
-		fullName: "Miriam Koch",
-		id: "contact-miriam",
-		phone: "+49 361 555 0184",
-	},
-	{
-		company: null,
-		email: "jonas.richter@example.de",
-		fullName: "Jonas Richter",
-		id: "contact-jonas",
-		phone: "+49 176 555 0129",
-	},
-];
+export type CreatePropertyContactInput = Omit<PropertyContactOption, "id">;
 
-const wait = (milliseconds: number) =>
-	new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 const required = (value: string, message: string) =>
 	value.trim() ? undefined : message;
 const positive = (value: string, message: string) =>
@@ -56,12 +34,22 @@ export function useCreatePropertyPage() {
 	const { language } = useLanguage();
 	const copy = createPropertyCopy[language];
 	const navigate = useNavigate();
-	const [contacts, setContacts] = useState(initialContacts);
 	const [contactSearch, setContactSearch] = useState("");
+	const [contactQuery, setContactQuery] = useState("");
 	const [isDirty, setIsDirty] = useState(false);
-	const [serverError, setServerError] = useState(false);
 	const [contactSuccess, setContactSuccess] = useState(false);
 	const allowNavigationRef = useRef(false);
+	const contactsQuery = useContactsQuery(contactQuery);
+	const createContactMutation = useCreateContactMutation();
+	const createPropertyMutation = useCreatePropertyMutation();
+
+	useEffect(() => {
+		const timer = window.setTimeout(
+			() => setContactQuery(contactSearch.trim()),
+			250,
+		);
+		return () => window.clearTimeout(timer);
+	}, [contactSearch]);
 
 	const blocker = useBlocker({
 		enableBeforeUnload: isDirty,
@@ -97,51 +85,51 @@ export function useCreatePropertyPage() {
 				document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus(),
 			),
 		onSubmit: async ({ value }) => {
-			setServerError(false);
-			await wait(750);
-			if (value.streetName.trim().toLocaleLowerCase() === "error") {
-				setServerError(true);
-				return;
+			createPropertyMutation.reset();
+			try {
+				const property = await createPropertyMutation.mutateAsync({
+					bathrooms: Number(value.bathrooms),
+					bedrooms: value.bedrooms ? Number(value.bedrooms) : null,
+					city: value.city.trim(),
+					floor_number:
+						value.propertyType === "APARTMENT" && value.floorNumber
+							? Number(value.floorNumber)
+							: null,
+					house_number: value.houseNumber.trim(),
+					living_area_m2: Number(value.livingArea),
+					plot_area_m2:
+						value.propertyType === "HOUSE" && value.plotArea
+							? Number(value.plotArea)
+							: null,
+					postal_code: value.postalCode.trim(),
+					primary_contact_id:
+						value.propertySource === "EXTERNAL_CLIENT"
+							? value.primaryContactId
+							: null,
+					property_source: value.propertySource,
+					property_type: value.propertyType,
+					rooms: Number(value.rooms),
+					street_name: value.streetName.trim(),
+					total_floors: value.totalFloors ? Number(value.totalFloors) : null,
+					unit_number: value.unitNumber.trim() || null,
+					year_built: value.yearBuilt ? Number(value.yearBuilt) : null,
+				});
+
+				allowNavigationRef.current = true;
+				setIsDirty(false);
+				await navigate({
+					params: { propertyId: property.id },
+					to: "/admin/properties/$propertyId/images",
+				});
+			} catch {
+				// The mutation error remains available to the form UI.
 			}
-			const propertyId = `property-${crypto.randomUUID()}`;
-			const referenceNumber = `PE-${String(Date.now()).slice(-6)}`;
-			const contact = contacts.find(
-				(item) => item.id === value.primaryContactId,
-			);
-			addDemoProperty({
-				archivedAt: null,
-				bathrooms: Number(value.bathrooms),
-				bedrooms: value.bedrooms ? Number(value.bedrooms) : null,
-				city: value.city.trim(),
-				contactCompany: contact?.company ?? null,
-				contactName: contact?.fullName ?? null,
-				coverImage: null,
-				houseNumber: value.houseNumber.trim(),
-				id: propertyId,
-				livingArea: Number(value.livingArea),
-				plotArea: value.plotArea ? Number(value.plotArea) : null,
-				postalCode: value.postalCode.trim(),
-				propertySource: value.propertySource,
-				propertyType: value.propertyType,
-				referenceNumber,
-				rooms: Number(value.rooms),
-				streetName: value.streetName.trim(),
-				unitNumber: value.unitNumber.trim() || null,
-				updatedAt: new Date().toISOString(),
-				yearBuilt: value.yearBuilt ? Number(value.yearBuilt) : null,
-			});
-			allowNavigationRef.current = true;
-			setIsDirty(false);
-			await navigate({
-				params: { propertyId },
-				to: "/admin/properties/$propertyId/images",
-			});
 		},
 	});
 
 	const markDirty = () => {
 		setIsDirty(true);
-		setServerError(false);
+		createPropertyMutation.reset();
 	};
 	const setPropertySource = (value: "AGENCY_OWNED" | "EXTERNAL_CLIENT") => {
 		form.setFieldValue("propertySource", value);
@@ -155,26 +143,33 @@ export function useCreatePropertyPage() {
 		else form.setFieldValue("floorNumber", "");
 		markDirty();
 	};
-	const addContact = (contact: MockPropertyContact) => {
-		setContacts((current) => [...current, contact]);
+	const addContact = async (input: CreatePropertyContactInput) => {
+		const contact = await createContactMutation.mutateAsync({
+			company_name: input.company ?? undefined,
+			email: input.email ?? undefined,
+			full_name: input.fullName,
+			phone: input.phone ?? undefined,
+		});
 		form.setFieldValue("primaryContactId", contact.id);
 		setContactSearch("");
+		setContactQuery("");
 		setContactSuccess(true);
 		markDirty();
 	};
-
-	const filteredContacts = contacts.filter((contact) =>
-		`${contact.fullName} ${contact.company ?? ""} ${contact.email ?? ""}`
-			.toLocaleLowerCase()
-			.includes(contactSearch.toLocaleLowerCase()),
-	);
 
 	return {
 		addContact,
 		blocker,
 		contactSearch,
 		contactSuccess,
-		contacts: filteredContacts,
+		contacts:
+			contactsQuery.data?.items.map((contact) => ({
+				company: contact.company_name,
+				email: contact.email,
+				fullName: contact.full_name,
+				id: contact.id,
+				phone: contact.phone,
+			})) ?? [],
 		copy,
 		form,
 		markDirty,
@@ -182,7 +177,7 @@ export function useCreatePropertyPage() {
 		optionalInteger,
 		positive,
 		required,
-		serverError,
+		serverError: createPropertyMutation.error?.message ?? null,
 		setContactSearch,
 		setPropertySource,
 		setPropertyType,
