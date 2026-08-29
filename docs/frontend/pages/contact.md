@@ -2,9 +2,10 @@
 
 ## Status
 
-Implemented and server-connected. The bilingual form submits a General Inquiry
-through the plain API module and React Query mutation using the shared backend
-field limits.
+Implemented, server-connected, and browser-verified. The bilingual form submits
+a General Inquiry through the plain API module and React Query mutation using
+the shared backend field limits. A real browser submission and its PostgreSQL
+row were verified on 29 August 2026.
 
 ## Page Job
 

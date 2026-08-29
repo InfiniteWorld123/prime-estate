@@ -36,15 +36,17 @@ The backend feature scope is also complete. Numbered migrations through
 
 ## Release Verification
 
-The remaining local work is verification and release packaging, not feature
-development:
+**Local release verification: Completed on 29 August 2026.**
 
-- Run formatting/check, type checking, tests, and the production build.
-- Apply all migrations to the local Docker PostgreSQL stack.
-- Run the core Admin-to-public workflow in a browser and confirm the resulting
-  Inquiry rows in PostgreSQL.
-- Recheck hidden-address and internal-field protection.
-- Review the final diff, create logical commits, and push the current branch.
+- Formatting/check, type checking, tests, and the production build pass.
+- The local Docker stack is healthy and migrations through `0006` are applied.
+- The browser workflow passed from Admin sign-in through Property, image,
+  Feature, Listing publication, public search/detail, both Inquiry forms,
+  Inbox processing, and closing the Listing as Sold.
+- The submitted Inquiry rows were confirmed in PostgreSQL before the exact
+  synthetic browser-test records and uploaded test image were removed.
+- Hidden street, house, and unit fields stayed absent from the public response
+  and page when exact-address visibility was disabled.
 
 Production hosting, TLS, environment provisioning, backups, real legal/business
 identity, and post-deployment smoke checks are deferred to the VPS deployment
@@ -66,5 +68,6 @@ These are not backlog items and must not appear as disabled navigation or
 
 ## Current Focus
 
-Complete the local release verification, commit and push the release candidate,
-then defer only VPS deployment work to next month.
+The local release candidate is complete. Only the VPS deployment decisions and
+post-deployment checks documented in [`../release.md`](../release.md) remain for
+next month.

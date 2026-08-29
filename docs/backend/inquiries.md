@@ -3,8 +3,9 @@
 ## Status
 
 Completed backend and frontend vertical slice. Public submission, the Admin
-Inbox, and the small Overview integration are implemented. Final authenticated
-browser workflow verification remains part of the release gate.
+Inbox, and the small Overview integration are implemented. Authenticated
+browser submission, Inbox processing, and stored-row verification passed on
+29 August 2026.
 
 ## Purpose
 

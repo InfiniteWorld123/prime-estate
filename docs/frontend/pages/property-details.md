@@ -2,9 +2,9 @@
 
 ## Status
 
-Public Listing integration is completed. Listing Inquiry submission is
-implemented in the current working tree and passes the automated quality gates;
-final browser submission and stored-row verification remain.
+Public Listing integration and Listing Inquiry submission are completed. The
+automated quality gates, real browser submission, PostgreSQL row check, Inbox
+processing, hidden-address behavior, and Sold availability behavior pass.
 
 The current page loads `GET /api/listings/:slug` through a plain frontend API
 module and a focused React Query hook. It renders real Listing, Property,
@@ -444,8 +444,8 @@ features/inquiries/hooks/useCreateInquiry.ts
 - **Completed:** Pending, not-found, error, client metadata, and background
   refresh behavior use the real response contract.
 - **Completed:** Property cards navigate to their real slug routes.
-- **Implemented, verification pending:** The inquiry dialog submits through the
-  documented backend Inquiry endpoint.
+- **Completed:** The inquiry dialog submits through the documented backend
+  Inquiry endpoint; browser submission and stored-row verification pass.
 - **Completed:** Sold, rented, withdrawn, and address-visibility behavior
   matches the backend contract.
 - **Completed:** Focused mapping tests, formatting, type checking, production

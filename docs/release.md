@@ -53,6 +53,26 @@ Also inspect mobile, tablet, and desktop layouts; German and English; light and
 dark themes; keyboard navigation; focus visibility; reduced motion; loading,
 empty, error, retry, authorization, and missing-image states.
 
+### Local release-candidate result
+
+Completed on 29 August 2026 against the local PostgreSQL and Docker stack:
+
+- Admin authentication, Overview, Inquiry Inbox, responsive Inbox cards, and
+  German/English copy were exercised in the browser.
+- A Property with a cover image and Features was created, listed, published,
+  found through public search, opened publicly with its exact address hidden,
+  and closed as Sold.
+- One Listing Inquiry and one General Inquiry were submitted in the browser,
+  confirmed in PostgreSQL, and the Listing Inquiry was read and moved through
+  `CONTACTED` to `CLOSED` in the Inbox.
+- The Sold detail remained public and no longer accepted Inquiries. Withdrawn
+  `404` and unavailable-Listing submission behavior were verified separately.
+- Exact synthetic test rows and the uploaded Cloudinary test image were removed
+  after verification.
+
+The production-hosting decisions and the Post-Deployment Gate below remain
+deferred to the VPS deployment next month.
+
 ## Post-Deployment Gate
 
 - Apply migrations before serving application traffic.
