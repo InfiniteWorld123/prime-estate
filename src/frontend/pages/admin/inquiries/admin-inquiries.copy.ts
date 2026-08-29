@@ -47,7 +47,8 @@ export const adminInquiriesCopy = {
 		reset: "Filter zurücksetzen",
 		restore: "Wiederherstellen",
 		retry: "Erneut versuchen",
-		results: (count: number) => `${count} Anfragen`,
+		results: (count: number) =>
+			count === 1 ? "1 Anfrage" : `${count} Anfragen`,
 		saving: "Wird gespeichert …",
 		status: "Bearbeitungsstatus",
 		sort: "Sortierung",
@@ -109,7 +110,8 @@ export const adminInquiriesCopy = {
 		reset: "Reset filters",
 		restore: "Restore",
 		retry: "Try again",
-		results: (count: number) => `${count} inquiries`,
+		results: (count: number) =>
+			count === 1 ? "1 inquiry" : `${count} inquiries`,
 		saving: "Saving…",
 		status: "Processing status",
 		sort: "Sort",
