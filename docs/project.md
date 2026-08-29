@@ -4,8 +4,8 @@
 
 Prime Estate is a full-stack residential real-estate platform for one agency.
 It helps the agency organize properties, publish sale and rental listings,
-present them to visitors, and manage potential customers until a listing is
-sold, rented, or withdrawn.
+present them to visitors, receive inquiries, and close listings as sold,
+rented, or withdrawn.
 
 The project is a serious portfolio project and learning project. It is built as
 if it could support a real agency, without pretending that unimplemented legal,
@@ -34,21 +34,15 @@ multi-agency marketplace.
 
 ### Visitor
 
-A visitor can browse published listings, view property details, send an
-inquiry, and eventually request a viewing appointment without first creating an
-account.
-
-### Registered User
-
-Authentication and normal user accounts exist in the technical foundation.
-The complete customer portal and its account-management capabilities are not
-part of the current MVP. Future approved slices may let a user manage their
-appointments or inquiries.
+A visitor can browse published listings, view property details, and send either
+a property-specific or general inquiry. The agency coordinates any viewing
+manually after contact.
 
 ### Admin
 
-The single agency admin manages contacts, properties, features, images,
-listings, inquiries, and eventually viewing appointments. The MVP does not
+The single verified agency admin signs in through the protected Admin-only
+authentication surface and manages contacts, properties, features, images,
+listings, and inquiries. Visitors do not create accounts. The MVP does not
 include multiple organizations or a staff permission hierarchy.
 
 ## Problem
@@ -56,8 +50,8 @@ include multiple organizations or a staff permission hierarchy.
 The platform gives a small agency one coherent workflow instead of disconnected
 property records, public listing pages, and incoming customer requests.
 Visitors receive clear property information and a direct path to contact the
-agency. The admin retains the internal property history and public listing
-lifecycle needed to follow a lead and close a listing.
+agency. The admin retains the internal property history, public listing
+lifecycle, and inquiry inbox needed to respond to visitors and close a listing.
 
 ## Core Workflow
 
@@ -65,9 +59,10 @@ lifecycle needed to follow a lead and close a listing.
 2. The admin prepares a sale or rental listing and its images.
 3. The admin publishes the listing.
 4. A visitor discovers it through public search and views its detail page.
-5. The visitor sends an inquiry or eventually requests a viewing.
-6. The admin follows the lead.
-7. The listing is sold, rented, or withdrawn and is archived accordingly.
+5. The visitor sends a property-specific or general inquiry.
+6. The admin processes the inquiry and coordinates any viewing outside the
+   platform.
+7. The Listing is sold, rented, or withdrawn.
 
 ## MVP Scope
 
@@ -76,9 +71,8 @@ lifecycle needed to follow a lead and close a listing.
 - Property, feature, and image management
 - Sale and rental listing drafting, publishing, and archiving
 - Public property search and property detail pages
-- Property inquiries and basic lead management
-- Viewing appointment requests and management after that slice is specified
-- Public availability and address-visibility rules
+- Property inquiries, an administrative inbox, and minimal inquiry-status
+  handling
 - German and English presentation
 
 German and English apply to application interface copy. Admin-authored listing
@@ -89,23 +83,29 @@ Implemented and planned status belongs in
 [`frontend/roadmap.md`](frontend/roadmap.md) and the relevant backend documents;
 this file defines scope, not completion status.
 
-## Not in the Current MVP
+## Project Exclusions
+
+Prime Estate ends at the workflow documented above. The following are not later
+phases of this portfolio project:
 
 - Multiple agencies, organizations, or tenants
 - Staff roles and fine-grained permissions
 - Full owner or customer portals
 - Contracts and payments
 - Advanced ownership management
-- Blogging and analytics
+- Blogging and custom analytics
+- A separate lead-management or CRM system
 - Saved properties, ratings, reviews, and comments
-- Automated lead scoring and SMS notifications
+- Lead notes, follow-up tasks, automated lead scoring, and SMS notifications
+- Automated availability, appointment scheduling, and booking management
+- Calendar and scheduling-provider integrations
 - Marketplace capabilities
 - Unspecified third-party business integrations
 
 Cloudinary and required authentication email delivery are infrastructure, not
-marketplace or business integrations. Inquiry email notification is optional
-and currently deferred; stored inquiries and the Admin Dashboard are the first
-notification surface.
+marketplace or business integrations. Inquiry email notifications are not
+planned; stored inquiries and the Admin Inquiry screen are the notification
+surface.
 
 ## Product Rules That Must Remain True
 
@@ -114,8 +114,7 @@ notification surface.
 - Visitors access listings, never an unrestricted public property API.
 - Exact addresses are private by default.
 - Published slugs are stable.
-- Sold and rented detail pages may remain public but cannot accept new inquiries
-  or bookings.
+- Sold and rented detail pages may remain public but cannot accept new inquiries.
 - Withdrawn listings are not publicly accessible.
 - Public content must not use fabricated trust claims or business statistics.
 
@@ -125,19 +124,16 @@ Detailed property and listing rules live in
 ## Success
 
 The MVP is successful when the single admin can publish and manage a property
-listing, a visitor can discover and understand it, the visitor can send an
-inquiry or request a viewing, and the admin can follow the lead until the
-listing is closed and archived.
+listing, a visitor can discover and understand it and send an inquiry, and the
+admin can process that inquiry and close the Listing.
 
-## Not Yet Specified
+## Release Decisions
 
-The following require future product decisions rather than assumptions:
+The following must be resolved before deployment rather than becoming new
+product modules:
 
-- Detailed viewing availability and booking rules
-- The final scope of customer account capabilities
-- Inquiry retention limits and final field-length contracts
+- Inquiry retention limits
 - Production agency identity, legal text, domain, and hosting provider
-- Blogging and analytics scope if they are promoted from deferred ideas
 
 ## Documentation Map
 
@@ -145,11 +141,12 @@ The following require future product decisions rather than assumptions:
 - [`backend/api.md`](backend/api.md): implemented API phases and status
 - [`backend/property-listings.md`](backend/property-listings.md): durable
   property and listing business rules
-- [`backend/inquiries.md`](backend/inquiries.md): planned inquiry and basic lead
+- [`backend/inquiries.md`](backend/inquiries.md): inquiry submission and inbox
   contract
 - [`frontend/architecture.md`](frontend/architecture.md): frontend ownership,
   folders, hooks, and state boundaries
 - [`frontend/design-system.md`](frontend/design-system.md): visual and component
   rules
 - [`frontend/roadmap.md`](frontend/roadmap.md): delivery status and current focus
+- [`release.md`](release.md): final quality and deployment-readiness checklist
 - `frontend/pages/`: approved page-level UX specifications

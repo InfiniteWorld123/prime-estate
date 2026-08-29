@@ -2,11 +2,9 @@
 
 ## Status
 
-The mock-first frontend implementation is complete. Public listing queries,
-working result-page navigation, and authentication remain separate integration
-slices.
-
-The current page uses mock data and does not connect to the backend.
+Completed and integrated. The page loads the latest seven Public Listings from
+the real API, uses the first result in the Hero, shows the remaining results in
+the carousel, and sends searches to the URL-driven Property results page.
 
 ## Page Job
 
@@ -68,7 +66,7 @@ Do not add fake review schema, sales counts, office history, or other claims.
 Desktop content:
 
 ```text
-Prime Estate | Properties | About | Contact | Sign in | Sign up
+Prime Estate | Properties | About | Contact
 ```
 
 `Properties` owns a menu with:
@@ -81,10 +79,9 @@ Properties for rent
 
 Mobile content uses a menu sheet rather than a small desktop dropdown.
 
-The static slice reserves the visual placement of `Sign in` and `Sign up` but
-does not implement authentication. Unimplemented destinations must not be
-presented as working links in a published build. During development they may be
-represented as clearly disabled UI until their route slices exist.
+The public header has no customer sign-in or registration action. Admin access
+uses the dedicated `/admin/login` route and is not promoted as a visitor call
+to action.
 
 The header also contains a theme control that supports light, dark, and system
 preference.
@@ -139,7 +136,7 @@ City or postal code
 Search properties
 ```
 
-Future integrated behavior:
+Integrated behavior:
 
 - `Buy` maps to `listing_type=SALE`.
 - `Rent` maps to `listing_type=RENT`.
@@ -156,20 +153,19 @@ Rent + Erfurt -> listing_type=RENT&city=Erfurt
 Rent + empty -> listing_type=RENT
 ```
 
-The static slice builds the visual and form contract only. Backend calls and
-working navigation are deliberately excluded until the public properties page
-exists.
+The form navigates to the public Properties route with the documented URL
+criteria.
 
 ### Hero Listing
 
-The integrated home page eventually requests the seven newest published
-listings. The newest item appears in the hero with the label `Recently added`.
+The integrated home page requests the seven newest published Listings. The
+newest item appears in the Hero with the label `Recently added`.
 
 This is not a featured-listing system. Do not add `is_featured`, featured
 ordering, or related backend rules in this slice.
 
-The static implementation uses the first item in a deterministic seven-item
-mock array.
+Development preview states may still use deterministic fixtures without
+presenting them as real agency inventory.
 
 ## Latest Properties
 
@@ -201,8 +197,8 @@ Carousel rules:
 - No infinite loop.
 - Preserve reduced-motion preference.
 
-The later backend request uses `sort=newest` and `page_size=7`. The first item
-feeds the hero and the next six feed this carousel.
+The backend request uses `sort=newest` and `page_size=7`. The first item feeds
+the Hero and the next six feed this carousel.
 
 ## Property Card
 
@@ -219,8 +215,8 @@ Each card shows only lightweight public information:
 - Living area in square metres
 - Property type
 
-Do not show the exact street address unless public address rules later permit
-it. Do not show features because the current public listing-card response does
+Do not show the exact street address unless the current public address contract
+permits it. Do not show Features because the public Listing-card response does
 not include them.
 
 Sale price example:
@@ -307,15 +303,15 @@ Planned groups:
 
 - Properties
 - Agency
-- Account
 - Legal
 
 Planned legal links include `Imprint` and `Privacy`. Their final content must be
 based on real project or agency details and must not be invented as legal
 advice.
 
-Do not show a Blog navigation link until the blogging slice exists. Do not ship
-broken or unexplained disabled navigation in the portfolio presentation.
+Do not show a Blog navigation link. Blogging is outside the Prime Estate
+project, and the released portfolio must not contain broken or unexplained
+disabled navigation.
 
 ## Mock Data Contract
 
@@ -367,31 +363,25 @@ page will reuse it. Marketing sections remain local to the home page.
 
 ## Page Hook Contract
 
-The static `useHomePage` hook may coordinate:
+The integrated `useHomePage` hook coordinates:
 
 - Buy or rent selection
 - Location input and client validation
-- Deterministic mock listing selection
+- The latest Public Listings query
+- Search navigation to `/properties`
 - View model passed to `HomePage`
 
-It must not contain reusable carousel internals or future backend transport.
-During API integration it will compose focused hooks such as
-`useLatestListings` and `usePropertySearch`.
+It does not contain reusable carousel internals or plain backend transport. The
+focused React Query hook and public API module own server interaction.
 
-## Deferred Integration
+## Current Integration
 
-Not part of the first implementation:
-
-- Backend calls
-- React Query listing query
-- Public properties results page
-- Public listing detail route
-- Working account routes
-- Working contact route
-- Real Cloudinary image data
-- Featured-listing backend rules
-- Saved properties
-- Inquiries and viewing bookings
+- Public Listing queries, result navigation, detail routes, Admin
+  authentication routes, Contact navigation, and Inquiry persistence are
+  implemented.
+- `is_featured`, saved properties, and Blogging are not part of the project.
+- Final browser/runtime verification is tracked in
+  [`../roadmap.md`](../roadmap.md).
 
 ## Acceptance Criteria for the Static Slice
 

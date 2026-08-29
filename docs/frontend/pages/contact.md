@@ -2,9 +2,9 @@
 
 ## Status
 
-Completed. The bilingual mock-first UI and local preview states pass the
-automated quality gates and have received visual approval. Real submission and
-persistence remain Stage 7 work.
+Implemented and server-connected. The bilingual form submits a General Inquiry
+through the plain API module and React Query mutation using the shared backend
+field limits.
 
 ## Page Job
 
@@ -89,11 +89,10 @@ Use TanStack Form. Fields:
   - General inquiry
 - Required message
 - Required privacy-consent checkbox with a Privacy Policy destination
-- Invisible honeypot field in the later integrated form
+- Invisible honeypot field
 
-The form does not ask the visitor to sign in. When an authenticated visitor is
-available in a future integration, known profile fields may be prefilled, but
-the mock-first UI does not invent session behavior.
+The form does not ask the visitor to sign in and does not present a customer
+account concept.
 
 ## Validation Behavior
 
@@ -112,15 +111,17 @@ Initial validation direction:
 
 - Trim text input before validation and submission.
 - Full name must not be blank.
-- Email must have a valid email shape.
-- Optional phone accepts common international formatting when present.
+- Full name is limited to 120 characters.
+- Email must have a valid shape and is limited to 254 characters.
+- Optional phone accepts common international formatting and is limited to 40
+  characters when present.
 - Interest must be one of the three visible choices.
-- Message must not be blank.
+- Message must not be blank and is limited to 2,000 characters.
 - Privacy consent must be accepted.
 
-Exact field-length limits and the backend request contract are finalized
-together during Stage 7. Frontend and backend rules must not contradict each
-other.
+The request contract is finalized in
+[`../../backend/inquiries.md`](../../backend/inquiries.md). Frontend and backend
+rules must remain consistent.
 
 ## Form States
 
@@ -153,8 +154,8 @@ Default -> First submit validation -> Submitting -> Success
 - Keep a clear retry action.
 - Do not expose backend details.
 
-The mock-first implementation may preview submitting, success, and error
-states locally. It must not pretend to deliver a real message.
+The integrated form uses the real mutation for submitting, success, and server
+error states while preserving entered values on failure.
 
 ## Frequently Asked Questions
 
@@ -191,16 +192,14 @@ layout and `shadcn/ui` primitives for fields, selection, checkbox, disclosure,
 and feedback where appropriate. The design must continue to use the Prime
 Estate visual system rather than default component styling.
 
-## Stage 7 Integration Boundary
+## Integration Boundary
 
-The real integration later requires an approved general-contact backend
-contract, persistence decision, spam protection, rate limiting, privacy
-metadata, and React Query mutation. These requirements are not silently added
-to the existing property-inquiry endpoint.
+The General Inquiry uses the shared implemented Inquiry endpoint, persistence,
+honeypot, database-backed rate limit, duplicate suppression, privacy metadata,
+and React Query mutation. Email notification remains outside the project.
 
 ## Excluded from This Slice
 
-- Real API submission or message delivery
 - Resend or other email notification
 - Authentication requirement
 - Interactive map

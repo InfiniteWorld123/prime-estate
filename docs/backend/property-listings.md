@@ -28,7 +28,6 @@ A property can be permanently deleted only when:
 
 - None of its listings have ever been published.
 - It has no inquiries.
-- It has no viewing bookings.
 - Its draft listings are deleted first.
 
 Once a property enters the public business workflow, it can only be
@@ -95,7 +94,7 @@ Draft listings that have never been published may be permanently deleted.
 - The exact address is hidden by default.
 - The admin may choose to display the exact address.
 - Sold and rented listing pages remain publicly accessible.
-- Sold and rented listings do not accept inquiries or bookings.
+- Sold and rented listings do not accept inquiries.
 - Withdrawn listing pages return `404 Not Found`.
 - Properties are never exposed through a public API.
 

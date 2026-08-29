@@ -2,17 +2,10 @@
 
 ## Status
 
-In progress. The mock-first UI implementation and its loading, empty, error,
-background-error, and missing-image states are complete. Formatting, type
-checking, the test command, the production build, and local HTTP rendering have
-been verified. The final cross-browser visual sign-off and the separate
-integration pass remain.
-
-Backend integration belongs to a later implementation pass. The first pass is
-UI-only: deterministic mock data, local interaction state, and no API requests,
-React Query hooks, URL-owned filters, or prefetching. Component contracts must
-still allow those concerns to replace the mock orchestration without a visual
-rewrite.
+Completed and integrated. The page uses the real Public Listings and Feature
+option APIs through React Query. Filters, sorting, pagination, and reset
+behavior are URL-owned, and the approved loading, empty, error,
+background-error, and missing-image states remain available.
 
 ## Page Job
 
@@ -135,9 +128,8 @@ search, or other unsupported filters in this slice.
 
 ## URL State
 
-URL ownership is deliberately deferred during the mock-only UI pass. Local
-state demonstrates the same draft-versus-applied behavior. The integration
-pass moves applied criteria into TanStack Router search parameters.
+Applied criteria are owned by TanStack Router search parameters. Temporary
+filter edits remain local until the visitor applies them.
 
 Search, filters, sort, and page describe a shareable public view and therefore
 belong in TanStack Router search parameters.
@@ -161,7 +153,7 @@ sort
 page
 ```
 
-- `feature_ids` is represented as comma-separated unique UUIDs when integrated.
+- `feature_ids` is represented as comma-separated unique UUIDs.
 - Changing any search or filter value resets `page` to `1`.
 - Changing sort resets `page` to `1`.
 - Default values should be omitted from a clean URL when possible.
@@ -201,8 +193,8 @@ The grid is the only result view in this stage: three columns on wide screens,
 two on medium screens, and one on mobile. Do not add a list/table toggle, map
 view, infinite scroll, or favourites.
 
-The entire property card becomes a keyboard-accessible link when the detail
-route exists. Detail-page prefetching is deferred to integration.
+The entire Property card is a keyboard-accessible link to the implemented
+detail route, with relevant detail prefetching.
 
 Do not fabricate urgency, view counts, popularity, or availability badges.
 
@@ -216,8 +208,7 @@ Do not fabricate urgency, view counts, popularity, or availability badges.
 - Use 12 results per page without a visitor-facing page-size selector.
 - Long page ranges use a non-interactive ellipsis around the current range.
 - Mobile may use the compact form `Previous - Page 3 of 10 - Next`.
-- Pagination prefetch on pointer hover or keyboard focus is deferred to the
-  React Query integration pass.
+- Pagination prefetch is handled by the React Query integration where useful.
 
 ## Page States
 
@@ -355,7 +346,7 @@ The mock-first UI pass is complete when:
 
 ### Integration Pass
 
-The complete Public Property Search stage is complete when:
+The completed Public Property Search integration provides:
 
 - Filters, sorting, pagination, and reset behavior are URL-driven.
 - Public listings and feature options are connected through plain API modules
@@ -363,4 +354,4 @@ The complete Public Property Search stage is complete when:
 - Hero search and header property navigation reach the correct results URL.
 - Relevant card and pagination destinations are prefetched without speculative
   filter-hover requests.
-- Tests and browser-level behavior pass with the real backend contract.
+- Tests and browser-level behavior verified against the real backend contract.

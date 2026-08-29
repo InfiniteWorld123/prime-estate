@@ -13,8 +13,8 @@ navigates to its administrative Listing route.
 
 Collection filters, sorting, pagination, and search are URL-owned through
 TanStack Router. Loading, preserved-data updating, empty, retry, server-error,
-and authorization-error states are implemented. Better Auth route protection
-and redirects remain a separate Stage 7 slice.
+authorization-error, Admin-only route protection, and redirect states are
+implemented.
 
 ## Domain Boundary
 
@@ -436,7 +436,7 @@ For Rent:
 - `RENTED`: the public page stays accessible and is marked Rented.
 - `WITHDRAWN`: the public page becomes unavailable and returns `404`.
 
-Sold and Rented public pages cannot accept inquiries or viewing requests.
+Sold and Rented public pages cannot accept new inquiries.
 Archiving is irreversible in the current lifecycle.
 
 When a Sale is archived as Sold, explain any backend cascade before
@@ -563,9 +563,7 @@ Property images, Features, and Create Listing require a focused Property
 Details navigation decision. They are deliberately not invented by this
 Listing page specification.
 
-## Next Slice
+## Completion
 
-Real Listing queries, mutations, cache invalidation, protected sessions, and
-server-aware navigation remain part of Stage 7 integration. Administrative
-Inquiries begin only after their backend slice and final API contract are
-implemented and verified.
+Listing queries, mutations, cache invalidation, protected sessions, lifecycle
+actions, and server-aware navigation are implemented.

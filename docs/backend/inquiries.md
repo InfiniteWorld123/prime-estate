@@ -1,22 +1,24 @@
-# Inquiries and Basic Lead Management
+# Inquiry Submission and Inbox Management
 
 ## Status
 
-Implemented backend vertical slice. Public and Admin frontend integration remains
-separate work.
+Completed backend and frontend vertical slice. Public submission, the Admin
+Inbox, and the small Overview integration are implemented. Final authenticated
+browser workflow verification remains part of the release gate.
 
 ## Purpose
 
 Allow visitors to contact the agency either about a currently available public
 listing or through the general contact form. PostgreSQL is the source of truth,
-and the Admin Dashboard is the first notification surface.
+and the Admin Inquiry Inbox is the notification surface.
 
 Inquiry email notifications, WebSockets, server-sent events, staff assignment,
-lead scoring, SMS, and viewing bookings are not part of this slice.
+lead scoring, SMS, a separate Lead/CRM system, and automated appointment
+scheduling are not part of the Prime Estate portfolio scope.
 
 ## Inquiry Types
 
-All inquiries use one `inquiries` table and one lead workflow.
+All inquiries use one `inquiries` table and one minimal processing workflow.
 
 - `LISTING` inquiries reference one internal Listing. The public client sends a
   stable Listing Slug, which the backend resolves to the internal ID.
@@ -40,6 +42,15 @@ Shared request fields:
 - Required `privacy_accepted: true`
 - Optional invisible `website` honeypot, which must remain empty
 
+Shared maximum lengths are enforced in Valibot, both public forms, and the
+database:
+
+- Full name: 120 characters
+- Email: 254 characters
+- Phone: 40 characters
+- Message: 2,000 characters
+- Listing Slug input: 200 characters
+
 A `LISTING` request also sends `listing_slug`. A `GENERAL` request instead sends
 `interest`.
 
@@ -60,11 +71,13 @@ Rules:
   the client does not choose the recorded version.
 - Success returns only `{ "received": true }` and no administrative fields.
 
-## Lead and Inbox State
+## Processing and Inbox State
 
-Lead status and inbox state are independent:
+The database field remains named `lead_status`, but it is only a minimal
+Inquiry processing marker rather than a separate Lead model. Processing and
+inbox state are independent:
 
-- Lead statuses: `NEW`, `CONTACTED`, `CLOSED`
+- Processing statuses: `NEW`, `CONTACTED`, `CLOSED`
 - `read_at` records whether the admin has read the inquiry.
 - `archived_at` removes an inquiry from the default active inbox without
   deleting its business history.
@@ -73,7 +86,7 @@ Allowed status transitions:
 
 - `NEW` to `CONTACTED` or `CLOSED`
 - `CONTACTED` to `CLOSED`
-- `CLOSED` to `CONTACTED` to reopen the lead
+- `CLOSED` to `CONTACTED` to reopen the inquiry
 - Sending the current status again is idempotent
 
 An inquiry cannot transition from `CONTACTED` or `CLOSED` back to `NEW`.
@@ -115,5 +128,5 @@ The public property dialog sends a `LISTING` inquiry. The Contact page sends a
 errors, prevent duplicate clicks while submitting, and show the generic success
 state after acceptance.
 
-The future Admin screen may derive an unread count and use React Query
-refetch-on-focus or periodic polling. It does not require real-time transport.
+The Admin Inbox derives its unread count and uses normal React Query
+revalidation. It does not use real-time transport.

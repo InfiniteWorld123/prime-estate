@@ -56,8 +56,8 @@ Detailed rules: [`frontend/architecture.md`](frontend/architecture.md).
 
 The backend is an Elysia application mounted under `/api`. It is organized by
 business module, with controllers, routes, and services for authentication,
-admin access, contacts, properties, features, property images, listings, and
-public listings.
+admin access, contacts, properties, features, property images, listings,
+public listings, and inquiries.
 
 Backend requests follow this direction:
 
@@ -81,8 +81,7 @@ explicit projections rather than unrestricted database records.
 ### Database
 
 PostgreSQL stores authentication data and the business records for contacts,
-properties, features, images, and listings. Future approved migrations will add
-inquiries and viewing records.
+properties, features, images, listings, and inquiries.
 
 The application uses `pg.Pool` and raw parameterized SQL. It does not use an
 ORM. Numbered SQL migrations under `src/backend/db/migrations/` are the schema
@@ -90,10 +89,12 @@ source of truth and run in filename order through the migration command.
 
 ### Authentication and Authorization
 
-Better Auth provides authentication and session infrastructure. Administrative
-routes require a valid session, verified email, and `ADMIN` role. The MVP is a
-single-agency system with one administrative role, not a multi-organization
-authorization model.
+Better Auth provides Admin-only email/password authentication, password
+recovery, and session infrastructure. Public registration is disabled.
+Administrative routes require a valid session, verified email, and `ADMIN`
+role. The one Admin is provisioned through a controlled operation rather than
+public bootstrap behavior. The MVP is a single-agency system with one
+administrative role, not a multi-organization authorization model.
 
 ### Property Images
 
@@ -104,10 +105,15 @@ receive the appropriate generated image URLs and selected metadata.
 ### Email
 
 The backend contains an email abstraction used where authentication requires
-email delivery. Inquiry email notification is not part of the first inquiry
-slice: inquiries will first be stored in PostgreSQL and surfaced in the Admin
-Dashboard. Optional email notification may be added later without becoming the
-source of truth.
+email delivery. Inquiry email notification is outside the finished product
+scope; PostgreSQL and the Admin Inquiry screen are the Inquiry surface.
+
+### Inquiry Boundary
+
+The Inquiry module stores public submissions and provides a small Admin inbox.
+Its implemented `lead_status` column is only a three-state processing marker;
+Prime Estate does not include a separate Lead, pipeline, activity, task, or CRM
+module.
 
 ## Frontend-to-Backend Data Flow
 
@@ -149,5 +155,8 @@ operational choices are not yet specified.
 - No multi-agency or staff-role architecture in the MVP.
 - No WebSockets until a real requirement exceeds React Query refetching or
   polling.
+- No appointment scheduling or booking module belongs to this portfolio project.
+- No blogging, custom analytics, or separate lead-management module belongs to
+  this portfolio project.
 - Mock UI and API integration may be separate roadmap passes, but their visual
   and data contracts should align to avoid rewrites.

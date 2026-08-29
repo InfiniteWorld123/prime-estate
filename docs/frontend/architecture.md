@@ -7,9 +7,9 @@ keeping route files thin, page composition explicit, and server interaction
 separate from visual components.
 
 Frontend work is delivered in mock-first and integration passes when useful.
-The administrative Property, Listing, and Authentication slices are
-server-connected. Public property experiences and Contact submission still
-have separate integration work. Current status lives in
+The administrative Property, Listing, Inquiry, Overview, and Admin
+Authentication slices and the public Listing and Inquiry experiences are
+server-connected. Current release-verification status lives in
 [`roadmap.md`](roadmap.md).
 
 ## Core Principles
@@ -106,7 +106,7 @@ Use these primitives selectively. Brand and domain components remain custom.
 | State kind | Owner | Examples |
 | --- | --- | --- |
 | Server state | React Query hooks | Listings, session, mutations |
-| Form state | TanStack Form or a focused form hook | Sign up, property search |
+| Form state | TanStack Form or a focused form hook | Admin sign in, property search |
 | URL state | TanStack Router search params | Filters, sort, page, search |
 | Local UI state | Nearest owning component | Mobile menu, disclosure |
 | Theme preference | Theme provider and persisted preference | Light, dark, system |
@@ -129,10 +129,10 @@ Backend API
 Example names:
 
 ```text
-api/auth.api.ts
-hooks/auth/useSignUp.ts
-hooks/pages/useSignUpPage.ts
-pages/auth/sign-up/SignUpPage.tsx
+api/inquiries.api.ts
+features/inquiries/hooks/useAdminInquiriesQuery.ts
+hooks/pages/useAdminInquiriesPage.ts
+pages/admin/inquiries/AdminInquiriesPage.tsx
 ```
 
 The API function is plain asynchronous TypeScript. The focused hook adds React
@@ -149,10 +149,10 @@ from entering the client bundle.
 
 - Every React hook name starts with `use`.
 - Page hooks use the page name: `useHomePage`, `usePropertiesPage`,
-  `useBlogPage`.
+  `useAdminInquiriesPage`.
 - A page hook composes focused hooks instead of reimplementing all behavior.
-- Reusable domain behavior uses domain names: `useLatestListings`,
-  `usePropertySearch`, `useSignUp`.
+- Reusable domain behavior uses domain names such as `useLatestListings` and
+  `useAdminInquiriesQuery`.
 - Hooks return a small view model with explicit values and actions.
 - Components destructure that view model and remain focused on rendering.
 - React Query hooks do not live in `api/`; API modules remain React-free.
@@ -175,7 +175,8 @@ src/frontend/
 |   |-- properties.api.ts
 |   |-- property-images.api.ts
 |   |-- auth.api.ts                     # Better Auth browser transport
-|   `-- public-listing.api.ts           # later
+|   |-- public-listings.api.ts
+|   `-- inquiries.api.ts
 |-- components/
 |   |-- layout/
 |   |   |-- MarketingHeader.tsx
@@ -190,6 +191,7 @@ src/frontend/
 |   |   |-- hooks/                      # session and auth mutations
 |   |   `-- server/                     # route-session server function
 |   |-- contacts/
+|   |-- inquiries/
 |   |-- properties/
 |   `-- listings/
 |       |-- components/
@@ -204,8 +206,6 @@ src/frontend/
 |-- pages/
 |   |-- auth/
 |   |   |-- sign-in/
-|   |   |-- sign-up/
-|   |   |-- verify-email/
 |   |   |-- forgot-password/
 |   |   `-- reset-password/
 |   `-- marketing/
@@ -229,17 +229,13 @@ children of an additional dashboard page:
 ```text
 pages/admin/properties/
 pages/admin/listings/
-pages/admin/inquiries/      # after its backend slice
-pages/admin/overview/       # deferred until the operational UI is complete
-pages/admin/blogging/       # deferred
-pages/admin/analytics/      # deferred
-pages/admin/users/          # deferred
+pages/admin/inquiries/
+pages/admin/overview/
 ```
 
 The shell direction and route model are defined in
-[`admin-shell.md`](admin-shell.md). Until the final Overview is specified,
-`/admin` redirects to `/admin/properties`; there is no redundant
-`/admin/dashboard` URL.
+[`admin-shell.md`](admin-shell.md). `/admin` renders the small operational
+Overview; there is no redundant `/admin/dashboard` URL.
 
 ## Naming Conventions
 
@@ -269,23 +265,15 @@ For a mock-first public slice:
 
 ## Authentication Boundary
 
-The connected Authentication slice includes:
-
-- Sign up
-- Email verification
-- Sign in
-- Forgot password
-- Reset password
-- Sign out
-- Session-aware navigation
-- Administrative access protection
-- Administrative access protection
+The connected Authentication slice includes Admin sign-in, Admin password
+recovery, sign-out, Admin session presentation, and administrative access
+protection. Public registration and customer-account presentation are disabled.
 
 The backend validates every administrative request independently. Router
 protection improves navigation and prevents unusable screens from rendering;
-it is not treated as the security boundary. The marketing header queries the
-real session, shows the authenticated identity or sign-in actions, and uses the
-real sign-out mutation. Future customer account capabilities remain deferred.
+it is not treated as the security boundary. The marketing header may show the
+authenticated Admin identity and sign-out action, but it exposes no public
+sign-in or registration call to action.
 
 ## Quality Gate Per Slice
 

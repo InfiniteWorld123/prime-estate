@@ -40,12 +40,12 @@ Do not read every feature specification when the task concerns only one slice.
 - The public interface supports German and English; German is the default.
 - Internal properties are never exposed as a public resource. Visitors browse
   public listings.
-- The full address is stored internally. Public routes reveal exact address
-  fields only when the listing explicitly allows it.
+- The full address is stored internally. Public Listing routes reveal exact
+  address fields only when the Listing explicitly allows it.
 - Listing lifecycle and archive rules must remain consistent with
   `docs/backend/property-listings.md`.
-- Sold and rented detail pages remain accessible but cannot accept inquiries or
-  bookings. Withdrawn listings return a public `404`.
+- Sold and rented detail pages remain accessible but cannot accept inquiries.
+  Withdrawn listings return a public `404`.
 - Do not fabricate listings, testimonials, reviews, ratings, sales numbers,
   urgency, staff biographies, legal details, or agency performance claims.
 
@@ -56,25 +56,31 @@ The intended MVP includes:
 - Authentication and protected admin access
 - Contacts, properties, features, images, and listing lifecycle management
 - Public listing search and property detail pages
-- Property inquiries and basic lead management
-- Viewing appointment requests and management once that slice is specified
+- Property inquiries, an administrative inbox, and minimal inquiry-status handling
 - Closing and archiving listings as sold, rented, or withdrawn
 
-The following are outside the current MVP unless the user explicitly changes
-the scope:
+The following are outside the Prime Estate project scope. Do not plan or
+implement them as later Prime Estate phases:
 
 - Multiple organizations or agencies
 - Staff roles and permissions
 - Full owner or customer portals
 - Contracts, payments, and advanced ownership management
-- Blogging and analytics
+- Blogging and custom analytics
+- A separate lead-management or CRM system
 - Saved properties, reviews, comments, and marketplace functionality
 - Automated lead scoring, SMS, and real-time notification infrastructure
+- Automated appointment scheduling and booking management
 - Unspecified third-party business integrations
 
 Infrastructure providers may be used when already approved, including
 Cloudinary for property images and email delivery where authentication requires
-it. Inquiry email notifications remain deferred.
+it. Inquiry email notifications are not planned; the stored Inquiry inbox is
+the notification surface.
+
+The implemented `lead_status` field is only the Inquiry inbox's minimal
+`NEW`/`CONTACTED`/`CLOSED` processing state. It does not make a separate Lead or
+CRM module part of the project.
 
 ## Backend Rules
 
@@ -116,14 +122,16 @@ it. Inquiry email notifications remain deferred.
 - Do not broaden one slice because a future feature sounds useful.
 - Document a separate feature file only when an approved slice has enough
   durable decisions to justify it.
-- Keep deferred ideas visible as deferred; do not implement them implicitly.
+- Keep project exclusions out of the backlog and interface; do not implement or
+  advertise them implicitly.
 - Preserve existing user changes and avoid unrelated refactors.
 - Before completing implementation, run the relevant subset of formatting,
   type checking, tests, build, and runtime checks described by the slice.
+- `docs/frontend/roadmap.md` owns the remaining product work.
+- `docs/release.md` owns the final deployment-readiness checklist.
 
 ## Missing or Conflicting Information
 
 When a necessary requirement is missing, state what is unknown and ask for a
-decision. Do not invent product behavior. In particular, the detailed viewing
-booking contract, full customer-account behavior, production legal identity,
-and hosting choice are not yet specified.
+decision. Do not invent product behavior. Full customer-account behavior,
+production legal identity, and hosting choice are not yet specified.

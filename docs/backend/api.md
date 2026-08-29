@@ -6,12 +6,11 @@ Build the Prime Estate backend as small vertical slices. Each slice includes
 validation, database queries, business rules, HTTP routes, and tests before the
 next slice begins.
 
-The MVP serves one real-estate agency. Registered users may exist, but only the
-single admin can access administrative routes. Properties are never exposed
-directly through the public API.
+The MVP serves one real-estate agency. Authentication is exposed only for the
+single Admin, and Properties are never exposed directly through the public API.
 
-Phases 1 through 7 are implemented. Phase 0 is implemented except for the
-automatic first-account bootstrap described below.
+Phases 0 through 7 are implemented. No additional Prime Estate backend feature
+phase is planned.
 
 Property and listing domain rules live in
 [`property-listings.md`](property-listings.md).
@@ -35,18 +34,20 @@ Property and listing domain rules live in
 Before building business APIs:
 
 - Keep exactly one `ADMIN` account for the MVP.
-- When the database has no accounts, the first registered account becomes
-  `ADMIN`.
-- Keep registration open and assign every later account the `USER` role.
-- A `USER` account must not access administrative routes.
+- Provision the one `ADMIN` account through a controlled deployment operation;
+  never grant public sign-up requests administrative access automatically.
+- Disable public registration in Better Auth and expose no customer-auth UI.
+- Existing `USER` records must not sign in through the released Admin login or
+  access administrative routes.
 - Require a valid session, verified email, and `ADMIN` role for every
   `/api/admin/*` route.
 - Test unauthenticated, unverified, non-admin, and admin access.
 
-Current status: the role column, single-admin database index, admin guard, and
-one existing admin account are present. Later accounts default to `USER`. The
-automatic first-account bootstrap is not implemented yet and can be completed
-as a separate authentication task.
+Current status: the role column, single-admin database index, Admin Guard,
+Admin-only sign-in restriction, disabled registration, and one existing
+development Admin account are present. Production Admin provisioning is an
+operational release step, not a missing public API or automatic-bootstrap
+feature.
 
 ## Phase 1: Contacts
 
@@ -177,8 +178,7 @@ Rules:
 - Never add a public `/api/properties` endpoint.
 - Hide the exact address unless the listing allows it.
 - Search results contain only currently published listings.
-- Sold and rented detail pages remain accessible but cannot accept inquiries
-  or bookings.
+- Sold and rented detail pages remain accessible but cannot accept inquiries.
 - Withdrawn listing detail pages return `404 Not Found`.
 - Support the agreed filters, sorting, feature matching, and pagination.
 - Multiple selected feature IDs use AND semantics: a property must have every
@@ -212,7 +212,8 @@ Rules:
   published Listing.
 - Resolve public Listing Slugs on the server and do not expose hidden Listing
   state.
-- Keep read, lead status, and archive state independent.
+- Keep read state, the implemented `lead_status` processing marker, and archive
+  state independent.
 - Do not permanently delete inquiries.
 - Apply the documented honeypot, duplicate-submit, privacy-consent, and
   database-backed rate-limit rules.
@@ -220,17 +221,17 @@ Rules:
 
 Detailed contract: [`inquiries.md`](inquiries.md).
 
-Current status: the complete backend inquiry slice is implemented. Public and
-Admin frontend integration remains.
+Current status: the complete backend Inquiry slice and its public and Admin
+frontend integrations are implemented. Browser/database verification belongs
+to the release gate.
 
-## Later Vertical Slices
+## Backend Scope Closure
 
-After the property/listing slice is complete:
-
-1. Viewing availability and bookings.
-2. Admin and public frontend screens for each completed backend capability.
-3. Blogging.
-4. Analytics selected from real product questions.
+The Prime Estate backend feature scope is closed after Phase 7. Blogging,
+custom analytics, appointment booking, and a separate Lead or CRM module are
+project exclusions. The small Admin Overview must compose existing list
+endpoints and their pagination totals; it does not justify a new analytics
+backend.
 
 ## Implementation Order Inside Each Phase
 
@@ -250,9 +251,9 @@ The property and listing backend vertical slice is complete, including
 Cloudinary-backed property images, bulk property archiving, administrative
 listing lifecycle routes, and public listing discovery.
 
-The inquiry and basic lead-management backend slice is complete. PostgreSQL and
-the Admin Dashboard are the primary notification surface, while email and
-real-time transport remain deferred.
+The Inquiry submission and Admin inbox slice is complete. PostgreSQL is the
+source of truth, and the implemented Admin Inquiry Inbox is the notification
+surface. Inquiry email and real-time transport are project exclusions.
 
 The current product work continues in the frontend roadmap. Runtime API smoke
 tests must be repeated before deployment against the final production

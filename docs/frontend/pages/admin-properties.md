@@ -25,7 +25,7 @@ discussion is approved.
 
 Plain API transport, React Query queries and mutations, TanStack Router URL
 ownership, loading, empty, retry, and server-error behavior are implemented.
-Better Auth route protection and redirects remain a separate Stage 7 slice.
+Better Auth Admin-only route protection and redirects are integrated.
 
 ## Purpose
 
@@ -42,8 +42,8 @@ Visitors never access this page or its Property records.
 /admin/properties
 ```
 
-Until the final Overview is built, `/admin` redirects to this route. Properties
-is the active Admin Shell navigation item.
+The `/admin` Overview links into this route. Properties is the corresponding
+Admin Shell navigation item.
 
 ## Page Structure
 
@@ -242,7 +242,7 @@ authoritative for business eligibility:
 
 - A Property cannot be archived while it has an open Listing.
 - Permanent deletion is allowed only when no Listing has ever been published,
-  no Inquiry or Viewing exists, and draft Listings are deleted first.
+  no Inquiry exists, and draft Listings are deleted first.
 
 The current collection response does not expose a complete `can_delete` or
 blocking-reason capability. Until an explicit capability is added, the UI must
@@ -858,22 +858,19 @@ conditional fields remain mutually valid, External client requires a primary
 Contact, and submit-first validation preserves entered values after errors.
 
 Detail loading, Contact search, PATCH mutation, cache invalidation, server
-conflict messages, and authorization-error presentation are implemented.
-Better Auth route protection remains separate Stage 7 work.
+conflict messages, authorization-error presentation, and Admin-only route
+protection are implemented.
 
 ### Lifecycle Actions
 
 Archive, Restore, and permanent Delete each require a clear confirmation
 Dialog. The UI explains the relevant consequence but does not guess business
 eligibility. During integration the backend remains authoritative for open
-Listing, Inquiry, Viewing, and historical-publication conflicts.
+Listing, Inquiry, and historical-publication conflicts.
 
-Unknown mock IDs render a contained not-found state with a return action.
+Unknown IDs render a contained not-found state with a return action.
 
-## Next Decision
+## Completion
 
-The next administrative implementation slice is the Listings collection,
-followed by Create Listing as specified in
-[`admin-listings.md`](admin-listings.md).
-Details/Edit and publication, followed by the remaining Property Details/Edit,
-linked Listings, archive, restore, and deletion decisions.
+Property collection, guided setup, Details/Edit, linked Listings, lifecycle
+actions, route protection, and backend integration are complete.

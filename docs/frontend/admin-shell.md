@@ -2,14 +2,10 @@
 
 ## Status
 
-**Completed for the mock-first UI stage.** The responsive shared shell, typed
-Properties and Listings navigation, `/admin` redirect, persisted desktop
-collapse preference, mobile Sheet, language and theme controls, and
-deterministic administrator account preview are implemented. Real access
-control, session data, and sign-out behavior remain Stage 7 work.
-
-Detailed property, listing, inquiry, and future administration workflows remain
-separate slices.
+**Completed and integrated.** The responsive shared shell, typed Overview,
+Properties, Listings, and Inquiries navigation, persisted desktop collapse
+preference, mobile Sheet, language and theme controls, real session identity,
+protected access, and sign-out behavior are implemented.
 
 ## Purpose
 
@@ -98,20 +94,21 @@ its scrolling behavior without duplicating global navigation.
 The administrative area uses `/admin` as its shared route prefix:
 
 ```text
-/admin                 -> temporary redirect to /admin/properties
+/admin                 -> small operational Overview
 /admin/properties      -> Property management
 /admin/listings        -> Listing management
-/admin/inquiries       -> Inquiry management when its admin slice is approved
+/admin/inquiries       -> Inquiry Inbox
 ```
 
-There is no separate `/admin/dashboard` route. Until the final Overview is
-specified, `/admin` redirects to the first real operational destination:
-`/admin/properties`. The redirect may later be replaced by the Overview without
-changing the shared shell or child routes.
+The Overview and Inquiry Inbox behavior is specified in
+[`pages/admin-overview-inquiries.md`](pages/admin-overview-inquiries.md).
 
-The eventual admin layout route owns the shell and access boundary. Child route
-files remain thin and render their page components. Real authentication guards,
-session handling, and API integration belong to Stage 7.
+There is no separate `/admin/dashboard` route. The Overview composes existing
+list endpoints and owns no analytics or event-tracking system.
+
+The Admin layout route owns the shell and access boundary. Child route files
+remain thin and render their page components. Backend authorization remains the
+authoritative security boundary.
 
 ## Navigation
 
@@ -120,23 +117,24 @@ hard-coded markup. Each entry may define its label, icon, destination, group,
 and active-match behavior. Desktop and mobile navigation render the same
 configuration.
 
-Initial navigation is intentionally small:
+Navigation is intentionally small:
 
+- Overview
 - Properties
 - Listings
-- Inquiries only when its administration slice is approved for implementation
+- Inquiries
 
-Overview appears only after its final content is specified. Settings appears
-only when a real settings surface exists. Deferred modules are not displayed as
-disabled or `Coming soon` links merely to make the application look larger.
+Settings appears only when a real settings surface exists. Excluded modules are
+not displayed as disabled or `Coming soon` links merely to make the application
+look larger.
 
-The following remain deferred and hidden until explicitly promoted into an
-approved slice:
+The following are excluded from Prime Estate:
 
-- Analytics
+- Custom Analytics
 - Blogging
+- Separate Lead/CRM management
+- Appointment Booking
 - General user management
-- Booking management beyond an approved viewing workflow
 
 The sidebar is expanded by default on desktop and may collapse to an icon rail.
 Its preference may be persisted locally. Collapsing navigation is local visual
@@ -200,9 +198,8 @@ Only implemented destinations appear. Sign out remains available. Profile,
 settings, and other account links must not be invented before their pages and
 behavior are approved.
 
-The mock-first Stage 6 shell may use a deterministic administrator preview.
-Real session data, authorization, redirects, and sign-out behavior belong to
-Stage 7.
+The released shell uses real Admin session data, authorization redirects, and
+sign-out behavior.
 
 ## Scalability Rules
 
@@ -229,22 +226,16 @@ Stage 7.
 
 ## Explicit Non-Goals
 
-This shell specification does not define:
+The shell itself does not own:
 
-- Overview metrics, cards, charts, or recent-activity content
-- Property, listing, inquiry, or booking workflows
+- Overview metrics or Inquiry records
+- Property, Listing, or Inquiry workflows
 - Global search
 - A notification system
 - Analytics or blogging functionality
 - General user administration
-- Real authentication or backend connections
+- Charts, event tracking, or analytics
 
-Those decisions require their own approved page or integration slice.
+## Remaining Shell Work
 
-## Next Decision
-
-The administrative Properties collection and Create Property workflow are
-specified in [`pages/admin-properties.md`](pages/admin-properties.md). The next
-decision is the internal Property Details/Edit workspace. The Overview and its
-analytics remain deferred until the operational workflows provide real product
-questions and data.
+No additional Admin destination or product module is planned.

@@ -2,13 +2,14 @@
 
 ## Status
 
-Mock-first frontend implementation completed. Public API and inquiry endpoint
-integration remain deferred to their dedicated passes.
+Public Listing integration is completed. Listing Inquiry submission is
+implemented in the current working tree and passes the automated quality gates;
+final browser submission and stored-row verification remain.
 
-The first pass is UI-only and uses one deterministic listing. It does not call
-the public listing API or submit inquiries. Its component contracts must allow
-React Query and the documented inquiry endpoint to replace mock orchestration
-without redesigning the page.
+The current page loads `GET /api/listings/:slug` through a plain frontend API
+module and a focused React Query hook. It renders real Listing, Property,
+Feature, and image data while retaining development-only state previews. The
+inquiry dialog submits the current Listing slug through the shared Inquiry API.
 
 ## Page Job
 
@@ -23,9 +24,11 @@ and usable throughout Germany.
 
 The public route is `/properties/$slug`.
 
-The route stays thin. In the mock pass it reads the slug and renders the page.
-During integration it owns query preloading, route pending behavior, metadata,
-and not-found handling. Page markup remains outside the route.
+The route stays thin: it reads the slug and renders the page. The page hook owns
+the current React Query orchestration, retry behavior, and not-found mapping.
+Page markup remains outside the route. Server-aware metadata and optional route
+preloading may be added in a later SEO-focused pass without changing the page
+composition.
 
 ## Backend Detail Contract
 
@@ -44,8 +47,7 @@ The existing `GET /api/listings/:slug` response provides:
 - Published and optional archived timestamps
 
 Withdrawn listings and unknown slugs return `404 Not Found`. Sold and rented
-detail pages remain publicly accessible but cannot receive inquiries or viewing
-requests.
+detail pages remain publicly accessible but cannot receive inquiries.
 
 ## Page Composition
 
@@ -187,11 +189,10 @@ The card shows:
 - `Prime Estate Team`
 - A short response expectation without promising an unsupported response time
 - Primary `Request information` action
-- Secondary `Book a viewing` action
 
-`Book a viewing` is UI-only in this slice. It will later navigate to a dedicated
-viewing flow. Visitors may request a viewing without an account; a future
-account may allow them to manage existing appointments.
+There is no separate appointment-scheduling flow. Visitors who want a viewing
+use `Request information`, and the agency coordinates the timing manually after
+contact.
 
 ## Request Information Dialog
 
@@ -205,8 +206,8 @@ The form uses TanStack Form and contains:
 - Required privacy-consent checkbox with a Privacy Policy link
 
 The listing slug and internal page context are submitted automatically and are
-not editable form fields. The future backend resolves the slug rather than
-trusting an internal ID supplied by the browser.
+not editable form fields. The backend resolves the slug rather than trusting an
+internal ID supplied by the browser.
 
 ### Validation Behavior
 
@@ -225,11 +226,11 @@ Initial validation rules:
 - Full name must be non-blank.
 - Email must use a valid email shape.
 - Phone remains optional and accepts common international formatting.
-- Message must be non-blank and remain within the backend's eventual maximum.
+- Message must be non-blank and remain within the backend maximum.
 - Privacy consent must be accepted.
 
-The frontend and backend limits must be finalized together when the inquiry API
-is implemented. Do not maintain contradictory validation contracts.
+The frontend follows the implemented Inquiry contract. Do not maintain
+contradictory validation limits.
 
 ### Dialog States
 
@@ -257,20 +258,20 @@ The editable form is ready and contains the prefilled inquiry message.
 - Provide one clear close action.
 - Closing and reopening after success starts a fresh form.
 
-The first mock implementation previews these states locally. Real submission
-waits for the contract in [`../../backend/inquiries.md`](../../backend/inquiries.md).
+The current implementation maps these states to the real mutation documented in
+[`../../backend/inquiries.md`](../../backend/inquiries.md).
 
 ## Availability States
 
 ### Available
 
-Show both contact actions normally.
+Show the contact action normally.
 
 ### Sold or Rented
 
 - Keep the complete public detail page accessible.
 - Show a prominent textual status banner near the listing summary.
-- Disable inquiry and viewing actions.
+- Disable the inquiry action.
 - Explain why the actions are unavailable; color alone is insufficient.
 - Offer an active `Browse available properties` action.
 - Use `Sold` only for sale listings and `Rented` only for rental listings.
@@ -438,12 +439,14 @@ features/inquiries/hooks/useCreateInquiry.ts
 
 ### Integration Pass
 
-- The detail route preloads and reads `GET /api/listings/:slug` through a plain
-  API function and focused React Query hook.
-- Pending, not-found, error, metadata, and background refresh behavior use the
-  real response contract.
-- Property cards navigate to their slug routes.
-- The inquiry dialog submits through the documented backend inquiry endpoint.
-- Sold, rented, withdrawn, and address-visibility behavior matches runtime API
-  smoke tests.
-- Focused component, integration, and browser-level tests pass.
+- **Completed:** The page reads `GET /api/listings/:slug` through a plain API
+  function and focused React Query hook.
+- **Completed:** Pending, not-found, error, client metadata, and background
+  refresh behavior use the real response contract.
+- **Completed:** Property cards navigate to their real slug routes.
+- **Implemented, verification pending:** The inquiry dialog submits through the
+  documented backend Inquiry endpoint.
+- **Completed:** Sold, rented, withdrawn, and address-visibility behavior
+  matches the backend contract.
+- **Completed:** Focused mapping tests, formatting, type checking, production
+  build, API smoke tests, and browser-level verification pass.
