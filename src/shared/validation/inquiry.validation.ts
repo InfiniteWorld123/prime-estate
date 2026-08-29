@@ -1,27 +1,54 @@
 import * as v from "valibot";
 
-const RequiredTextSchema = v.pipe(
-	v.string(),
-	v.trim(),
-	v.minLength(1, "This field is required"),
-);
+export const INQUIRY_FIELD_LIMITS = {
+	fullName: 120,
+	email: 254,
+	phone: 40,
+	message: 2000,
+	listingSlug: 200,
+	honeypot: 200,
+} as const;
+
+export const INQUIRY_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const INQUIRY_PHONE_PATTERN = /^[+\d][\d\s()./-]{5,39}$/;
+
+const RequiredTextSchema = (maximumLength: number, fieldName: string) =>
+	v.pipe(
+		v.string(),
+		v.trim(),
+		v.minLength(1, "This field is required"),
+		v.maxLength(maximumLength, `${fieldName} is too long`),
+	);
 
 const EmailSchema = v.pipe(
 	v.string(),
 	v.trim(),
 	v.toLowerCase(),
-	v.email("Please enter a valid email address"),
+	v.regex(INQUIRY_EMAIL_PATTERN, "Please enter a valid email address"),
+	v.maxLength(INQUIRY_FIELD_LIMITS.email, "Email address is too long"),
 );
 
-const OptionalTextSchema = v.optional(
+const OptionalPhoneSchema = v.optional(
 	v.pipe(
 		v.string(),
 		v.trim(),
+		v.maxLength(INQUIRY_FIELD_LIMITS.phone, "Phone number is too long"),
+		v.check(
+			(value) => value === "" || INQUIRY_PHONE_PATTERN.test(value),
+			"Please enter a valid phone number",
+		),
 		v.transform((value) => (value === "" ? undefined : value)),
 	),
 );
 
-const HoneypotSchema = v.optional(v.pipe(v.string(), v.trim()), "");
+const HoneypotSchema = v.optional(
+	v.pipe(
+		v.string(),
+		v.trim(),
+		v.maxLength(INQUIRY_FIELD_LIMITS.honeypot, "Invalid form value"),
+	),
+	"",
+);
 
 const PrivacyConsentSchema = v.literal(
 	true,
@@ -29,10 +56,10 @@ const PrivacyConsentSchema = v.literal(
 );
 
 const InquiryContactFields = {
-	full_name: RequiredTextSchema,
+	full_name: RequiredTextSchema(INQUIRY_FIELD_LIMITS.fullName, "Full name"),
 	email: EmailSchema,
-	phone: OptionalTextSchema,
-	message: RequiredTextSchema,
+	phone: OptionalPhoneSchema,
+	message: RequiredTextSchema(INQUIRY_FIELD_LIMITS.message, "Message"),
 	privacy_accepted: PrivacyConsentSchema,
 	website: HoneypotSchema,
 };
@@ -48,7 +75,10 @@ export const GeneralInquirySchema = v.object({
 
 export const ListingInquirySchema = v.object({
 	inquiry_type: v.literal("LISTING"),
-	listing_slug: RequiredTextSchema,
+	listing_slug: RequiredTextSchema(
+		INQUIRY_FIELD_LIMITS.listingSlug,
+		"Listing slug",
+	),
 	...InquiryContactFields,
 });
 

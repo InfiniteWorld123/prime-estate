@@ -15,15 +15,11 @@ import { Route as MarketingIndexRouteImport } from './../routes/_marketing/index
 import { Route as ApiSplatRouteImport } from './../routes/api.$'
 import { Route as AdminPropertiesRouteImport } from './../routes/admin.properties'
 import { Route as AdminListingsRouteImport } from './../routes/admin.listings'
-import { Route as MarketingVerifyEmailRouteImport } from './../routes/_marketing/verify-email'
+import { Route as AdminInquiriesRouteImport } from './../routes/admin.inquiries'
 import { Route as MarketingTermsRouteImport } from './../routes/_marketing/terms'
-import { Route as MarketingSignUpRouteImport } from './../routes/_marketing/sign-up'
-import { Route as MarketingSignInRouteImport } from './../routes/_marketing/sign-in'
-import { Route as MarketingResetPasswordRouteImport } from './../routes/_marketing/reset-password'
 import { Route as MarketingPropertiesRouteImport } from './../routes/_marketing/properties'
 import { Route as MarketingPrivacyRouteImport } from './../routes/_marketing/privacy'
 import { Route as MarketingImprintRouteImport } from './../routes/_marketing/imprint'
-import { Route as MarketingForgotPasswordRouteImport } from './../routes/_marketing/forgot-password'
 import { Route as MarketingContactRouteImport } from './../routes/_marketing/contact'
 import { Route as MarketingAboutRouteImport } from './../routes/_marketing/about'
 import { Route as AdminPropertiesNewRouteImport } from './../routes/admin.properties_.new'
@@ -31,6 +27,9 @@ import { Route as AdminPropertiesPropertyIdRouteImport } from './../routes/admin
 import { Route as AdminListingsNewRouteImport } from './../routes/admin.listings_.new'
 import { Route as AdminListingsListingIdRouteImport } from './../routes/admin.listings_.$listingId'
 import { Route as MarketingPropertiesSlugRouteImport } from './../routes/_marketing/properties_.$slug'
+import { Route as MarketingAdminResetPasswordRouteImport } from './../routes/_marketing/admin.reset-password'
+import { Route as MarketingAdminLoginRouteImport } from './../routes/_marketing/admin.login'
+import { Route as MarketingAdminForgotPasswordRouteImport } from './../routes/_marketing/admin.forgot-password'
 import { Route as AdminPropertiesPropertyIdImagesRouteImport } from './../routes/admin.properties_.$propertyId_.images'
 import { Route as AdminPropertiesPropertyIdFeaturesRouteImport } from './../routes/admin.properties_.$propertyId_.features'
 import { Route as AdminListingsListingIdPreviewRouteImport } from './../routes/admin.listings_.$listingId_.preview'
@@ -66,29 +65,14 @@ const AdminListingsRoute = AdminListingsRouteImport.update({
   path: '/listings',
   getParentRoute: () => AdminRoute,
 } as any)
-const MarketingVerifyEmailRoute = MarketingVerifyEmailRouteImport.update({
-  id: '/_marketing/verify-email',
-  path: '/verify-email',
-  getParentRoute: () => rootRouteImport,
+const AdminInquiriesRoute = AdminInquiriesRouteImport.update({
+  id: '/inquiries',
+  path: '/inquiries',
+  getParentRoute: () => AdminRoute,
 } as any)
 const MarketingTermsRoute = MarketingTermsRouteImport.update({
   id: '/_marketing/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketingSignUpRoute = MarketingSignUpRouteImport.update({
-  id: '/_marketing/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketingSignInRoute = MarketingSignInRouteImport.update({
-  id: '/_marketing/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketingResetPasswordRoute = MarketingResetPasswordRouteImport.update({
-  id: '/_marketing/reset-password',
-  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingPropertiesRoute = MarketingPropertiesRouteImport.update({
@@ -104,11 +88,6 @@ const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
 const MarketingImprintRoute = MarketingImprintRouteImport.update({
   id: '/_marketing/imprint',
   path: '/imprint',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketingForgotPasswordRoute = MarketingForgotPasswordRouteImport.update({
-  id: '/_marketing/forgot-password',
-  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingContactRoute = MarketingContactRouteImport.update({
@@ -147,6 +126,23 @@ const MarketingPropertiesSlugRoute = MarketingPropertiesSlugRouteImport.update({
   path: '/properties/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketingAdminResetPasswordRoute =
+  MarketingAdminResetPasswordRouteImport.update({
+    id: '/_marketing/admin/reset-password',
+    path: '/admin/reset-password',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const MarketingAdminLoginRoute = MarketingAdminLoginRouteImport.update({
+  id: '/_marketing/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketingAdminForgotPasswordRoute =
+  MarketingAdminForgotPasswordRouteImport.update({
+    id: '/_marketing/admin/forgot-password',
+    path: '/admin/forgot-password',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminPropertiesPropertyIdImagesRoute =
   AdminPropertiesPropertyIdImagesRouteImport.update({
     id: '/properties_/$propertyId_/images',
@@ -176,20 +172,19 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/about': typeof MarketingAboutRoute
   '/contact': typeof MarketingContactRoute
-  '/forgot-password': typeof MarketingForgotPasswordRoute
   '/imprint': typeof MarketingImprintRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/properties': typeof MarketingPropertiesRoute
-  '/reset-password': typeof MarketingResetPasswordRoute
-  '/sign-in': typeof MarketingSignInRoute
-  '/sign-up': typeof MarketingSignUpRoute
   '/terms': typeof MarketingTermsRoute
-  '/verify-email': typeof MarketingVerifyEmailRoute
+  '/admin/inquiries': typeof AdminInquiriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/properties': typeof AdminPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/': typeof MarketingIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/forgot-password': typeof MarketingAdminForgotPasswordRoute
+  '/admin/login': typeof MarketingAdminLoginRoute
+  '/admin/reset-password': typeof MarketingAdminResetPasswordRoute
   '/properties/$slug': typeof MarketingPropertiesSlugRoute
   '/admin/listings/$listingId': typeof AdminListingsListingIdRoute
   '/admin/listings/new': typeof AdminListingsNewRoute
@@ -203,20 +198,19 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/about': typeof MarketingAboutRoute
   '/contact': typeof MarketingContactRoute
-  '/forgot-password': typeof MarketingForgotPasswordRoute
   '/imprint': typeof MarketingImprintRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/properties': typeof MarketingPropertiesRoute
-  '/reset-password': typeof MarketingResetPasswordRoute
-  '/sign-in': typeof MarketingSignInRoute
-  '/sign-up': typeof MarketingSignUpRoute
   '/terms': typeof MarketingTermsRoute
-  '/verify-email': typeof MarketingVerifyEmailRoute
+  '/admin/inquiries': typeof AdminInquiriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/properties': typeof AdminPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/': typeof MarketingIndexRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/forgot-password': typeof MarketingAdminForgotPasswordRoute
+  '/admin/login': typeof MarketingAdminLoginRoute
+  '/admin/reset-password': typeof MarketingAdminResetPasswordRoute
   '/properties/$slug': typeof MarketingPropertiesSlugRoute
   '/admin/listings/$listingId': typeof AdminListingsListingIdRoute
   '/admin/listings/new': typeof AdminListingsNewRoute
@@ -232,20 +226,19 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/_marketing/about': typeof MarketingAboutRoute
   '/_marketing/contact': typeof MarketingContactRoute
-  '/_marketing/forgot-password': typeof MarketingForgotPasswordRoute
   '/_marketing/imprint': typeof MarketingImprintRoute
   '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/_marketing/properties': typeof MarketingPropertiesRoute
-  '/_marketing/reset-password': typeof MarketingResetPasswordRoute
-  '/_marketing/sign-in': typeof MarketingSignInRoute
-  '/_marketing/sign-up': typeof MarketingSignUpRoute
   '/_marketing/terms': typeof MarketingTermsRoute
-  '/_marketing/verify-email': typeof MarketingVerifyEmailRoute
+  '/admin/inquiries': typeof AdminInquiriesRoute
   '/admin/listings': typeof AdminListingsRoute
   '/admin/properties': typeof AdminPropertiesRoute
   '/api/$': typeof ApiSplatRoute
   '/_marketing/': typeof MarketingIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/_marketing/admin/forgot-password': typeof MarketingAdminForgotPasswordRoute
+  '/_marketing/admin/login': typeof MarketingAdminLoginRoute
+  '/_marketing/admin/reset-password': typeof MarketingAdminResetPasswordRoute
   '/_marketing/properties_/$slug': typeof MarketingPropertiesSlugRoute
   '/admin/listings_/$listingId': typeof AdminListingsListingIdRoute
   '/admin/listings_/new': typeof AdminListingsNewRoute
@@ -262,20 +255,19 @@ export interface FileRouteTypes {
     | '/admin'
     | '/about'
     | '/contact'
-    | '/forgot-password'
     | '/imprint'
     | '/privacy'
     | '/properties'
-    | '/reset-password'
-    | '/sign-in'
-    | '/sign-up'
     | '/terms'
-    | '/verify-email'
+    | '/admin/inquiries'
     | '/admin/listings'
     | '/admin/properties'
     | '/api/$'
     | '/'
     | '/admin/'
+    | '/admin/forgot-password'
+    | '/admin/login'
+    | '/admin/reset-password'
     | '/properties/$slug'
     | '/admin/listings/$listingId'
     | '/admin/listings/new'
@@ -289,20 +281,19 @@ export interface FileRouteTypes {
   to:
     | '/about'
     | '/contact'
-    | '/forgot-password'
     | '/imprint'
     | '/privacy'
     | '/properties'
-    | '/reset-password'
-    | '/sign-in'
-    | '/sign-up'
     | '/terms'
-    | '/verify-email'
+    | '/admin/inquiries'
     | '/admin/listings'
     | '/admin/properties'
     | '/api/$'
     | '/'
     | '/admin'
+    | '/admin/forgot-password'
+    | '/admin/login'
+    | '/admin/reset-password'
     | '/properties/$slug'
     | '/admin/listings/$listingId'
     | '/admin/listings/new'
@@ -317,20 +308,19 @@ export interface FileRouteTypes {
     | '/admin'
     | '/_marketing/about'
     | '/_marketing/contact'
-    | '/_marketing/forgot-password'
     | '/_marketing/imprint'
     | '/_marketing/privacy'
     | '/_marketing/properties'
-    | '/_marketing/reset-password'
-    | '/_marketing/sign-in'
-    | '/_marketing/sign-up'
     | '/_marketing/terms'
-    | '/_marketing/verify-email'
+    | '/admin/inquiries'
     | '/admin/listings'
     | '/admin/properties'
     | '/api/$'
     | '/_marketing/'
     | '/admin/'
+    | '/_marketing/admin/forgot-password'
+    | '/_marketing/admin/login'
+    | '/_marketing/admin/reset-password'
     | '/_marketing/properties_/$slug'
     | '/admin/listings_/$listingId'
     | '/admin/listings_/new'
@@ -346,17 +336,15 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   MarketingAboutRoute: typeof MarketingAboutRoute
   MarketingContactRoute: typeof MarketingContactRoute
-  MarketingForgotPasswordRoute: typeof MarketingForgotPasswordRoute
   MarketingImprintRoute: typeof MarketingImprintRoute
   MarketingPrivacyRoute: typeof MarketingPrivacyRoute
   MarketingPropertiesRoute: typeof MarketingPropertiesRoute
-  MarketingResetPasswordRoute: typeof MarketingResetPasswordRoute
-  MarketingSignInRoute: typeof MarketingSignInRoute
-  MarketingSignUpRoute: typeof MarketingSignUpRoute
   MarketingTermsRoute: typeof MarketingTermsRoute
-  MarketingVerifyEmailRoute: typeof MarketingVerifyEmailRoute
   ApiSplatRoute: typeof ApiSplatRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
+  MarketingAdminForgotPasswordRoute: typeof MarketingAdminForgotPasswordRoute
+  MarketingAdminLoginRoute: typeof MarketingAdminLoginRoute
+  MarketingAdminResetPasswordRoute: typeof MarketingAdminResetPasswordRoute
   MarketingPropertiesSlugRoute: typeof MarketingPropertiesSlugRoute
 }
 
@@ -404,39 +392,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminListingsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_marketing/verify-email': {
-      id: '/_marketing/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof MarketingVerifyEmailRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/inquiries': {
+      id: '/admin/inquiries'
+      path: '/inquiries'
+      fullPath: '/admin/inquiries'
+      preLoaderRoute: typeof AdminInquiriesRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_marketing/terms': {
       id: '/_marketing/terms'
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof MarketingTermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_marketing/sign-up': {
-      id: '/_marketing/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof MarketingSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_marketing/sign-in': {
-      id: '/_marketing/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof MarketingSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_marketing/reset-password': {
-      id: '/_marketing/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof MarketingResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_marketing/properties': {
@@ -458,13 +425,6 @@ declare module '@tanstack/react-router' {
       path: '/imprint'
       fullPath: '/imprint'
       preLoaderRoute: typeof MarketingImprintRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_marketing/forgot-password': {
-      id: '/_marketing/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof MarketingForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_marketing/contact': {
@@ -516,6 +476,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingPropertiesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_marketing/admin/reset-password': {
+      id: '/_marketing/admin/reset-password'
+      path: '/admin/reset-password'
+      fullPath: '/admin/reset-password'
+      preLoaderRoute: typeof MarketingAdminResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_marketing/admin/login': {
+      id: '/_marketing/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof MarketingAdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_marketing/admin/forgot-password': {
+      id: '/_marketing/admin/forgot-password'
+      path: '/admin/forgot-password'
+      fullPath: '/admin/forgot-password'
+      preLoaderRoute: typeof MarketingAdminForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/properties_/$propertyId_/images': {
       id: '/admin/properties_/$propertyId_/images'
       path: '/properties/$propertyId/images'
@@ -548,6 +529,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminInquiriesRoute: typeof AdminInquiriesRoute
   AdminListingsRoute: typeof AdminListingsRoute
   AdminPropertiesRoute: typeof AdminPropertiesRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -562,6 +544,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminInquiriesRoute: AdminInquiriesRoute,
   AdminListingsRoute: AdminListingsRoute,
   AdminPropertiesRoute: AdminPropertiesRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -583,17 +566,15 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   MarketingAboutRoute: MarketingAboutRoute,
   MarketingContactRoute: MarketingContactRoute,
-  MarketingForgotPasswordRoute: MarketingForgotPasswordRoute,
   MarketingImprintRoute: MarketingImprintRoute,
   MarketingPrivacyRoute: MarketingPrivacyRoute,
   MarketingPropertiesRoute: MarketingPropertiesRoute,
-  MarketingResetPasswordRoute: MarketingResetPasswordRoute,
-  MarketingSignInRoute: MarketingSignInRoute,
-  MarketingSignUpRoute: MarketingSignUpRoute,
   MarketingTermsRoute: MarketingTermsRoute,
-  MarketingVerifyEmailRoute: MarketingVerifyEmailRoute,
   ApiSplatRoute: ApiSplatRoute,
   MarketingIndexRoute: MarketingIndexRoute,
+  MarketingAdminForgotPasswordRoute: MarketingAdminForgotPasswordRoute,
+  MarketingAdminLoginRoute: MarketingAdminLoginRoute,
+  MarketingAdminResetPasswordRoute: MarketingAdminResetPasswordRoute,
   MarketingPropertiesSlugRoute: MarketingPropertiesSlugRoute,
 }
 export const routeTree = rootRouteImport

@@ -111,9 +111,6 @@ export function LegalPage({ type }: LegalPageProps) {
 								<LegalSection title={copy.useTitle}>
 									<p>{copy.useText}</p>
 								</LegalSection>
-								<LegalSection title={copy.accountTitle}>
-									<p>{copy.accountText}</p>
-								</LegalSection>
 								<LegalSection title={copy.liability}>
 									<p>{copy.liabilityText}</p>
 								</LegalSection>

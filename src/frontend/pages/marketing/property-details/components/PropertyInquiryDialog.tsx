@@ -2,6 +2,12 @@ import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { Link } from "@tanstack/react-router";
 import { CircleCheck, LoaderCircle } from "lucide-react";
 import { useState } from "react";
+import {
+	INQUIRY_EMAIL_PATTERN,
+	INQUIRY_FIELD_LIMITS,
+	INQUIRY_PHONE_PATTERN,
+} from "#/shared/validation/inquiry.validation";
+import { ApiRequestError } from "@/frontend/api/utils";
 import { Button } from "@/frontend/components/ui/button";
 import { Checkbox } from "@/frontend/components/ui/checkbox";
 import {
@@ -13,6 +19,7 @@ import {
 import { Input } from "@/frontend/components/ui/input";
 import { Label } from "@/frontend/components/ui/label";
 import { Textarea } from "@/frontend/components/ui/textarea";
+import { useCreateInquiryMutation } from "@/frontend/features/inquiries/hooks/useCreateInquiryMutation";
 import type { PropertyDetailListing } from "@/frontend/features/listings/listing.types";
 import { useLanguage } from "@/frontend/i18n/LanguageProvider";
 
@@ -22,10 +29,7 @@ type PropertyInquiryDialogProps = {
 	open: boolean;
 };
 
-type SubmissionState = "form" | "server-error" | "success";
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phonePattern = /^[+\d][\d\s()./-]{5,24}$/;
+type SubmissionState = "form" | "server-error" | "success" | "unavailable";
 
 export function PropertyInquiryDialog({
 	listing,
@@ -36,6 +40,7 @@ export function PropertyInquiryDialog({
 	const inquiryCopy = copy.propertyDetails.inquiry;
 	const [submissionState, setSubmissionState] =
 		useState<SubmissionState>("form");
+	const createInquiryMutation = useCreateInquiryMutation();
 	const defaultMessage = inquiryCopy.messageTemplate.replace(
 		"{reference}",
 		listing.referenceNumber,
@@ -47,6 +52,7 @@ export function PropertyInquiryDialog({
 			phone: "",
 			message: defaultMessage,
 			privacyAccepted: false,
+			website: "",
 		},
 		validationLogic: revalidateLogic({
 			mode: "submit",
@@ -59,15 +65,26 @@ export function PropertyInquiryDialog({
 		},
 		onSubmit: async ({ value }) => {
 			setSubmissionState("form");
-			await new Promise((resolve) => window.setTimeout(resolve, 800));
-			if (
-				import.meta.env.DEV &&
-				value.email.trim().toLowerCase() === "error@prime-estate.test"
-			) {
-				setSubmissionState("server-error");
-				return;
+			createInquiryMutation.reset();
+			try {
+				await createInquiryMutation.mutateAsync({
+					inquiry_type: "LISTING",
+					listing_slug: listing.slug,
+					full_name: value.fullName,
+					email: value.email,
+					phone: value.phone || undefined,
+					message: value.message,
+					privacy_accepted: true,
+					website: value.website,
+				});
+				setSubmissionState("success");
+			} catch (error) {
+				setSubmissionState(
+					error instanceof ApiRequestError && error.status === 404
+						? "unavailable"
+						: "server-error",
+				);
 			}
-			setSubmissionState("success");
 		},
 	});
 
@@ -76,6 +93,7 @@ export function PropertyInquiryDialog({
 		if (!nextOpen) {
 			window.setTimeout(() => {
 				form.reset();
+				createInquiryMutation.reset();
 				setSubmissionState("form");
 			}, 150);
 		}
@@ -123,11 +141,28 @@ export function PropertyInquiryDialog({
 								void form.handleSubmit();
 							}}
 						>
+							<form.Field name="website">
+								{(field) => (
+									<input
+										aria-hidden="true"
+										autoComplete="off"
+										className="absolute -left-[10000px] h-px w-px overflow-hidden"
+										name={field.name}
+										onChange={(event) => field.handleChange(event.target.value)}
+										tabIndex={-1}
+										value={field.state.value}
+									/>
+								)}
+							</form.Field>
 							<form.Field
 								name="fullName"
 								validators={{
 									onDynamic: ({ value }) =>
-										value.trim() ? undefined : inquiryCopy.validation.fullName,
+										value.trim().length > INQUIRY_FIELD_LIMITS.fullName
+											? inquiryCopy.validation.fullNameLength
+											: value.trim()
+												? undefined
+												: inquiryCopy.validation.fullName,
 								}}
 							>
 								{(field) => {
@@ -143,6 +178,7 @@ export function PropertyInquiryDialog({
 												autoComplete="name"
 												className="h-10"
 												id={field.name}
+												maxLength={INQUIRY_FIELD_LIMITS.fullName}
 												onBlur={field.handleBlur}
 												onChange={(event) =>
 													field.handleChange(event.target.value)
@@ -167,7 +203,8 @@ export function PropertyInquiryDialog({
 								name="email"
 								validators={{
 									onDynamic: ({ value }) =>
-										emailPattern.test(value.trim())
+										value.trim().length <= INQUIRY_FIELD_LIMITS.email &&
+										INQUIRY_EMAIL_PATTERN.test(value.trim())
 											? undefined
 											: inquiryCopy.validation.email,
 								}}
@@ -185,6 +222,7 @@ export function PropertyInquiryDialog({
 												autoComplete="email"
 												className="h-10"
 												id={field.name}
+												maxLength={INQUIRY_FIELD_LIMITS.email}
 												onBlur={field.handleBlur}
 												onChange={(event) =>
 													field.handleChange(event.target.value)
@@ -210,7 +248,7 @@ export function PropertyInquiryDialog({
 								name="phone"
 								validators={{
 									onDynamic: ({ value }) =>
-										!value.trim() || phonePattern.test(value.trim())
+										!value.trim() || INQUIRY_PHONE_PATTERN.test(value.trim())
 											? undefined
 											: inquiryCopy.validation.phone,
 								}}
@@ -233,6 +271,7 @@ export function PropertyInquiryDialog({
 												autoComplete="tel"
 												className="h-10"
 												id={field.name}
+												maxLength={INQUIRY_FIELD_LIMITS.phone}
 												onBlur={field.handleBlur}
 												onChange={(event) =>
 													field.handleChange(event.target.value)
@@ -259,7 +298,7 @@ export function PropertyInquiryDialog({
 								validators={{
 									onDynamic: ({ value }) => {
 										if (!value.trim()) return inquiryCopy.validation.message;
-										if (value.length > 2000)
+										if (value.trim().length > INQUIRY_FIELD_LIMITS.message)
 											return inquiryCopy.validation.messageLength;
 										return undefined;
 									},
@@ -277,7 +316,7 @@ export function PropertyInquiryDialog({
 												aria-invalid={Boolean(error)}
 												className="min-h-32 resize-y"
 												id={field.name}
-												maxLength={2000}
+												maxLength={INQUIRY_FIELD_LIMITS.message}
 												onBlur={field.handleBlur}
 												onChange={(event) =>
 													field.handleChange(event.target.value)
@@ -348,9 +387,12 @@ export function PropertyInquiryDialog({
 								}}
 							</form.Field>
 
-							{submissionState === "server-error" ? (
+							{submissionState === "server-error" ||
+							submissionState === "unavailable" ? (
 								<p aria-live="polite" className="text-sm text-destructive">
-									{inquiryCopy.serverError}
+									{submissionState === "unavailable"
+										? inquiryCopy.unavailableError
+										: inquiryCopy.serverError}
 								</p>
 							) : null}
 

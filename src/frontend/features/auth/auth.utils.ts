@@ -1,5 +1,3 @@
-export const PENDING_VERIFICATION_EMAIL_KEY =
-	"prime-estate-pending-verification-email";
 export const PENDING_PASSWORD_RESET_EMAIL_KEY =
 	"prime-estate-pending-password-reset-email";
 

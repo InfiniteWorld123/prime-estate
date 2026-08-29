@@ -28,7 +28,6 @@ export function MarketingFooter() {
 	const footerRoutes = [
 		["/properties", "/properties", "/properties"],
 		["/about", "/contact"],
-		["/sign-in", "/sign-up"],
 		["/imprint", "/privacy"],
 	] as const;
 	return (
@@ -45,7 +44,7 @@ export function MarketingFooter() {
 
 					<nav
 						aria-label={copy.footer.navigation}
-						className="grid grid-cols-2 gap-8 sm:grid-cols-4"
+						className="grid grid-cols-2 gap-8 sm:grid-cols-3"
 					>
 						{copy.footer.groups.map((group, groupIndex) => (
 							<div key={group.title}>

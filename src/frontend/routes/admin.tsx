@@ -10,12 +10,12 @@ export const Route = createFileRoute("/admin")({
 		if (!authSession) {
 			throw redirect({
 				search: { redirect: location.href },
-				to: "/sign-in",
+				to: "/admin/login",
 			});
 		}
 
 		if (!authSession.user.emailVerified) {
-			throw redirect({ to: "/verify-email" });
+			throw redirect({ to: "/admin/login" });
 		}
 
 		if (authSession.user.role !== "ADMIN") {

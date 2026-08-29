@@ -1,7 +1,6 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { AdminOverviewPage } from "@/frontend/pages/admin/overview/AdminOverviewPage";
 
 export const Route = createFileRoute("/admin/")({
-	beforeLoad: () => {
-		throw redirect({ to: "/admin/properties" });
-	},
+	component: AdminOverviewPage,
 });

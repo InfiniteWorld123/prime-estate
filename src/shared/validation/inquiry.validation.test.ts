@@ -2,6 +2,7 @@ import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 import {
 	CreateInquirySchema,
+	INQUIRY_FIELD_LIMITS,
 	ListInquiriesQuerySchema,
 } from "./inquiry.validation";
 
@@ -52,6 +53,34 @@ describe("inquiry validation", () => {
 		});
 
 		expect(result.success).toBe(false);
+	});
+
+	it("enforces the shared public field limits", () => {
+		const result = v.safeParse(CreateInquirySchema, {
+			inquiry_type: "GENERAL",
+			interest: "GENERAL",
+			...sharedInput,
+			message: "x".repeat(INQUIRY_FIELD_LIMITS.message + 1),
+		});
+
+		expect(result.success).toBe(false);
+	});
+
+	it("enforces the shared phone shape", () => {
+		const valid = v.safeParse(CreateInquirySchema, {
+			inquiry_type: "GENERAL",
+			interest: "GENERAL",
+			...sharedInput,
+		});
+		const invalid = v.safeParse(CreateInquirySchema, {
+			inquiry_type: "GENERAL",
+			interest: "GENERAL",
+			...sharedInput,
+			phone: "phone me",
+		});
+
+		expect(valid.success).toBe(true);
+		expect(invalid.success).toBe(false);
 	});
 
 	it("parses pagination and boolean filters", () => {

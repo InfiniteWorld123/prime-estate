@@ -24,7 +24,7 @@ export function ForgotPasswordPage() {
 						{copy.forgot.sentDescription}
 					</p>
 					<Button asChild className="mt-8 h-11 w-full">
-						<Link to="/reset-password">{copy.forgot.continue}</Link>
+						<Link to="/admin/reset-password">{copy.forgot.continue}</Link>
 					</Button>
 				</div>
 			</AuthShell>
@@ -34,7 +34,7 @@ export function ForgotPasswordPage() {
 			<div>
 				<Link
 					className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-					to="/sign-in"
+					to="/admin/login"
 				>
 					<ArrowLeft aria-hidden="true" className="size-4" />
 					{copy.forgot.back}

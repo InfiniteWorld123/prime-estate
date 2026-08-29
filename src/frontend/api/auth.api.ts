@@ -71,16 +71,6 @@ export async function getAuthSession(): Promise<AuthSession | null> {
 	};
 }
 
-export async function signUpWithEmail(input: {
-	email: string;
-	name: string;
-	password: string;
-}) {
-	const { data, error } = await authClient.signUp.email(input);
-	throwIfError(error, "Unable to create the account");
-	return data;
-}
-
 export async function signInWithEmail(input: {
 	email: string;
 	password: string;
@@ -88,24 +78,6 @@ export async function signInWithEmail(input: {
 }) {
 	const { data, error } = await authClient.signIn.email(input);
 	throwIfError(error, "Unable to sign in");
-	return data;
-}
-
-export async function sendVerificationCode(email: string) {
-	const { data, error } = await authClient.emailOtp.sendVerificationOtp({
-		email,
-		type: "email-verification",
-	});
-	throwIfError(error, "Unable to send the verification code");
-	return data;
-}
-
-export async function verifyEmailWithCode(input: {
-	email: string;
-	otp: string;
-}) {
-	const { data, error } = await authClient.emailOtp.verifyEmail(input);
-	throwIfError(error, "Unable to verify the email address");
 	return data;
 }
 

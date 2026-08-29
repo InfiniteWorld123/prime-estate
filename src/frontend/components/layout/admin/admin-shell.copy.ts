@@ -7,9 +7,13 @@ export const adminShellCopy = {
 		listings: "Inserate",
 		listingsDescription:
 			"Entwürfe, veröffentlichte und archivierte Inserate verwalten.",
+		inquiries: "Anfragen",
+		inquiriesDescription: "Eingehende Anfragen lesen und bearbeiten.",
 		mainNavigation: "Admin-Navigation",
 		mobileDescription: "Verwaltungsbereich von Prime Estate",
 		openNavigation: "Navigation öffnen",
+		overview: "Übersicht",
+		overviewDescription: "Aktuellen Bestand und neue Anfragen überblicken.",
 		properties: "Immobilien",
 		propertiesDescription:
 			"Den internen Immobilienbestand der Agentur verwalten.",
@@ -27,9 +31,13 @@ export const adminShellCopy = {
 		listings: "Listings",
 		listingsDescription:
 			"Manage draft, published, and archived property listings.",
+		inquiries: "Inquiries",
+		inquiriesDescription: "Read and process incoming inquiries.",
 		mainNavigation: "Admin navigation",
 		mobileDescription: "Prime Estate administration area",
 		openNavigation: "Open navigation",
+		overview: "Overview",
+		overviewDescription: "Review current inventory and new inquiries.",
 		properties: "Properties",
 		propertiesDescription: "Manage the agency's internal property inventory.",
 		region: "Erfurt · Thuringia",

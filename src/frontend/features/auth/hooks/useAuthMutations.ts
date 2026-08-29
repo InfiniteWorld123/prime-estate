@@ -3,17 +3,10 @@ import {
 	getAuthSession,
 	requestPasswordReset,
 	resetPasswordWithCode,
-	sendVerificationCode,
 	signInWithEmail,
 	signOutCurrentSession,
-	signUpWithEmail,
-	verifyEmailWithCode,
 } from "@/frontend/api/auth.api";
 import { authQueryKeys } from "./auth-query-keys";
-
-export function useSignUpMutation() {
-	return useMutation({ mutationFn: signUpWithEmail });
-}
 
 export function useSignInMutation() {
 	const queryClient = useQueryClient();
@@ -22,20 +15,6 @@ export function useSignInMutation() {
 			await signInWithEmail(input);
 			return await getAuthSession();
 		},
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: authQueryKeys.all });
-		},
-	});
-}
-
-export function useSendVerificationCodeMutation() {
-	return useMutation({ mutationFn: sendVerificationCode });
-}
-
-export function useVerifyEmailMutation() {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: verifyEmailWithCode,
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: authQueryKeys.all });
 		},

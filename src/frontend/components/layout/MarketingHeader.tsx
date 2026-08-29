@@ -131,17 +131,7 @@ function AccountNavigation({
 				<Skeleton className="h-9 w-24" />
 			</div>
 		);
-	if (!user)
-		return (
-			<div className="hidden items-center gap-2 lg:flex">
-				<Button asChild variant="ghost">
-					<Link to="/sign-in">{copy.header.signIn}</Link>
-				</Button>
-				<Button asChild>
-					<Link to="/sign-up">{copy.header.signUp}</Link>
-				</Button>
-			</div>
-		);
+	if (!user || user.role !== "ADMIN") return null;
 	return (
 		<div className="hidden lg:block">
 			<DropdownMenu>
@@ -164,11 +154,9 @@ function AccountNavigation({
 						</span>
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
-					{user.role === "ADMIN" ? (
-						<DropdownMenuItem asChild>
-							<Link to="/admin/properties">{copy.header.administration}</Link>
-						</DropdownMenuItem>
-					) : null}
+					<DropdownMenuItem asChild>
+						<Link to="/admin">{copy.header.administration}</Link>
+					</DropdownMenuItem>
 					<DropdownMenuItem
 						disabled={isSigningOut}
 						onSelect={() => void signOut()}
@@ -267,19 +255,15 @@ function MobileNavigation({
 							<Skeleton className="h-4 w-40" />
 							<Skeleton className="mt-3 h-9 w-full" />
 						</div>
-					) : user ? (
+					) : user?.role === "ADMIN" ? (
 						<div className="rounded-md border bg-muted/35 p-3">
 							<p className="truncate text-sm font-medium">{user.name}</p>
 							<p className="mt-1 truncate text-xs text-muted-foreground">
 								{user.email}
 							</p>
-							{user.role === "ADMIN" ? (
-								<Button asChild className="mt-3 w-full" variant="outline">
-									<Link to="/admin/properties">
-										{copy.header.administration}
-									</Link>
-								</Button>
-							) : null}
+							<Button asChild className="mt-3 w-full" variant="outline">
+								<Link to="/admin">{copy.header.administration}</Link>
+							</Button>
 							<Button
 								className="mt-2 w-full"
 								disabled={isSigningOut}
@@ -303,19 +287,7 @@ function MobileNavigation({
 								</p>
 							) : null}
 						</div>
-					) : (
-						<>
-							<Link
-								className="rounded-md px-3 py-3 text-sm font-medium hover:bg-muted"
-								to="/sign-in"
-							>
-								{copy.header.signIn}
-							</Link>
-							<Button asChild className="mt-3">
-								<Link to="/sign-up">{copy.header.signUp}</Link>
-							</Button>
-						</>
-					)}
+					) : null}
 				</nav>
 
 				<div className="border-t px-4 py-4 text-xs text-muted-foreground">

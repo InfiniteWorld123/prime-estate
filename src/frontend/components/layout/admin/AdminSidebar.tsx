@@ -37,7 +37,7 @@ export function AdminSidebar({
 				<Link
 					aria-label="Prime Estate Administration"
 					className="flex items-center gap-3 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-					to="/admin/properties"
+					to="/admin"
 				>
 					<span className="grid size-9 shrink-0 place-items-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
 						<Building2 aria-hidden="true" className="size-4.5" />

@@ -1,14 +1,17 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { defaultDestinationForUser } from "@/frontend/features/auth/auth-navigation";
 import { getAuthRouteSession } from "@/frontend/features/auth/server/getAuthRouteSession";
-import { SignUpPage } from "@/frontend/pages/auth/sign-up/SignUpPage";
+import { SignInPage } from "@/frontend/pages/auth/sign-in/SignInPage";
 
-export const Route = createFileRoute("/_marketing/sign-up")({
+export const Route = createFileRoute("/_marketing/admin/login")({
 	beforeLoad: async () => {
 		const authSession = await getAuthRouteSession();
-		if (authSession) {
+		if (authSession?.user.role === "ADMIN") {
 			throw redirect({ to: defaultDestinationForUser(authSession.user) });
 		}
 	},
-	component: SignUpPage,
+	component: SignInPage,
+	validateSearch: (search): { redirect?: string } => ({
+		redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+	}),
 });

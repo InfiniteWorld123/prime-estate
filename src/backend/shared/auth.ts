@@ -3,16 +3,9 @@ import { APIError, createAuthMiddleware } from "better-auth/api";
 import { emailOTP } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import * as v from "valibot";
-import {
-	NameSchema,
-	PasswordSchema,
-} from "#/shared/validation/auth.validation";
+import { PasswordSchema } from "#/shared/validation/auth.validation";
 import { pool } from "../db/pool";
-import {
-	sendAuthCode,
-	sendResetPasswordSuccessEmail,
-	sendWelcomeEmail,
-} from "./mailer";
+import { sendAuthCode, sendResetPasswordSuccessEmail } from "./mailer";
 
 const throwValidationError = (message: string): never => {
 	throw APIError.fromStatus("UNPROCESSABLE_ENTITY", {
@@ -29,18 +22,7 @@ const validatePassword = (value: unknown) => {
 	}
 };
 
-const validateSignUpName = (body: Record<string, unknown>) => {
-	const result = v.safeParse(NameSchema, body.name);
-
-	if (!result.success) {
-		throwValidationError(result.issues[0]?.message ?? "Invalid name");
-	}
-
-	body.name = result.output;
-};
-
 const passwordFieldByPath = new Map<string, string>([
-	["/sign-up/email", "password"],
 	["/email-otp/reset-password", "password"],
 	["/reset-password", "newPassword"],
 	["/change-password", "newPassword"],
@@ -49,6 +31,17 @@ const passwordFieldByPath = new Map<string, string>([
 
 const logInformationalEmailError = (type: string, error: unknown) => {
 	console.error(`Unable to send ${type} email`, error);
+};
+
+const isAdminEmail = async (value: unknown) => {
+	if (typeof value !== "string") return false;
+
+	const result = await pool.query<{ role: string }>(
+		`SELECT role FROM "user" WHERE email = $1 LIMIT 1;`,
+		[value.trim().toLowerCase()],
+	);
+
+	return result.rows[0]?.role === "ADMIN";
 };
 
 export const auth = betterAuth({
@@ -65,6 +58,7 @@ export const auth = betterAuth({
 	},
 	emailAndPassword: {
 		enabled: true,
+		disableSignUp: true,
 		requireEmailVerification: true,
 		minPasswordLength: 12,
 		async onPasswordReset({ user }) {
@@ -72,18 +66,6 @@ export const auth = betterAuth({
 				await sendResetPasswordSuccessEmail({ email: user.email });
 			} catch (error) {
 				logInformationalEmailError("password reset confirmation", error);
-			}
-		},
-	},
-	emailVerification: {
-		async afterEmailVerification(user) {
-			try {
-				await sendWelcomeEmail({
-					email: user.email,
-					name: user.name,
-				});
-			} catch (error) {
-				logInformationalEmailError("welcome", error);
 			}
 		},
 	},
@@ -95,8 +77,17 @@ export const auth = betterAuth({
 
 			const body = context.body as Record<string, unknown>;
 
-			if (context.path === "/sign-up/email") {
-				validateSignUpName(body);
+			if (
+				context.path === "/sign-in/email" ||
+				context.path === "/sign-in/email-otp" ||
+				context.path === "/email-otp/reset-password"
+			) {
+				if (!(await isAdminEmail(body.email))) {
+					throw APIError.fromStatus("UNAUTHORIZED", {
+						code: "INVALID_EMAIL_OR_PASSWORD",
+						message: "Invalid administrator credentials",
+					});
+				}
 			}
 
 			const passwordField = passwordFieldByPath.get(context.path);
@@ -108,12 +99,20 @@ export const auth = betterAuth({
 	},
 	plugins: [
 		emailOTP({
+			disableSignUp: true,
 			otpLength: 6,
 			expiresIn: 5 * 60,
 			allowedAttempts: 3,
 			sendVerificationOnSignUp: false,
 			overrideDefaultEmailVerification: true,
 			async sendVerificationOTP({ email, otp, type }) {
+				if (
+					(type === "sign-in" || type === "forget-password") &&
+					!(await isAdminEmail(email))
+				) {
+					return;
+				}
+
 				await sendAuthCode({ email, otp, type });
 			},
 		}),

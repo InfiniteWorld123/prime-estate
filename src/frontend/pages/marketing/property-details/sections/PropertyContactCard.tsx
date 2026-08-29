@@ -1,4 +1,4 @@
-import { CalendarDays, MessageSquareText, ShieldCheck } from "lucide-react";
+import { MessageSquareText, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/frontend/components/ui/button";
 import type { PropertyDetailListing } from "@/frontend/features/listings/listing.types";
@@ -58,16 +58,6 @@ export function PropertyContactCard({ listing }: PropertyContactCardProps) {
 								>
 									<MessageSquareText aria-hidden="true" />
 									{contactCopy.requestInformation}
-								</Button>
-								<Button
-									className="h-10 w-full"
-									disabled
-									title={contactCopy.bookingLater}
-									type="button"
-									variant="outline"
-								>
-									<CalendarDays aria-hidden="true" />
-									{contactCopy.bookViewing}
 								</Button>
 							</div>
 						</>

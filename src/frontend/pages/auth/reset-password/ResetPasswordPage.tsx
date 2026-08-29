@@ -35,7 +35,7 @@ export function ResetPasswordPage() {
 						{copy.reset.successDescription}
 					</p>
 					<Button asChild className="mt-8 h-11 w-full">
-						<Link to="/sign-in">{copy.reset.signIn}</Link>
+						<Link to="/admin/login">{copy.reset.signIn}</Link>
 					</Button>
 				</div>
 			</AuthShell>
@@ -163,7 +163,7 @@ export function ResetPasswordPage() {
 							<p>{copy.reset.error}</p>
 							<Link
 								className="mt-2 inline-block font-medium underline underline-offset-4"
-								to="/forgot-password"
+								to="/admin/forgot-password"
 							>
 								{copy.reset.newCode}
 							</Link>

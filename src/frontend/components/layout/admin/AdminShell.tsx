@@ -29,9 +29,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
 		});
 	};
 
-	const currentPage = pathname.startsWith("/admin/listings")
-		? copy.listings
-		: copy.properties;
+	const currentPage = pathname.startsWith("/admin/inquiries")
+		? copy.inquiries
+		: pathname.startsWith("/admin/listings")
+			? copy.listings
+			: pathname.startsWith("/admin/properties")
+				? copy.properties
+				: copy.overview;
 
 	return (
 		<div className="min-h-screen bg-background text-foreground lg:flex">

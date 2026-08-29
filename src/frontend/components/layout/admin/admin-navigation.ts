@@ -1,16 +1,31 @@
-import { Building2, FileText, type LucideIcon } from "lucide-react";
+import {
+	Building2,
+	FileText,
+	Inbox,
+	LayoutDashboard,
+	type LucideIcon,
+} from "lucide-react";
 
 export type AdminNavigationDestination =
+	| "/admin"
 	| "/admin/properties"
-	| "/admin/listings";
+	| "/admin/listings"
+	| "/admin/inquiries";
 
 export type AdminNavigationItem = {
 	icon: LucideIcon;
-	label: "properties" | "listings";
+	exact?: boolean;
+	label: "overview" | "properties" | "listings" | "inquiries";
 	to: AdminNavigationDestination;
 };
 
 export const adminNavigation: AdminNavigationItem[] = [
+	{
+		exact: true,
+		icon: LayoutDashboard,
+		label: "overview",
+		to: "/admin",
+	},
 	{
 		icon: Building2,
 		label: "properties",
@@ -20,5 +35,10 @@ export const adminNavigation: AdminNavigationItem[] = [
 		icon: FileText,
 		label: "listings",
 		to: "/admin/listings",
+	},
+	{
+		icon: Inbox,
+		label: "inquiries",
+		to: "/admin/inquiries",
 	},
 ];

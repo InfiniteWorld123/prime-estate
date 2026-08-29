@@ -1,7 +1,7 @@
 import type { AuthUser } from "@/frontend/api/auth.api";
 
 export const defaultDestinationForUser = (user: AuthUser) =>
-	user.role === "ADMIN" ? "/admin/properties" : "/";
+	user.role === "ADMIN" ? "/admin" : "/";
 
 export const safeInternalRedirect = (value: unknown): string | null => {
 	if (typeof value !== "string") return null;

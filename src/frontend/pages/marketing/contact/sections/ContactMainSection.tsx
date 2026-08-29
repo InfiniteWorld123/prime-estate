@@ -31,6 +31,7 @@ type ContactCopy =
 type ContactMainSectionProps = {
 	copy: ContactCopy;
 	emailPattern: RegExp;
+	fieldLimits: ReturnType<typeof useContactPage>["fieldLimits"];
 	form: ReturnType<typeof useContactPage>["form"];
 	phonePattern: RegExp;
 	resetForm: () => void;
@@ -42,6 +43,7 @@ const infoIcons = [Mail, Globe2, MapPin, MessageCircle];
 export function ContactMainSection({
 	copy,
 	emailPattern,
+	fieldLimits,
 	form,
 	phonePattern,
 	resetForm,
@@ -102,12 +104,31 @@ export function ContactMainSection({
 									void form.handleSubmit();
 								}}
 							>
+								<form.Field name="website">
+									{(field) => (
+										<input
+											aria-hidden="true"
+											autoComplete="off"
+											className="absolute -left-[10000px] h-px w-px overflow-hidden"
+											name={field.name}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
+											tabIndex={-1}
+											value={field.state.value}
+										/>
+									)}
+								</form.Field>
 								<div className="grid gap-5 sm:grid-cols-2">
 									<form.Field
 										name="fullName"
 										validators={{
 											onDynamic: ({ value }) =>
-												value.trim() ? undefined : copy.validation.fullName,
+												value.trim().length > fieldLimits.fullName
+													? copy.validation.fullNameLength
+													: value.trim()
+														? undefined
+														: copy.validation.fullName,
 										}}
 									>
 										{(field) => (
@@ -115,6 +136,7 @@ export function ContactMainSection({
 												error={field.state.meta.errors[0]}
 												id={field.name}
 												label={copy.fullName}
+												maxLength={fieldLimits.fullName}
 												onBlur={field.handleBlur}
 												onChange={field.handleChange}
 												placeholder={copy.fullNamePlaceholder}
@@ -126,6 +148,7 @@ export function ContactMainSection({
 										name="email"
 										validators={{
 											onDynamic: ({ value }) =>
+												value.trim().length <= fieldLimits.email &&
 												emailPattern.test(value.trim())
 													? undefined
 													: copy.validation.email,
@@ -137,6 +160,7 @@ export function ContactMainSection({
 												error={field.state.meta.errors[0]}
 												id={field.name}
 												label={copy.email}
+												maxLength={fieldLimits.email}
 												onBlur={field.handleBlur}
 												onChange={field.handleChange}
 												placeholder={copy.emailPlaceholder}
@@ -162,6 +186,7 @@ export function ContactMainSection({
 												error={field.state.meta.errors[0]}
 												id={field.name}
 												label={`${copy.phone} · ${copy.optional}`}
+												maxLength={fieldLimits.phone}
 												onBlur={field.handleBlur}
 												onChange={field.handleChange}
 												placeholder={copy.phonePlaceholder}
@@ -223,7 +248,11 @@ export function ContactMainSection({
 									name="message"
 									validators={{
 										onDynamic: ({ value }) =>
-											value.trim() ? undefined : copy.validation.message,
+											!value.trim()
+												? copy.validation.message
+												: value.trim().length > fieldLimits.message
+													? copy.validation.messageLength
+													: undefined,
 									}}
 								>
 									{(field) => {
@@ -238,6 +267,7 @@ export function ContactMainSection({
 													aria-invalid={Boolean(error)}
 													className="min-h-36 resize-y"
 													id={field.name}
+													maxLength={fieldLimits.message}
 													onBlur={field.handleBlur}
 													onChange={(event) =>
 														field.handleChange(event.target.value)
@@ -387,6 +417,7 @@ type TextFieldProps = {
 	error: unknown;
 	id: string;
 	label: string;
+	maxLength?: number;
 	onBlur: () => void;
 	onChange: (value: string) => void;
 	placeholder: string;
@@ -399,6 +430,7 @@ function TextField({
 	error,
 	id,
 	label,
+	maxLength,
 	onBlur,
 	onChange,
 	placeholder,
@@ -414,6 +446,7 @@ function TextField({
 				autoComplete={autoComplete}
 				className="h-11"
 				id={id}
+				maxLength={maxLength}
 				onBlur={onBlur}
 				onChange={(event) => onChange(event.target.value)}
 				placeholder={placeholder}

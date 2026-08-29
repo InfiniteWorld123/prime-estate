@@ -23,7 +23,9 @@ export function AdminNavigation({
 		<nav aria-label={copy.mainNavigation} className="flex flex-col gap-1">
 			{adminNavigation.map((item) => {
 				const Icon = item.icon;
-				const isActive = pathname.startsWith(item.to);
+				const isActive = item.exact
+					? pathname === item.to || pathname === `${item.to}/`
+					: pathname.startsWith(item.to);
 				const label = copy[item.label];
 
 				return (

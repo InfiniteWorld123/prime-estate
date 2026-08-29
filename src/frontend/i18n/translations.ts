@@ -32,8 +32,6 @@ export const translations = {
 			forRentDescription: "Aktuell verfügbare Mietimmobilien",
 			about: "Über uns",
 			contact: "Kontakt",
-			signIn: "Anmelden",
-			signUp: "Konto erstellen",
 			account: "Kontomenü",
 			administration: "Administration",
 			signOut: "Abmelden",
@@ -120,8 +118,6 @@ export const translations = {
 				description:
 					"Sie haben Fragen zu dieser Immobilie? Senden Sie uns eine Nachricht und wir melden uns persönlich bei Ihnen.",
 				requestInformation: "Informationen anfragen",
-				bookViewing: "Besichtigung anfragen",
-				bookingLater: "Die Terminplanung folgt in einem späteren Schritt.",
 				unavailableTitle: "Diese Immobilie ist nicht mehr verfügbar",
 				soldMessage:
 					"Diese Immobilie wurde verkauft. Anfragen sind nicht mehr möglich.",
@@ -149,12 +145,15 @@ export const translations = {
 				submitting: "Anfrage wird gesendet",
 				serverError:
 					"Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+				unavailableError:
+					"Dieses Inserat ist nicht mehr verfügbar. Ihre Angaben wurden nicht gesendet.",
 				successTitle: "Ihre Anfrage wurde übermittelt",
 				successDescription:
 					"Das Prime Estate Team wird sich mit Ihnen in Verbindung setzen.",
 				close: "Schließen",
 				validation: {
 					fullName: "Bitte geben Sie Ihren vollständigen Namen ein.",
+					fullNameLength: "Der Name darf höchstens 120 Zeichen enthalten.",
 					email: "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
 					phone: "Bitte geben Sie eine gültige Telefonnummer ein.",
 					message: "Bitte geben Sie eine Nachricht ein.",
@@ -296,7 +295,7 @@ export const translations = {
 				{
 					title: "Besichtigung planen",
 					description:
-						"Vereinbaren Sie einen passenden Termin, um die Immobilie persönlich kennenzulernen.",
+						"Fragen Sie eine Besichtigung an; die Agentur stimmt den Termin anschließend persönlich mit Ihnen ab.",
 				},
 			],
 		},
@@ -339,7 +338,6 @@ export const translations = {
 					items: ["Alle Immobilien", "Zum Kauf", "Zur Miete"],
 				},
 				{ title: "Agentur", items: ["Über uns", "Kontakt"] },
-				{ title: "Konto", items: ["Anmelden", "Konto erstellen"] },
 				{ title: "Rechtliches", items: ["Impressum", "Datenschutz"] },
 			],
 			disabledTitle: "{item} wird in einem späteren Schritt ergänzt",
@@ -378,8 +376,6 @@ export const translations = {
 			forRentDescription: "Homes currently available to rent",
 			about: "About",
 			contact: "Contact",
-			signIn: "Sign in",
-			signUp: "Sign up",
 			account: "Account menu",
 			administration: "Administration",
 			signOut: "Sign out",
@@ -466,8 +462,6 @@ export const translations = {
 				description:
 					"Have a question about this property? Send us a message and our team will contact you personally.",
 				requestInformation: "Request information",
-				bookViewing: "Request a viewing",
-				bookingLater: "Viewing appointments will be added in a later step.",
 				unavailableTitle: "This property is no longer available",
 				soldMessage:
 					"This property has been sold. New inquiries are no longer available.",
@@ -494,12 +488,15 @@ export const translations = {
 				submit: "Send inquiry",
 				submitting: "Sending inquiry",
 				serverError: "The inquiry could not be sent. Please try again.",
+				unavailableError:
+					"This listing is no longer available. Your information was not submitted.",
 				successTitle: "Your inquiry was submitted",
 				successDescription:
 					"The Prime Estate team will contact you about this property.",
 				close: "Close",
 				validation: {
 					fullName: "Enter your full name.",
+					fullNameLength: "The name must not exceed 120 characters.",
 					email: "Enter a valid email address.",
 					phone: "Enter a valid phone number.",
 					message: "Enter a message.",
@@ -640,7 +637,7 @@ export const translations = {
 				{
 					title: "Arrange a viewing",
 					description:
-						"Choose a suitable time to experience the property beyond the listing.",
+						"Request a viewing, then coordinate a suitable time directly with the agency.",
 				},
 			],
 		},
@@ -681,7 +678,6 @@ export const translations = {
 			groups: [
 				{ title: "Properties", items: ["Browse all", "For sale", "For rent"] },
 				{ title: "Agency", items: ["About", "Contact"] },
-				{ title: "Account", items: ["Sign in", "Create account"] },
 				{ title: "Legal", items: ["Imprint", "Privacy"] },
 			],
 			disabledTitle: "{item} will be added in a later frontend slice",

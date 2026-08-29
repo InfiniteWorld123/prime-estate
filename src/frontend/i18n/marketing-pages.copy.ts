@@ -73,16 +73,18 @@ export const marketingPagesCopy = {
 			submitting: "Nachricht wird gesendet",
 			successTitle: "Vielen Dank für Ihre Nachricht",
 			successDescription:
-				"Ihre Nachricht wurde in dieser Vorschau erfolgreich erfasst. Die echte Übermittlung wird im Integrationsschritt verbunden.",
+				"Ihre Nachricht wurde erfolgreich übermittelt. Das Prime Estate Team wird sich mit Ihnen in Verbindung setzen.",
 			sendAnother: "Weitere Nachricht senden",
 			serverError:
 				"Die Nachricht konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut.",
 			validation: {
 				fullName: "Bitte geben Sie Ihren vollständigen Namen ein.",
+				fullNameLength: "Der Name darf höchstens 120 Zeichen enthalten.",
 				email: "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
 				phone: "Bitte geben Sie eine gültige Telefonnummer ein.",
 				interest: "Bitte wählen Sie ein Anliegen aus.",
 				message: "Bitte geben Sie eine Nachricht ein.",
+				messageLength: "Die Nachricht darf höchstens 2000 Zeichen enthalten.",
 				privacy: "Bitte stimmen Sie der Datenschutzerklärung zu.",
 			},
 			infoEyebrow: "Direkter Kontakt",
@@ -137,7 +139,7 @@ export const marketingPagesCopy = {
 				"Diese Datenschutzerklärung beschreibt den aktuellen Demo-Stand der öffentlichen Oberfläche. Sie ersetzt keine abschließende rechtliche Prüfung vor einem Produktivbetrieb.",
 			dataTitle: "Daten in Formularen",
 			dataText:
-				"Kontakt- und Anfrageformulare arbeiten in der aktuellen UI-Vorschau mit lokalen Zuständen. Eine echte Übermittlung oder Speicherung wird erst im dokumentierten Integrationsschritt aktiviert.",
+				"Kontakt- und Immobilienanfragen werden gespeichert, damit das Prime Estate Team sie bearbeiten und beantworten kann.",
 			preferencesTitle: "Lokale Einstellungen",
 			preferencesText:
 				"Sprache und Farbschema können im Browser gespeichert werden, damit Ihre Auswahl bei einem späteren Besuch erhalten bleibt.",
@@ -149,9 +151,6 @@ export const marketingPagesCopy = {
 			useTitle: "Nutzung der Demo",
 			useText:
 				"Die Oberfläche darf zur Ansicht und Erprobung verwendet werden. Formulare und Beispieldaten dienen der Produktdarstellung, solange keine echte Integration ausdrücklich aktiviert wurde.",
-			accountTitle: "Demokonten",
-			accountText:
-				"Kontofunktionen werden derzeit als Benutzeroberfläche demonstriert. Verbindliche Kundenfunktionen werden erst nach dokumentierter technischer und rechtlicher Freigabe angeboten.",
 		},
 	},
 	en: {
@@ -228,15 +227,17 @@ export const marketingPagesCopy = {
 			submitting: "Sending message",
 			successTitle: "Thank you for your message",
 			successDescription:
-				"Your message was captured successfully in this preview. Real delivery will be connected during integration.",
+				"Your message was submitted successfully. The Prime Estate team will contact you.",
 			sendAnother: "Send another message",
 			serverError: "We couldn't process the message. Please try again.",
 			validation: {
 				fullName: "Enter your full name.",
+				fullNameLength: "The name must not exceed 120 characters.",
 				email: "Enter a valid email address.",
 				phone: "Enter a valid phone number.",
 				interest: "Select what you are interested in.",
 				message: "Enter a message.",
+				messageLength: "The message must not exceed 2,000 characters.",
 				privacy: "Accept the Privacy Policy to continue.",
 			},
 			infoEyebrow: "Direct contact",
@@ -291,7 +292,7 @@ export const marketingPagesCopy = {
 				"This Privacy Policy describes the current public UI demo. It does not replace a final legal review before production use.",
 			dataTitle: "Form information",
 			dataText:
-				"Contact and inquiry forms currently use local preview state. Real transmission or storage will only be enabled in the documented integration stage.",
+				"Contact and property inquiries are stored so the Prime Estate team can review and respond to them.",
 			preferencesTitle: "Local preferences",
 			preferencesText:
 				"Language and colour-theme preferences may be saved in your browser so your selection remains available on a later visit.",
@@ -303,9 +304,6 @@ export const marketingPagesCopy = {
 			useTitle: "Using the demo",
 			useText:
 				"The interface may be viewed and tested. Forms and example data demonstrate the product until a real integration is explicitly enabled.",
-			accountTitle: "Demo accounts",
-			accountText:
-				"Account capabilities are currently presented as interface flows. Binding customer tools will only be offered after documented technical and legal approval.",
 		},
 	},
 } as const;

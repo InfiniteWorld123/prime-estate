@@ -1,0 +1,38 @@
+export const adminOverviewCopy = {
+	de: {
+		activeProperties: "Aktive Immobilien",
+		administration: "Administration",
+		description:
+			"Ein kompakter Überblick über den aktuellen Bestand und die neuesten offenen Anfragen.",
+		draftListings: "Inseratentwürfe",
+		empty: "Keine aktiven Anfragen vorhanden.",
+		error: "Der Überblick konnte nicht vollständig geladen werden.",
+		inbox: "Postfach öffnen",
+		latestInquiries: "Neueste Anfragen",
+		listing: "Inserat",
+		general: "Allgemein",
+		locale: "de-DE",
+		publishedListings: "Veröffentlichte Inserate",
+		retry: "Erneut versuchen",
+		title: "Übersicht",
+		unreadInquiries: "Ungelesene Anfragen",
+	},
+	en: {
+		activeProperties: "Active properties",
+		administration: "Administration",
+		description:
+			"A compact view of the current inventory and the latest active inquiries.",
+		draftListings: "Draft listings",
+		empty: "There are no active inquiries.",
+		error: "The overview could not be loaded completely.",
+		inbox: "Open inbox",
+		latestInquiries: "Latest inquiries",
+		listing: "Listing",
+		general: "General",
+		locale: "en-GB",
+		publishedListings: "Published listings",
+		retry: "Try again",
+		title: "Overview",
+		unreadInquiries: "Unread inquiries",
+	},
+} as const;

@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 import { Checkbox } from "@/frontend/components/ui/checkbox";
 import { Label } from "@/frontend/components/ui/label";
@@ -8,7 +7,6 @@ import {
 	PasswordField,
 } from "@/frontend/features/auth/components/AuthFields";
 import { AuthShell } from "@/frontend/features/auth/components/AuthShell";
-import { AuthSocialButton } from "@/frontend/features/auth/components/AuthSocialButton";
 import { useSignInPage } from "@/frontend/hooks/pages/useSignInPage";
 
 export function SignInPage() {
@@ -92,12 +90,12 @@ export function SignInPage() {
 								</div>
 							)}
 						</form.Field>
-						<Link
+						<a
 							className="text-sm font-medium text-primary hover:underline"
-							to="/forgot-password"
+							href="/admin/forgot-password"
 						>
 							{copy.signIn.forgot}
-						</Link>
+						</a>
 					</div>
 					{submissionState !== "form" ? (
 						<div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
@@ -110,14 +108,6 @@ export function SignInPage() {
 									? copy.signIn.unverified
 									: copy.signIn.error}
 							</p>
-							{submissionState === "unverified" ? (
-								<Link
-									className="mt-2 inline-block font-medium underline underline-offset-4"
-									to="/verify-email"
-								>
-									{copy.signIn.verifyAction}
-								</Link>
-							) : null}
 						</div>
 					) : null}
 					<form.Subscribe selector={(state) => state.isSubmitting}>
@@ -130,20 +120,6 @@ export function SignInPage() {
 						)}
 					</form.Subscribe>
 				</form>
-				<AuthSocialButton
-					comingLater={copy.common.comingLater}
-					label={copy.common.google}
-					separator={copy.common.or}
-				/>
-				<p className="mt-6 text-center text-sm text-muted-foreground">
-					{copy.signIn.noAccount}{" "}
-					<Link
-						className="font-semibold text-primary hover:underline"
-						to="/sign-up"
-					>
-						{copy.signIn.createAccount}
-					</Link>
-				</p>
 			</div>
 		</AuthShell>
 	);

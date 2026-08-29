@@ -2,10 +2,7 @@ import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthRequestError } from "@/frontend/api/auth.api";
-import {
-	isValidEmail,
-	PENDING_VERIFICATION_EMAIL_KEY,
-} from "@/frontend/features/auth/auth.utils";
+import { isValidEmail } from "@/frontend/features/auth/auth.utils";
 import {
 	defaultDestinationForUser,
 	safeInternalRedirect,
@@ -20,7 +17,7 @@ export function useSignInPage() {
 	const { language } = useLanguage();
 	const copy = authCopy[language];
 	const navigate = useNavigate();
-	const search = useSearch({ from: "/_marketing/sign-in" });
+	const search = useSearch({ from: "/_marketing/admin/login" });
 	const signInMutation = useSignInMutation();
 	const [submissionState, setSubmissionState] = useState<SignInState>("form");
 	const form = useForm({
@@ -59,7 +56,6 @@ export function useSignInPage() {
 						error.message.toLowerCase().includes("verif"));
 
 				if (isUnverified) {
-					window.sessionStorage.setItem(PENDING_VERIFICATION_EMAIL_KEY, email);
 					setSubmissionState("unverified");
 					return;
 				}
