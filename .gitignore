@@ -3,12 +3,13 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
+.env*
 .nitro
 .tanstack
 .wrangler
 .output
 .vinxi
+worker-configuration.d.ts
 __unconfig*
 todos.json
 .idea/
