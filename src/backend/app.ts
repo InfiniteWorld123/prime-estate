@@ -9,7 +9,10 @@ import { handleError } from "./shared/error-handler";
 import { HttpStatusCode } from "./shared/http";
 import { responseError } from "./shared/response";
 
-export const app = new Elysia({ prefix: "/api" })
+// Cloudflare Workers forbid runtime code generation (`new Function`), which
+// Elysia's ahead-of-time compiler relies on. `aot: false` switches Elysia to
+// its dynamic handler and is required to run on workerd.
+export const app = new Elysia({ prefix: "/api", aot: false })
 	.error({ AppError })
 	.onError(handleError)
 	.use(adminRoutes)
