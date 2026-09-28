@@ -1,16 +1,17 @@
-import { pool } from "#/backend/db/pool";
+import { getPool } from "#/backend/db/pool";
 import {
 	clearDatabaseSeed,
 	seedDatabase,
 	validateDatabaseSeed,
 } from "./seed.database";
 import { buildSeedData, seedSummary } from "./seed.generator";
-import { uploadSeedImages } from "./seed.images";
+import { uploadSeedImageAssets } from "./seed.images";
 
 const flags = new Set(process.argv.slice(2));
 const isDryRun = flags.has("--dry-run");
 const isClear = flags.has("--clear");
 const isValidate = flags.has("--validate");
+const shouldUploadImages = flags.has("--upload-images");
 
 if (process.env.NODE_ENV === "production") {
 	throw new Error("Seed commands are disabled when NODE_ENV=production");
@@ -30,12 +31,12 @@ try {
 	} else if (isClear) {
 		await clearDatabaseSeed(data);
 		console.info("Prime Estate database seed rows cleared");
-		console.info("Cloudinary seed assets were preserved intentionally");
+		console.info("Shared Cloudinary seed assets were preserved intentionally");
 	} else {
-		console.info("Uploading deterministic property images to Cloudinary");
-		await uploadSeedImages(data.images, (completed, total) => {
-			console.info(`Seed image upload ${completed}/${total}`);
-		});
+		if (shouldUploadImages) {
+			console.info("Uploading the shared seed images to Cloudinary");
+			await uploadSeedImageAssets();
+		}
 		console.info("Writing seed records to PostgreSQL");
 		const databaseSummary = await seedDatabase(data);
 		console.info("Prime Estate seed complete", {
@@ -44,5 +45,5 @@ try {
 		});
 	}
 } finally {
-	await pool.end();
+	await getPool().end();
 }

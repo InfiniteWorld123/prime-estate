@@ -79,6 +79,18 @@ bun run db:migrate
 bun run dev
 ```
 
+The Worker reaches PostgreSQL through the `HYPERDRIVE` binding. For local
+development, point that binding at your local database by exporting the same
+value as `DATABASE_URL`:
+
+```bash
+export CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE="$DATABASE_URL"
+```
+
+Load the demo data (500 properties that reuse a small set of Cloudinary images)
+with `bun run db:seed`. Add `-- --upload-images` once for a new Cloudinary
+account; `bun run db:seed:clear` removes the demo rows again.
+
 ## Database Migrations
 
 SQL migration files live in `src/backend/db/migrations` and run in filename order.

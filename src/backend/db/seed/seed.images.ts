@@ -1,8 +1,8 @@
-import { access, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { v2 as cloudinary } from "cloudinary";
 import { env } from "#/shared/env";
-import type { SeedImage } from "./seed.generator";
+import { type SeedImageAsset, seedImageAssets } from "./seed.assets";
 
 const configureCloudinary = () => {
 	if (
@@ -10,7 +10,7 @@ const configureCloudinary = () => {
 		!env.CLOUDINARY_API_KEY ||
 		!env.CLOUDINARY_API_SECRET
 	) {
-		throw new Error("Cloudinary is required to seed property images");
+		throw new Error("Cloudinary is required to upload the seed images");
 	}
 	cloudinary.config({
 		cloud_name: env.CLOUDINARY_CLOUD_NAME,
@@ -20,18 +20,16 @@ const configureCloudinary = () => {
 	});
 };
 
-const sourcePath = (image: SeedImage) =>
-	resolve(process.cwd(), "public/images/properties", image.sourceFile);
-
-const uploadImage = async (image: SeedImage) => {
-	const buffer = await readFile(sourcePath(image));
+const uploadAsset = async ({ sourceFile, publicId }: SeedImageAsset) => {
+	const buffer = await readFile(
+		resolve(process.cwd(), "public/images/properties", sourceFile),
+	);
 	await new Promise<void>((resolveUpload, rejectUpload) => {
 		const stream = cloudinary.uploader.upload_stream(
 			{
-				public_id: image.storageKey,
+				public_id: publicId,
 				resource_type: "image",
-				overwrite: true,
-				invalidate: false,
+				overwrite: false,
 				unique_filename: false,
 				use_filename: false,
 			},
@@ -47,33 +45,10 @@ const uploadImage = async (image: SeedImage) => {
 	});
 };
 
-export const uploadSeedImages = async (
-	images: SeedImage[],
-	onProgress?: (completed: number, total: number) => void,
-) => {
+/** Uploads the shared seed assets; only needed for a new Cloudinary account. */
+export const uploadSeedImageAssets = async () => {
 	configureCloudinary();
-	for (const image of images) {
-		try {
-			await access(sourcePath(image));
-		} catch {
-			throw new Error(`Seed source image is missing: ${image.sourceFile}`);
-		}
+	for (const asset of Object.values(seedImageAssets)) {
+		await uploadAsset(asset);
 	}
-
-	let cursor = 0;
-	let completed = 0;
-	const workers = Array.from({ length: 8 }, async () => {
-		while (cursor < images.length) {
-			const image = images[cursor];
-			cursor += 1;
-			if (!image) return;
-			await uploadImage(image);
-			completed += 1;
-			if (completed % 25 === 0 || completed === images.length) {
-				onProgress?.(completed, images.length);
-			}
-		}
-	});
-
-	await Promise.all(workers);
 };
