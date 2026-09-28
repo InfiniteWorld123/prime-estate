@@ -8,10 +8,10 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("#/backend/db/pool", () => ({
-	pool: {
+	getPool: () => ({
 		query: mocks.poolQuery,
 		connect: mocks.poolConnect,
-	},
+	}),
 }));
 
 import { AppError } from "#/backend/shared/error";

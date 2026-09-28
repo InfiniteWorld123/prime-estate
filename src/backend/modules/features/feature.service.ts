@@ -1,4 +1,4 @@
-import { pool } from "#/backend/db/pool";
+import { getPool } from "#/backend/db/pool";
 import { conflictError, validationError } from "#/backend/shared/error";
 import { requireCreated, requireFound } from "#/backend/shared/service-utils";
 import type {
@@ -49,7 +49,7 @@ export const createFeatureService = async (
 		VALUES ($1, $2)
 		RETURNING id, code, name, created_at, updated_at;
 	`;
-	const result = await pool.query<FeatureType>(query, [
+	const result = await getPool().query<FeatureType>(query, [
 		generateFeatureCode(input.name),
 		input.name,
 	]);
@@ -87,8 +87,8 @@ export const listFeaturesService = async (
 		);
 	`;
 	const [featuresResult, countResult] = await Promise.all([
-		pool.query<FeatureType>(listQuery, [search, pageSize, offset]),
-		pool.query<FeatureCountRow>(countQuery, [search]),
+		getPool().query<FeatureType>(listQuery, [search, pageSize, offset]),
+		getPool().query<FeatureCountRow>(countQuery, [search]),
 	]);
 	const totalItems = Number(countResult.rows[0]?.total_count ?? 0);
 	const totalPages = Math.ceil(totalItems / pageSize);
@@ -105,7 +105,7 @@ export const listFeaturesService = async (
 };
 
 export const listFeatureOptionsService = async (): Promise<FeatureType[]> => {
-	const result = await pool.query<FeatureType>(`
+	const result = await getPool().query<FeatureType>(`
 		SELECT id, code, name, created_at, updated_at
 		FROM features
 		ORDER BY LOWER(name) ASC, id ASC;
@@ -116,7 +116,7 @@ export const listFeatureOptionsService = async (): Promise<FeatureType[]> => {
 export const getFeatureByIdService = async (
 	id: string,
 ): Promise<FeatureType> => {
-	const result = await pool.query<FeatureType>(
+	const result = await getPool().query<FeatureType>(
 		`SELECT id, code, name, created_at, updated_at FROM features WHERE id = $1;`,
 		[id],
 	);
@@ -127,7 +127,7 @@ export const updateFeatureService = async (
 	id: string,
 	input: UpdateFeatureDataType,
 ): Promise<FeatureType> => {
-	const result = await pool.query<FeatureType>(
+	const result = await getPool().query<FeatureType>(
 		`UPDATE features
 		 SET name = $1, updated_at = CURRENT_TIMESTAMP
 		 WHERE id = $2
@@ -140,7 +140,7 @@ export const updateFeatureService = async (
 export const deleteFeatureService = async (
 	id: string,
 ): Promise<FeatureType> => {
-	const usageResult = await pool.query<ExistsRow>(
+	const usageResult = await getPool().query<ExistsRow>(
 		`SELECT EXISTS (
 			SELECT 1 FROM property_features WHERE feature_id = $1
 		 ) AS exists;`,
@@ -151,7 +151,7 @@ export const deleteFeatureService = async (
 			"Feature cannot be deleted while it is used by properties",
 		);
 	}
-	const result = await pool.query<FeatureType>(
+	const result = await getPool().query<FeatureType>(
 		`DELETE FROM features
 		 WHERE id = $1
 		 RETURNING id, code, name, created_at, updated_at;`,
@@ -163,12 +163,12 @@ export const deleteFeatureService = async (
 export const getPropertyFeaturesService = async (
 	propertyId: string,
 ): Promise<FeatureType[]> => {
-	const propertyResult = await pool.query<IdRow>(
+	const propertyResult = await getPool().query<IdRow>(
 		"SELECT id FROM properties WHERE id = $1;",
 		[propertyId],
 	);
 	requireFound(propertyResult.rows[0], "Property not found");
-	const result = await pool.query<FeatureType>(
+	const result = await getPool().query<FeatureType>(
 		`SELECT f.id, f.code, f.name, f.created_at, f.updated_at
 		 FROM property_features AS pf
 		 JOIN features AS f ON f.id = pf.feature_id
@@ -183,7 +183,7 @@ export const replacePropertyFeaturesService = async (
 	propertyId: string,
 	input: ReplacePropertyFeaturesDataType,
 ): Promise<FeatureType[]> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		const propertyResult = await client.query<IdRow>(

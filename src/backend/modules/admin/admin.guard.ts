@@ -1,11 +1,11 @@
 import { Elysia } from "elysia";
-import { auth } from "#/backend/shared/auth";
+import { getAuth } from "#/backend/shared/auth";
 import { forbiddenError, unauthorizedError } from "#/backend/shared/error";
 
 export const adminGuard = new Elysia({
 	name: "admin-guard",
 }).resolve({ as: "scoped" }, async ({ request }) => {
-	const session = await auth.api.getSession({
+	const session = await getAuth().api.getSession({
 		headers: request.headers,
 		query: {
 			disableCookieCache: true,

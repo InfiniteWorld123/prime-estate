@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { auth } from "#/backend/shared/auth";
+import { getAuth } from "#/backend/shared/auth";
 import {
 	ForgotPasswordSchema,
 	ResetPasswordSchema,
@@ -17,4 +17,4 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 	.post("/sign-out", signOut)
 	.post("/forgot-password", forgotPassword, { body: ForgotPasswordSchema })
 	.post("/reset-password", resetPassword, { body: ResetPasswordSchema })
-	.all("/*", ({ request }) => auth.handler(request));
+	.all("/*", ({ request }) => getAuth().handler(request));

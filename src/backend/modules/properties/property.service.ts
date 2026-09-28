@@ -1,4 +1,4 @@
-import { pool } from "#/backend/db/pool";
+import { getPool } from "#/backend/db/pool";
 import { getContactByIdService } from "#/backend/modules/contacts/contact.service";
 import {
 	conflictError,
@@ -243,7 +243,7 @@ export const createPropertyService = async (
 		input.total_floors ?? null,
 	];
 
-	const result = await pool.query<PropertyIdRow>(query, values);
+	const result = await getPool().query<PropertyIdRow>(query, values);
 
 	const created = requireCreated(
 		result.rows[0],
@@ -462,9 +462,9 @@ export const listPropertiesService = async (
 	`;
 
 	const [propertiesResult, countResult] = await Promise.all([
-		pool.query<PropertyRow>(listQuery, values),
+		getPool().query<PropertyRow>(listQuery, values),
 
-		pool.query<PropertyCountRow>(countQuery, countValues),
+		getPool().query<PropertyCountRow>(countQuery, countValues),
 	]);
 
 	const totalItems = Number(countResult.rows[0]?.total_count ?? 0);
@@ -526,7 +526,7 @@ export const getPropertyByIdService = async (
 		WHERE p.id = $1;
 	`;
 
-	const result = await pool.query<PropertyRow>(query, [id]);
+	const result = await getPool().query<PropertyRow>(query, [id]);
 
 	const property = requireFound(result.rows[0], "Property not found");
 
@@ -643,7 +643,7 @@ export const updatePropertyService = async (
 		RETURNING id;
 	`;
 
-	const result = await pool.query<PropertyIdRow>(query, values);
+	const result = await getPool().query<PropertyIdRow>(query, values);
 
 	requireFound(result.rows[0], "Property not found");
 
@@ -660,7 +660,7 @@ const hasOpenListingsService = async (propertyId: string): Promise<boolean> => {
 		) AS exists;
 	`;
 
-	const result = await pool.query<ExistsRow>(query, [propertyId]);
+	const result = await getPool().query<ExistsRow>(query, [propertyId]);
 
 	return result.rows[0]?.exists ?? false;
 };
@@ -674,7 +674,7 @@ const hasAnyListingsService = async (propertyId: string): Promise<boolean> => {
 		) AS exists;
 	`;
 
-	const result = await pool.query<ExistsRow>(query, [propertyId]);
+	const result = await getPool().query<ExistsRow>(query, [propertyId]);
 
 	return result.rows[0]?.exists ?? false;
 };
@@ -704,7 +704,7 @@ export const archivePropertyService = async (
 		RETURNING id;
 	`;
 
-	const result = await pool.query<PropertyIdRow>(query, [id]);
+	const result = await getPool().query<PropertyIdRow>(query, [id]);
 
 	requireFound(result.rows[0], "Property not found");
 
@@ -714,7 +714,7 @@ export const archivePropertyService = async (
 export const bulkArchivePropertiesService = async (
 	input: BulkArchivePropertiesDataType,
 ): Promise<BulkArchivePropertiesResultType> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 
 	try {
 		await client.query("BEGIN");
@@ -804,7 +804,7 @@ export const restorePropertyService = async (
 		RETURNING id;
 	`;
 
-	const result = await pool.query<PropertyIdRow>(query, [id]);
+	const result = await getPool().query<PropertyIdRow>(query, [id]);
 
 	requireFound(result.rows[0], "Property not found");
 
@@ -828,7 +828,7 @@ export const deletePropertyService = async (
 		RETURNING id;
 	`;
 
-	const result = await pool.query<PropertyIdRow>(query, [id]);
+	const result = await getPool().query<PropertyIdRow>(query, [id]);
 
 	requireFound(result.rows[0], "Property not found");
 

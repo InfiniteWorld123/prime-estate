@@ -1,4 +1,4 @@
-import { pool } from "#/backend/db/pool";
+import { getPool } from "#/backend/db/pool";
 import {
 	internalError,
 	notFoundError,
@@ -145,7 +145,7 @@ export const createInquiryService = async (
 		return { received: true };
 	}
 
-	const client = await pool.connect();
+	const client = await getPool().connect();
 
 	try {
 		await client.query("BEGIN");
@@ -291,14 +291,14 @@ export const listInquiriesService = async (
 	const skip = addValue(offset);
 
 	const [itemsResult, countResult] = await Promise.all([
-		pool.query<InquiryRow>(
+		getPool().query<InquiryRow>(
 			`${inquirySelect}
 			 ${whereClause}
 			 ORDER BY ${inquiryOrderBy[sort]}
 			 LIMIT ${limit} OFFSET ${skip};`,
 			values,
 		),
-		pool.query<CountRow>(
+		getPool().query<CountRow>(
 			`SELECT COUNT(*) AS total_count
 			 FROM inquiries AS inquiry
 			 ${whereClause};`,
@@ -326,7 +326,7 @@ export const listInquiriesService = async (
 export const getInquiryByIdService = async (
 	id: string,
 ): Promise<InquiryType> => {
-	const result = await pool.query<InquiryRow>(
+	const result = await getPool().query<InquiryRow>(
 		`${inquirySelect}
 		 WHERE inquiry.id = $1;`,
 		[id],
@@ -338,7 +338,7 @@ export const getInquiryByIdService = async (
 export const markInquiryReadService = async (
 	id: string,
 ): Promise<InquiryType> => {
-	const result = await pool.query<IdRow>(
+	const result = await getPool().query<IdRow>(
 		`UPDATE inquiries
 		 SET
 			read_at = COALESCE(read_at, CURRENT_TIMESTAMP),
@@ -359,7 +359,7 @@ export const updateInquiryStatusService = async (
 	id: string,
 	input: UpdateInquiryStatusDataType,
 ): Promise<InquiryType> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 
 	try {
 		await client.query("BEGIN");
@@ -404,7 +404,7 @@ export const updateInquiryStatusService = async (
 export const archiveInquiryService = async (
 	id: string,
 ): Promise<InquiryType> => {
-	const result = await pool.query<IdRow>(
+	const result = await getPool().query<IdRow>(
 		`UPDATE inquiries
 		 SET
 			archived_at = COALESCE(archived_at, CURRENT_TIMESTAMP),
@@ -424,7 +424,7 @@ export const archiveInquiryService = async (
 export const unarchiveInquiryService = async (
 	id: string,
 ): Promise<InquiryType> => {
-	const result = await pool.query<IdRow>(
+	const result = await getPool().query<IdRow>(
 		`UPDATE inquiries
 		 SET
 			archived_at = NULL,

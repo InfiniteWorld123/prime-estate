@@ -1,12 +1,21 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "prime-estate",
-  "main": "@tanstack/react-start/server-entry",
-  "compatibility_date": "2026-09-12",
-  "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": false,
-  "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "prime-estate",
+	"main": "src/server.ts",
+	"compatibility_date": "2026-09-12",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": false,
+	// Plain-text variables (BASE_URL, BETTER_AUTH_URL, CLOUDINARY_CLOUD_NAME,
+	// CLOUDINARY_API_KEY) are managed in the Cloudflare dashboard.
+	"keep_vars": true,
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "5aa915b6361a48f387071a1c757684c0"
+		}
+	],
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1
+	}
 }

@@ -1,4 +1,4 @@
-import { pool } from "#/backend/db/pool";
+import { getPool } from "#/backend/db/pool";
 import { notFoundError, validationError } from "#/backend/shared/error";
 import { getStoredImageUrl } from "#/backend/shared/image-storage";
 import type {
@@ -233,14 +233,14 @@ export const listPublicListingsService = async (
 	const limit = addValue(pageSize);
 	const skip = addValue(offset);
 	const [listResult, countResult] = await Promise.all([
-		pool.query<PublicListingRow>(
+		getPool().query<PublicListingRow>(
 			`${publicListingSelect}
 			 ${whereClause}
 			 ORDER BY ${publicOrderBy[sort]}
 			 LIMIT ${limit} OFFSET ${skip};`,
 			values,
 		),
-		pool.query<CountRow>(
+		getPool().query<CountRow>(
 			`SELECT COUNT(*) AS total_count
 			 FROM listings AS listing
 			 JOIN properties AS property ON property.id = listing.property_id
@@ -268,7 +268,7 @@ export const listPublicListingsService = async (
 export const getPublicListingBySlugService = async (
 	slug: string,
 ): Promise<PublicListingDetailType> => {
-	const listingResult = await pool.query<PublicListingRow>(
+	const listingResult = await getPool().query<PublicListingRow>(
 		`${publicListingSelect}
 		 WHERE listing.slug = $1
 		   AND (
@@ -286,14 +286,14 @@ export const getPublicListingBySlugService = async (
 	}
 
 	const [imagesResult, featuresResult] = await Promise.all([
-		pool.query<PublicImageRow>(
+		getPool().query<PublicImageRow>(
 			`SELECT id, storage_key, alt_text, sort_order, is_cover
 			 FROM property_images
 			 WHERE property_id = $1
 			 ORDER BY sort_order ASC, created_at ASC, id ASC;`,
 			[listing.property_id],
 		),
-		pool.query<PublicFeatureType>(
+		getPool().query<PublicFeatureType>(
 			`SELECT feature.id, feature.code, feature.name
 			 FROM property_features AS property_feature
 			 JOIN features AS feature ON feature.id = property_feature.feature_id
@@ -345,7 +345,7 @@ export const getPublicListingBySlugService = async (
 export const listPublicFeaturesService = async (): Promise<
 	PublicFeatureType[]
 > => {
-	const result = await pool.query<PublicFeatureType>(
+	const result = await getPool().query<PublicFeatureType>(
 		`SELECT feature.id, feature.code, feature.name
 		 FROM features AS feature
 		 JOIN property_features AS property_feature

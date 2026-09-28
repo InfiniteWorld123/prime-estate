@@ -1,5 +1,5 @@
 import type { PoolClient } from "pg";
-import { pool } from "#/backend/db/pool";
+import { getPool } from "#/backend/db/pool";
 import type { SeedData } from "./seed.generator";
 
 type SeedDatabaseSummary = {
@@ -288,7 +288,7 @@ const writeSeedRows = async (client: PoolClient, data: SeedData) => {
 export const seedDatabase = async (
 	data: SeedData,
 ): Promise<SeedDatabaseSummary> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		const summary = await writeSeedRows(client, data);
@@ -305,7 +305,7 @@ export const seedDatabase = async (
 export const validateDatabaseSeed = async (
 	data: SeedData,
 ): Promise<SeedDatabaseSummary> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		const summary = await writeSeedRows(client, data);
@@ -320,7 +320,7 @@ export const validateDatabaseSeed = async (
 };
 
 export const clearDatabaseSeed = async (data: SeedData) => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		await clearSeedRows(client, data);

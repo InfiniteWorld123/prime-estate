@@ -1,4 +1,4 @@
-import { pool } from "#/backend/db/pool";
+import { getPool } from "#/backend/db/pool";
 import { validationError } from "#/backend/shared/error";
 import { requireCreated, requireFound } from "#/backend/shared/service-utils";
 import type {
@@ -49,7 +49,7 @@ export const createContactService = async (
 		input.phone ?? null,
 	];
 
-	const result = await pool.query<ContactType>(query, values);
+	const result = await getPool().query<ContactType>(query, values);
 
 	return requireCreated(result.rows[0], "Contact could not be created");
 };
@@ -99,8 +99,8 @@ export const listContactsService = async (
     `;
 
 	const [contactsResult, countResult] = await Promise.all([
-		pool.query<ContactType>(listQuery, [search, pageSize, offset]),
-		pool.query<ContactCountRow>(countQuery, [search]),
+		getPool().query<ContactType>(listQuery, [search, pageSize, offset]),
+		getPool().query<ContactCountRow>(countQuery, [search]),
 	]);
 
 	const totalItems = Number(countResult.rows[0]?.total_count ?? 0);
@@ -133,7 +133,7 @@ export const getContactByIdService = async (
         FROM contacts
         WHERE id = $1;
     `;
-	const result = await pool.query<ContactType>(query, [id]);
+	const result = await getPool().query<ContactType>(query, [id]);
 
 	return requireFound(result.rows[0], "Contact not found");
 };
@@ -213,7 +213,7 @@ export const updateContactService = async (
             updated_at;
     `;
 
-	const result = await pool.query<ContactType>(query, values);
+	const result = await getPool().query<ContactType>(query, values);
 
 	return requireFound(result.rows[0], "Contact not found");
 };
@@ -234,7 +234,7 @@ export const deleteContactService = async (
             updated_at;
     `;
 
-	const result = await pool.query<ContactType>(query, [id]);
+	const result = await getPool().query<ContactType>(query, [id]);
 
 	return requireFound(result.rows[0], "Contact not found");
 };

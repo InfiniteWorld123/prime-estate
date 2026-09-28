@@ -1,4 +1,5 @@
-import { pool } from "#/backend/db/pool";
+import type { Pool } from "pg";
+import { getPool } from "#/backend/db/pool";
 import { getPropertyFeaturesService } from "#/backend/modules/features/feature.service";
 import { listPropertyImagesService } from "#/backend/modules/property-images/property-image.service";
 import {
@@ -196,7 +197,7 @@ const normalizeSlug = (value: string): string => {
 
 const getAvailableSlug = async (
 	value: string,
-	client: { query: typeof pool.query },
+	client: { query: Pool["query"] },
 ): Promise<string> => {
 	const baseSlug = normalizeSlug(value);
 	const result = await client.query<{ slug: string }>(
@@ -233,7 +234,7 @@ const buildGeneratedDescription = (listing: ListingCopySource): string => {
 
 const getListingState = async (
 	id: string,
-	client: { query: typeof pool.query },
+	client: { query: Pool["query"] },
 	lock = false,
 ): Promise<ListingStateRow> => {
 	const result = await client.query<ListingStateRow>(
@@ -251,7 +252,7 @@ const getListingState = async (
 export const getAdminListingByIdService = async (
 	id: string,
 ): Promise<AdminListingDetailType> => {
-	const row = await getListingState(id, pool);
+	const row = await getListingState(id, getPool());
 	const [images, features] = await Promise.all([
 		listPropertyImagesService(row.property_id),
 		getPropertyFeaturesService(row.property_id),
@@ -263,7 +264,7 @@ export const createListingService = async (
 	propertyId: string,
 	input: CreateListingDataType,
 ): Promise<AdminListingDetailType> => {
-	const propertyResult = await pool.query<ListingPropertyRow>(
+	const propertyResult = await getPool().query<ListingPropertyRow>(
 		`SELECT id, archived_at, property_type, city, living_area_m2, rooms
 		 FROM properties
 		 WHERE id = $1;`,
@@ -282,9 +283,9 @@ export const createListingService = async (
 		input.description ?? buildGeneratedDescription(copySource);
 	const slug = input.slug
 		? normalizeSlug(input.slug)
-		: await getAvailableSlug(title, pool);
+		: await getAvailableSlug(title, getPool());
 
-	const result = await pool.query<IdRow>(
+	const result = await getPool().query<IdRow>(
 		`INSERT INTO listings (
 			property_id, listing_type, price_amount, title, description, slug,
 			seo_title, seo_description, show_exact_address
@@ -373,14 +374,14 @@ export const listAdminListingsService = async (
 	const limit = addValue(pageSize);
 	const skip = addValue(offset);
 	const [rowsResult, countResult] = await Promise.all([
-		pool.query<ListingRow>(
+		getPool().query<ListingRow>(
 			`${listingSelect}
 			 ${whereClause}
 			 ORDER BY ${listingOrderBy[sort]}
 			 LIMIT ${limit} OFFSET ${skip};`,
 			values,
 		),
-		pool.query<CountRow>(
+		getPool().query<CountRow>(
 			`SELECT COUNT(*) AS total_count
 			 FROM listings AS listing
 			 JOIN properties AS property ON property.id = listing.property_id
@@ -409,7 +410,7 @@ export const updateListingService = async (
 	id: string,
 	input: UpdateListingDataType,
 ): Promise<AdminListingDetailType> => {
-	const listing = await getListingState(id, pool);
+	const listing = await getListingState(id, getPool());
 	if (listing.status === "ARCHIVED") {
 		throw conflictError("Archived listings cannot be edited");
 	}
@@ -457,7 +458,7 @@ export const updateListingService = async (
 	);
 	const values = updates.map((update) => update.value);
 	values.push(id);
-	await pool.query(
+	await getPool().query(
 		`UPDATE listings
 		 SET ${assignments.join(", ")}, updated_at = CURRENT_TIMESTAMP
 		 WHERE id = $${values.length};`,
@@ -469,7 +470,7 @@ export const updateListingService = async (
 export const publishListingService = async (
 	id: string,
 ): Promise<AdminListingDetailType> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		const listing = await getListingState(id, client, true);
@@ -522,7 +523,7 @@ export const archiveListingService = async (
 	id: string,
 	input: ArchiveListingDataType,
 ): Promise<AdminListingDetailType> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		const listing = await getListingState(id, client, true);
@@ -574,11 +575,11 @@ export const archiveListingService = async (
 export const deleteDraftListingService = async (
 	id: string,
 ): Promise<AdminListingType> => {
-	const listing = await getListingState(id, pool);
+	const listing = await getListingState(id, getPool());
 	if (listing.status !== "DRAFT") {
 		throw conflictError("Only draft listings can be deleted");
 	}
-	const result = await pool.query<IdRow>(
+	const result = await getPool().query<IdRow>(
 		"DELETE FROM listings WHERE id = $1 AND status = 'DRAFT' RETURNING id;",
 		[id],
 	);

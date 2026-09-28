@@ -13,9 +13,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("#/backend/shared/auth", () => ({
-	auth: {
+	getAuth: () => ({
 		api: { getSession: mocks.getSession },
-	},
+	}),
 }));
 
 vi.mock("./inquiry.service", () => ({

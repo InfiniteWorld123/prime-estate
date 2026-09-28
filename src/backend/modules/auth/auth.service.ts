@@ -1,4 +1,4 @@
-import { auth } from "#/backend/shared/auth";
+import { getAuth } from "#/backend/shared/auth";
 import type {
 	ForgotPasswordServiceType,
 	ResetPasswordServiceType,
@@ -6,23 +6,23 @@ import type {
 } from "../../../shared/types/auth.type";
 
 export const signInService = async ({ body }: { body: SignInServiceType }) =>
-	await auth.api.signInEmail({ body });
+	await getAuth().api.signInEmail({ body });
 
 export const signOutService = async ({ headers }: { headers: Headers }) =>
-	await auth.api.signOut({ headers });
+	await getAuth().api.signOut({ headers });
 
 export const forgotPasswordService = async ({
 	body,
 }: {
 	body: ForgotPasswordServiceType;
-}) => await auth.api.requestPasswordResetEmailOTP({ body });
+}) => await getAuth().api.requestPasswordResetEmailOTP({ body });
 
 export const resetPasswordService = async ({
 	body,
 }: {
 	body: ResetPasswordServiceType;
 }) => {
-	return await auth.api.resetPasswordEmailOTP({
+	return await getAuth().api.resetPasswordEmailOTP({
 		body: {
 			email: body.email,
 			otp: body.otp,

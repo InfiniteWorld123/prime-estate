@@ -1,4 +1,4 @@
-import { pool } from "#/backend/db/pool";
+import { getPool } from "#/backend/db/pool";
 import {
 	badRequestError,
 	conflictError,
@@ -44,13 +44,13 @@ const validateImageFile = (file: File) => {
 export const listPropertyImagesService = async (
 	propertyId: string,
 ): Promise<PropertyImageType[]> => {
-	const propertyResult = await pool.query<IdRow>(
+	const propertyResult = await getPool().query<IdRow>(
 		"SELECT id FROM properties WHERE id = $1;",
 		[propertyId],
 	);
 	requireFound(propertyResult.rows[0], "Property not found");
 
-	const result = await pool.query<PropertyImageRow>(
+	const result = await getPool().query<PropertyImageRow>(
 		`SELECT id, property_id, storage_key, alt_text, sort_order, is_cover,
 		        created_at, updated_at
 		 FROM property_images
@@ -67,14 +67,14 @@ export const uploadPropertyImageService = async (
 	altText: string | null,
 ): Promise<PropertyImageType> => {
 	validateImageFile(file);
-	const propertyResult = await pool.query<IdRow>(
+	const propertyResult = await getPool().query<IdRow>(
 		"SELECT id FROM properties WHERE id = $1;",
 		[propertyId],
 	);
 	requireFound(propertyResult.rows[0], "Property not found");
 
 	const uploaded = await uploadPropertyImage(propertyId, file);
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		await client.query("SELECT id FROM properties WHERE id = $1 FOR UPDATE;", [
@@ -124,7 +124,7 @@ export const updatePropertyImageService = async (
 	imageId: string,
 	input: UpdatePropertyImageDataType,
 ): Promise<PropertyImageType> => {
-	const result = await pool.query<PropertyImageRow>(
+	const result = await getPool().query<PropertyImageRow>(
 		`UPDATE property_images
 		 SET alt_text = $1, updated_at = CURRENT_TIMESTAMP
 		 WHERE id = $2 AND property_id = $3
@@ -139,7 +139,7 @@ export const reorderPropertyImagesService = async (
 	propertyId: string,
 	input: ReorderPropertyImagesDataType,
 ): Promise<PropertyImageType[]> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		const propertyResult = await client.query<IdRow>(
@@ -182,7 +182,7 @@ export const setPropertyCoverImageService = async (
 	propertyId: string,
 	imageId: string,
 ): Promise<PropertyImageType> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		await client.query("SELECT id FROM properties WHERE id = $1 FOR UPDATE;", [
@@ -221,7 +221,7 @@ export const deletePropertyImageService = async (
 	propertyId: string,
 	imageId: string,
 ): Promise<PropertyImageType> => {
-	const client = await pool.connect();
+	const client = await getPool().connect();
 	try {
 		await client.query("BEGIN");
 		await client.query("SELECT id FROM properties WHERE id = $1 FOR UPDATE;", [

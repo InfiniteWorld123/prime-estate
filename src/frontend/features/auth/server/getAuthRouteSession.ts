@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { auth } from "#/backend/shared/auth";
+import { getAuth } from "#/backend/shared/auth";
 import type { AuthUser } from "@/frontend/api/auth.api";
 
 export type AuthRouteSession = {
@@ -10,7 +10,7 @@ export type AuthRouteSession = {
 export const getAuthRouteSession = createServerFn({ method: "GET" }).handler(
 	async (): Promise<AuthRouteSession | null> => {
 		const request = getRequest();
-		const session = await auth.api.getSession({
+		const session = await getAuth().api.getSession({
 			headers: request.headers,
 			query: { disableCookieCache: true },
 		});
