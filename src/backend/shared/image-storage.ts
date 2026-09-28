@@ -73,5 +73,8 @@ export const getStoredImageUrl = (storageKey: string): string => {
 		secure: true,
 		fetch_format: "auto",
 		quality: "auto",
+		// URL analytics reads the SDK's package.json through `__dirname`,
+		// which does not exist on Cloudflare Workers.
+		urlAnalytics: false,
 	});
 };
